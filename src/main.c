@@ -12,10 +12,22 @@
 #define NOTE_A1 (double) 55.00
 #define NOTE_B1 (double) 61.74
 
+#define NOTE_C2 (double) 65.41
+#define NOTE_D2 (double) 73.42
+#define NOTE_E2 (double) 82.41
+#define NOTE_F2 (double) 87.31
+#define NOTE_G2 (double) 98.00
+#define NOTE_A2 (double) 110.00
+#define NOTE_B2 (double) 123.47
+
+#define NOTE_C3 (double) 130.81
+#define NOTE_D3 (double) 146.83
+#define NOTE_E3 (double) 164.81
 #define NOTE_F3 (double) 174.61
 #define NOTE_G3 (double) 196.00
 #define NOTE_A3 (double) 220.00
 #define NOTE_B3 (double) 246.94
+
 #define NOTE_C4 (double) 261.63
 
 uint32_t WAV_BPM = 120;
@@ -75,47 +87,57 @@ int dats_parse(void){
    printf("address file_buffer 1 %p\n", (void *) file_buffer);
    #endif
    int i = 0;
-   int note_found = 0;
+   int accepted_note = 0;
    int line = 1;
 
    while (i != file_length){
 
-      while (*file_buffer != '\n') { /* looks for correct sentence */
-         note_found = 0;
-         for (int dats_mov = 0; dats_mov < 6; dats_mov++){ 
+      while (*file_buffer != '\n'){
+         for (int length_mov = 0; length_mov < 6; length_mov++){
+            if (!strncmp(file_buffer, NOTE_KEY_LENGTH[length_mov].NOTE, 7)){
+               printf("found matching length %.*s\n", 7, NOTE_KEY_LENGTH[length_mov].NOTE);
 
-            if (!strncmp(file_buffer, NOTE_KEY_LENGTH[dats_mov].NOTE, 7)){
-	       #ifdef DATS_DEBUG
-	       printf("match note_key_length : %.7s\n", NOTE_KEY_LENGTH[dats_mov].NOTE);
-               #endif
                while (*file_buffer != '\n'){
-		  file_buffer++; i++;
-                  for (int note_mov = 0; note_mov < 7; note_mov++){
-		     if (!strncmp(file_buffer, NOTE_KEY[note_mov].NOTE, 2)){
-		        note_found++;
-		        printf("note found %.*s %.*s\n", 7, NOTE_KEY_LENGTH[dats_mov].NOTE, 2, NOTE_KEY[note_mov].NOTE);
-			break;
-		     }
-		  }
-		  if (note_found) break;
+                  for (int key_mov = 0; key_mov < 7; key_mov++){
+                     if (!strncmp(file_buffer, NOTE_KEY[key_mov].NOTE, 2)){
+                        accepted_note++;
+                        printf("note accepted: %.7s %.2s\n", NOTE_KEY_LENGTH[length_mov].NOTE, NOTE_KEY[key_mov].NOTE);
+                        break;
+                     }
+                  }
 
-	       }
-	       if (!note_found){
-                  fprintf(stderr, "invalid syntax %.5s\n", file_buffer);
-		  goto clean;
-	       }
-	       if (note_found) break;
+                  if (*file_buffer == '\n'){
+                     line++;
+                     if (!accepted_note) {
 
-	    }
+                        fprintf(stderr, "syntax error at line %d\n", line);
+                     }
+                  }
+                  file_buffer++; i++;
+               }
+            }
 
-	 }
+         }
+         if (*file_buffer == '\n'){
+            if (!accepted_note) {
+
+               fprintf(stderr, "syntax error at line %d\n", line);
+               goto clean;
+            }         
+            line++; accepted_note = 0;
+         }
+
          file_buffer++; i++;
       }
+
       file_buffer++; i++;
- 
+
    }
+
+   #ifdef DATS_DEBUG
+   printf("line %d\n", line);
+   #endif
    clean:
-      printf("%s\n", NOTE_KEY_LENGTH[3].NOTE);
       #ifdef DATS_DEBUG
       printf("\nafter while %p\n", (void *) file_buffer-i);
       #endif
