@@ -49,14 +49,15 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    BEG = 258,
-    END = 259,
+    D_BEG = 258,
+    D_END = 259,
     K_NL = 260,
     V1_NL = 261,
     V2_NL = 262,
     V4_NL = 263,
     V8_NL = 264,
-    EOL = 265
+    EOL = 265,
+    SP = 266
   };
 #endif
 

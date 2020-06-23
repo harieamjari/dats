@@ -24,8 +24,8 @@ int yyerror(const char *s);
 file_struct : beginning note D_END end_line
 	    ;
 
-note : K_NL SP note_length end_line
-     | K_NL SP note_length end_line note
+note : with_or_without_sp K_NL SP note_length end_line
+     | with_or_without_sp K_NL SP note_length end_line note
      ;
 
 end_line : EOL
@@ -34,6 +34,10 @@ end_line : EOL
 
 beginning : with_or_without_sp_endl D_BEG with_or_without_sp_endl
 	  ;
+
+with_or_without_sp :
+		   | SP with_or_without_sp
+		   ;
 
 with_or_without_sp_endl :
 		   | SP with_or_without_sp_endl

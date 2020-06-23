@@ -4,20 +4,20 @@
 #include "test.tab.h"
 
 #define YY_DECL int yylex()
-uint32_t dats_line = 0;
+uint32_t dats_line = 1;
 %}
 
 
 %%
-"BEGIN" {return BEG;}
-"END"   {return END;}
+"BEGIN" {return D_BEG;}
+"END"   {return D_END;}
 "NL"    {return K_NL;}
 "1"     {return V1_NL;}
 "2"     {return V2_NL;}
 "4"     {return V4_NL;}
 "8"     {return V8_NL;}
-[ \t]+ {/* exclude all whitespace */}
-[0-9]+  {printf("warning unknown\n");}
+[ \t]+    {return SP;}
+[0-9a-zA-Z]+  {printf("lexer: unknown \'%s\' at line %d\n", yytext, dats_line);}
 \n  {dats_line++; return EOL;}
 %%
 

@@ -363,8 +363,8 @@ struct yy_trans_info
 static const flex_int16_t yy_accept[25] =
     {   0,
         0,    0,   12,   11,    8,   10,    9,    4,    5,    6,
-        7,   11,   11,   11,    8,    9,    0,    0,    3,    0,
-        2,    0,    1,    0
+        7,    9,    9,    9,    8,    9,    9,    9,    3,    9,
+        2,    9,    1,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -375,14 +375,14 @@ static const YY_CHAR yy_ec[256] =
         1,    2,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    4,    5,    6,
         4,    7,    4,    4,    4,    8,    4,    1,    1,    1,
-        1,    1,    1,    1,    1,    9,    1,   10,   11,    1,
-       12,    1,   13,    1,    1,   14,    1,   15,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    4,    9,    4,   10,   11,    4,
+       12,    4,   13,    4,    4,   14,    4,   15,    4,    4,
+        4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
+        1,    1,    1,    1,    1,    1,    4,    4,    4,    4,
 
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
+        4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
+        4,    4,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -401,28 +401,28 @@ static const YY_CHAR yy_ec[256] =
 
 static const YY_CHAR yy_meta[16] =
     {   0,
-        1,    1,    1,    2,    2,    2,    2,    2,    1,    1,
-        1,    1,    1,    1,    1
+        1,    1,    1,    2,    2,    2,    2,    2,    2,    2,
+        2,    2,    2,    2,    2
     } ;
 
 static const flex_int16_t yy_base[26] =
     {   0,
         0,    0,   26,   27,   23,   27,    0,    0,    0,    0,
-        0,   13,    8,    8,   19,    0,    8,    9,   27,    5,
-       27,    2,   27,   27,   14
+        0,   13,    8,    8,   19,    0,    8,    9,    0,    5,
+        0,    2,    0,   27,   14
     } ;
 
 static const flex_int16_t yy_def[26] =
     {   0,
        24,    1,   24,   24,   24,   24,   25,   25,   25,   25,
-       25,   24,   24,   24,   24,   25,   24,   24,   24,   24,
-       24,   24,   24,    0,   24
+       25,   25,   25,   25,   24,   25,   25,   25,   25,   25,
+       25,   25,   25,    0,   24
     } ;
 
 static const flex_int16_t yy_nxt[43] =
     {   0,
-        4,    5,    6,    7,    8,    9,   10,   11,   12,    4,
-       13,    4,    4,    4,   14,   16,   23,   22,   21,   20,
+        4,    5,    6,    7,    8,    9,   10,   11,   12,    7,
+       13,    7,    7,    7,   14,   16,   23,   22,   21,   20,
        15,   19,   18,   17,   15,   24,    3,   24,   24,   24,
        24,   24,   24,   24,   24,   24,   24,   24,   24,   24,
        24,   24
@@ -458,7 +458,7 @@ char *yytext;
 #include "test.tab.h"
 
 #define YY_DECL int yylex()
-uint32_t dats_line = 0;
+uint32_t dats_line = 1;
 #line 462 "lex.yy.c"
 #line 463 "lex.yy.c"
 
@@ -739,12 +739,12 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 YY_RULE_SETUP
 #line 12 "test.l"
-{return BEG;}
+{return D_BEG;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
 #line 13 "test.l"
-{return END;}
+{return D_END;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
@@ -774,12 +774,12 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 #line 19 "test.l"
-{/* exclude all whitespace */}
+{return SP;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 20 "test.l"
-{printf("warning unknown\n");}
+{printf("lexer: unknown \'%s\' at line %d\n", yytext, dats_line);}
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */

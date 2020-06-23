@@ -117,14 +117,15 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    BEG = 258,
-    END = 259,
+    D_BEG = 258,
+    D_END = 259,
     K_NL = 260,
     V1_NL = 261,
     V2_NL = 262,
     V4_NL = 263,
     V8_NL = 264,
-    EOL = 265
+    EOL = 265,
+    SP = 266
   };
 #endif
 
@@ -375,21 +376,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  4
+#define YYFINAL  8
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   10
+#define YYLAST   17
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  11
+#define YYNTOKENS  12
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  4
+#define YYNNTS  7
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  8
+#define YYNRULES  14
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  15
+#define YYNSTATES  25
 
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   265
+#define YYMAXUTOK   266
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex, with out-of-bounds checking.  */
@@ -426,14 +427,15 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10
+       5,     6,     7,     8,     9,    10,    11
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    22,    22,    24,    25,    27,    28,    29,    30
+       0,    24,    24,    27,    28,    31,    32,    35,    38,    39,
+      40,    43,    44,    45,    46
 };
 #endif
 
@@ -442,8 +444,9 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "BEG", "END", "K_NL", "V1_NL", "V2_NL",
-  "V4_NL", "V8_NL", "EOL", "$accept", "file_struct", "note", "list_note", YY_NULLPTR
+  "$end", "error", "$undefined", "D_BEG", "D_END", "K_NL", "V1_NL",
+  "V2_NL", "V4_NL", "V8_NL", "EOL", "SP", "$accept", "file_struct", "note",
+  "end_line", "beginning", "with_or_without_sp_endl", "note_length", YY_NULLPTR
 };
 #endif
 
@@ -453,14 +456,14 @@ static const char *const yytname[] =
 static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265
+     265,   266
 };
 # endif
 
-#define YYPACT_NINF -7
+#define YYPACT_NINF -9
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-7)))
+  (!!((Yystate) == (-9)))
 
 #define YYTABLE_NINF -1
 
@@ -471,8 +474,9 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       1,    -5,     6,     2,    -7,    -6,     4,    -7,    -7,    -7,
-      -7,    -1,    -7,     2,    -7
+      -3,    -3,    -3,     6,     4,    10,    -9,    -9,    -9,     3,
+      11,    -3,    -4,     7,    -9,    -9,    -9,    -9,    -9,     7,
+       7,    -9,     4,    -9,    -9
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -480,20 +484,21 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     3,     1,     0,     0,     5,     6,     7,
-       8,     0,     2,     3,     4
+       8,     8,     8,     0,     0,     0,    10,     9,     1,     0,
+       0,     8,     0,     0,     7,    11,    12,    13,    14,     0,
+       5,     2,     3,     6,     4
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -7,    -7,    -3,    -7
+      -9,    -9,    -6,    -8,    -9,    -1,    -9
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     6,    11
+      -1,     3,    10,    21,     4,     5,    19
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -501,34 +506,37 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       7,     8,     9,    10,     1,     3,     4,     5,    12,    13,
-      14
+       6,     7,    15,    16,    17,    18,     8,     1,     2,     9,
+      14,    22,    23,    11,    12,    13,    24,    20
 };
 
 static const yytype_uint8 yycheck[] =
 {
-       6,     7,     8,     9,     3,    10,     0,     5,     4,    10,
-      13
+       1,     2,     6,     7,     8,     9,     0,    10,    11,     5,
+      11,    19,    20,     3,    11,     4,    22,    10
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    12,    10,     0,     5,    13,     6,     7,     8,
-       9,    14,     4,    10,    13
+       0,    10,    11,    13,    16,    17,    17,    17,     0,     5,
+      14,     3,    11,     4,    17,     6,     7,     8,     9,    18,
+      10,    15,    15,    15,    14
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    11,    12,    13,    13,    14,    14,    14,    14
+       0,    12,    13,    14,    14,    15,    15,    16,    17,    17,
+      17,    18,    18,    18,    18
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     4,     0,     4,     1,     1,     1,     1
+       0,     2,     4,     4,     5,     1,     2,     3,     0,     2,
+       2,     1,     1,     1,     1
 };
 
 
@@ -1214,32 +1222,32 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 5:
-#line 27 "test.y"
-    {printf("found note1\n");}
-#line 1221 "test.tab.c"
+  case 11:
+#line 43 "test.y"
+    {printf("found note1 at line %d\n", dats_line);}
+#line 1229 "test.tab.c"
     break;
 
-  case 6:
-#line 28 "test.y"
-    {printf("found note2\n");}
-#line 1227 "test.tab.c"
+  case 12:
+#line 44 "test.y"
+    {printf("found note2 at line %d\n", dats_line);}
+#line 1235 "test.tab.c"
     break;
 
-  case 7:
-#line 29 "test.y"
-    {printf("found note4\n");}
-#line 1233 "test.tab.c"
+  case 13:
+#line 45 "test.y"
+    {printf("found note4 at line %d\n", dats_line);}
+#line 1241 "test.tab.c"
     break;
 
-  case 8:
-#line 30 "test.y"
-    {printf("found note8\n");}
-#line 1239 "test.tab.c"
+  case 14:
+#line 46 "test.y"
+    {printf("found note8 at line %d\n", dats_line);}
+#line 1247 "test.tab.c"
     break;
 
 
-#line 1243 "test.tab.c"
+#line 1251 "test.tab.c"
 
       default: break;
     }
@@ -1471,26 +1479,29 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 32 "test.y"
+#line 48 "test.y"
 
 
 int main(int argc, char *argv[]){
-/*
+
    if (argc < 2) {
-      fprintf(stderr, "try %s [filename]\n", argv[0]);
-      return 1;
+      fprintf(stderr, "ye may try %s [filename]\n", argv[0]);
+      yyin = stdin;
+      goto dats_parse;
+      
    }
    if (!(yyin = fopen(argv[1], "r"))){
       perror(argv[1]);
       return 1;
    }
-*/
+   dats_parse:
    yyparse();
 
    return 0;
 }
 
 int yyerror(const char *s){
-   fprintf(stderr, "invalid keyword %s at line %d\n", s, dats_line);
+   fprintf(stderr, "yyerror %s at line %d\n", s, dats_line-1);
    return 1;
 }
+
