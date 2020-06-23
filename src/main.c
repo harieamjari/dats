@@ -93,11 +93,19 @@ int dats_parse(void){
    while (i != file_length){
 
       while (*file_buffer != '\n'){
+         if (*file_buffer == ' ') {
+            file_buffer++; i++;
+            continue;
+         }
          for (int length_mov = 0; length_mov < 6; length_mov++){
             if (!strncmp(file_buffer, NOTE_KEY_LENGTH[length_mov].NOTE, 7)){
                printf("found matching length %.*s\n", 7, NOTE_KEY_LENGTH[length_mov].NOTE);
 
                while (*file_buffer != '\n'){
+                  if (*file_buffer == ' ') {
+                     file_buffer++; i++;
+                     continue;
+                  }
                   for (int key_mov = 0; key_mov < 7; key_mov++){
                      if (!strncmp(file_buffer, NOTE_KEY[key_mov].NOTE, 2)){
                         accepted_note++;
@@ -111,6 +119,7 @@ int dats_parse(void){
                      if (!accepted_note) {
 
                         fprintf(stderr, "syntax error at line %d\n", line);
+                        goto clean;
                      }
                   }
                   file_buffer++; i++;

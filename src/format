@@ -1,0 +1,183 @@
+     1	#include <stdio.h>
+     2	#include <stdint.h>
+     3	#include <stdlib.h>
+     4	
+     5	#define DATS_DEBUG
+     6	
+     7	#define NOTE_C1 (double) 32.70
+     8	#define NOTE_D1 (double) 36.71
+     9	#define NOTE_E1 (double) 41.20
+    10	#define NOTE_F1 (double) 43.64
+    11	#define NOTE_G1 (double) 49.00
+    12	#define NOTE_A1 (double) 55.00
+    13	#define NOTE_B1 (double) 61.74
+    14	
+    15	#define NOTE_C2 (double) 65.41
+    16	#define NOTE_D2 (double) 73.42
+    17	#define NOTE_E2 (double) 82.41
+    18	#define NOTE_F2 (double) 87.31
+    19	#define NOTE_G2 (double) 98.00
+    20	#define NOTE_A2 (double) 110.00
+    21	#define NOTE_B2 (double) 123.47
+    22	
+    23	#define NOTE_C3 (double) 130.81
+    24	#define NOTE_D3 (double) 146.83
+    25	#define NOTE_E3 (double) 164.81
+    26	#define NOTE_F3 (double) 174.61
+    27	#define NOTE_G3 (double) 196.00
+    28	#define NOTE_A3 (double) 220.00
+    29	#define NOTE_B3 (double) 246.94
+    30	
+    31	#define NOTE_C4 (double) 261.63
+    32	
+    33	uint32_t WAV_BPM = 120;
+    34	uint64_t WAV_ALLOC = 0;
+    35	uint32_t WAV_SAMPLE_RATE = 44100;
+    36	
+    37	#define WAV_BPM_PERIOD (double) 60*WAV_SAMPLE_RATE/WAV_BPM
+    38	
+    39	/* Initialize a file to */
+    40	
+    41	typedef struct {
+    42	   char NOTE[2];
+    43	   double FREQUENCY;
+    44	
+    45	} NOTE_KEY_STRUCT;
+    46	
+    47	typedef struct {
+    48	   char NOTE[7];
+    49	   uint32_t NOTE_LENGTH;
+    50	
+    51	} NOTE_KEY_LENGTH_STRUCT;
+    52	
+    53	NOTE_KEY_STRUCT NOTE_KEY[] = {
+    54	   {"C1", NOTE_C1},
+    55	   {"D1", NOTE_D1},
+    56	   {"E1", NOTE_E1},
+    57	   {"F1", NOTE_F1},
+    58	   {"G1", NOTE_G1},
+    59	   {"A1", NOTE_A1},
+    60	   {"B1", NOTE_B1}
+    61	};
+    62	
+    63	NOTE_KEY_LENGTH_STRUCT NOTE_KEY_LENGTH[6] = {
+    64	  {{0,0,0,0,0,0,0}, 0},
+    65	  {{0,0,0,0,0,0,0}, 0},
+    66	  {{0,0,0,0,0,0,0}, 0},
+    67	  {{0,0,0,0,0,0,0}, 0},
+    68	  {{0,0,0,0,0,0,0}, 0},
+    69	  {{0,0,0,0,0,0,0}, 0}
+    70	};
+    71	
+    72	FILE *parse_in = NULL;
+    73	char *file_buffer = NULL;
+    74	
+    75	int dats_parse(void){
+    76	
+    77	   /* read parse_in */
+    78	   int file_length;
+    79	
+    80	   fseek(parse_in, 0, SEEK_END);
+    81	   file_length = ftell(parse_in);
+    82	   file_buffer = malloc(file_length);
+    83	   fseek(parse_in, 0, SEEK_SET);
+    84	   fread(file_buffer, 1, file_length, parse_in);
+    85	
+    86	   #ifdef DATS_DEBUG
+    87	   printf("address file_buffer 1 %p\n", (void *) file_buffer);
+    88	   #endif
+    89	   int i = 0;
+    90	   int accepted_note = 0;
+    91	   int line = 1;
+    92	
+    93	   while (i != file_length){
+    94	
+    95	      while (*file_buffer != '\n'){
+    96	         if (*file_buffer == ' ') {
+    97	            file_buffer++; i++;
+    98	            continue;
+    99	         }
+   100	         for (int length_mov = 0; length_mov < 6; length_mov++){
+   101	            if (!strncmp(file_buffer, NOTE_KEY_LENGTH[length_mov].NOTE, 7)){
+   102	               printf("found matching length %.*s\n", 7, NOTE_KEY_LENGTH[length_mov].NOTE);
+   103	
+   104	               while (*file_buffer != '\n'){
+   105	                  if (*file_buffer == ' ') {
+   106	                     file_buffer++; i++;
+   107	                     continue;
+   108	                  }
+   109	                  for (int key_mov = 0; key_mov < 7; key_mov++){
+   110	                     if (!strncmp(file_buffer, NOTE_KEY[key_mov].NOTE, 2)){
+   111	                        accepted_note++;
+   112	                        printf("note accepted: %.7s %.2s\n", NOTE_KEY_LENGTH[length_mov].NOTE, NOTE_KEY[key_mov].NOTE);
+   113	                        break;
+   114	                     }
+   115	                  }
+   116	
+   117	                  if (*file_buffer == '\n'){
+   118	                     line++;
+   119	                     if (!accepted_note) {
+   120	
+   121	                        fprintf(stderr, "syntax error at line %d\n", line);
+   122	                        goto clean;
+   123	                     }
+   124	                  }
+   125	                  file_buffer++; i++;
+   126	               }
+   127	            }
+   128	
+   129	         }
+   130	         if (*file_buffer == '\n'){
+   131	            if (!accepted_note) {
+   132	
+   133	               fprintf(stderr, "syntax error at line %d\n", line);
+   134	               goto clean;
+   135	            }         
+   136	            line++; accepted_note = 0;
+   137	         }
+   138	
+   139	         file_buffer++; i++;
+   140	      }
+   141	
+   142	      file_buffer++; i++;
+   143	
+   144	   }
+   145	
+   146	   #ifdef DATS_DEBUG
+   147	   printf("line %d\n", line);
+   148	   #endif
+   149	   clean:
+   150	      #ifdef DATS_DEBUG
+   151	      printf("\nafter while %p\n", (void *) file_buffer-i);
+   152	      #endif
+   153	      free(file_buffer-i);
+   154	      fclose(parse_in);
+   155	
+   156	      return 0;
+   157	}
+   158	
+   159	int main(int argc, char *argv[]){
+   160	   if (argc < 2){
+   161	      fprintf(stderr, "try \'%s [filename]\'\n", argv[0]);
+   162	      return 1;
+   163	   }
+   164	   parse_in = fopen(argv[1], "r");
+   165	   if (!parse_in){
+   166	      perror(argv[1]);
+   167	      return 1;
+   168	
+   169	   }
+   170	 
+   171	   NOTE_KEY_LENGTH[0] = (NOTE_KEY_LENGTH_STRUCT) {"NOTE_1 ", WAV_BPM_PERIOD*4};
+   172	   NOTE_KEY_LENGTH[1] = (NOTE_KEY_LENGTH_STRUCT) {"NOTE_2 ", WAV_BPM_PERIOD*2},
+   173	   NOTE_KEY_LENGTH[2] = (NOTE_KEY_LENGTH_STRUCT) {"NOTE_4 ", WAV_BPM_PERIOD};
+   174	   NOTE_KEY_LENGTH[3] = (NOTE_KEY_LENGTH_STRUCT) {"NOTE_8 ", WAV_BPM_PERIOD/2};
+   175	   NOTE_KEY_LENGTH[4] = (NOTE_KEY_LENGTH_STRUCT) {"NOTE_16", WAV_BPM_PERIOD/4};
+   176	   NOTE_KEY_LENGTH[5] = (NOTE_KEY_LENGTH_STRUCT) {"NOTE_32", WAV_BPM_PERIOD/8};
+   177	  
+   178	
+   179	  printf("dats_parse %d\n", dats_parse());
+   180	   
+   181	   //printf("WAV_ALLOC %llu\n", WAV_ALLOC);
+   182	   return 0;
+   183	}
