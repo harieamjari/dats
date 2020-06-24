@@ -34,8 +34,8 @@
 /* Undocumented macros, especially those whose name start with YY_,
    are private implementation details.  Do not rely on them.  */
 
-#ifndef YY_YY_TEST_TAB_H_INCLUDED
-# define YY_YY_TEST_TAB_H_INCLUDED
+#ifndef YY_YY_DATS_PARSER_TAB_H_INCLUDED
+# define YY_YY_DATS_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -51,13 +51,21 @@ extern int yydebug;
   {
     D_BEG = 258,
     D_END = 259,
-    K_NL = 260,
-    V1_NL = 261,
-    V2_NL = 262,
-    V4_NL = 263,
-    V8_NL = 264,
-    EOL = 265,
-    SP = 266
+    C3_NK = 260,
+    D3_NK = 261,
+    E3_NK = 262,
+    F3_NK = 263,
+    G3_NK = 264,
+    A3_NK = 265,
+    B3_NK = 266,
+    K_NL = 267,
+    K_NK = 268,
+    V1_NL = 269,
+    V2_NL = 270,
+    V4_NL = 271,
+    V8_NL = 272,
+    EOL = 273,
+    SP = 274
   };
 #endif
 
@@ -73,4 +81,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_TEST_TAB_H_INCLUDED  */
+#endif /* !YY_YY_DATS_PARSER_TAB_H_INCLUDED  */
