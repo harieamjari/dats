@@ -1,12 +1,16 @@
 %{
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include "dats_note.h"
+#include "wav.h"
 
 extern FILE *yyin;
 extern int yylex();
 extern int yyparse();
 extern uint32_t dats_line;
 
+int dats_clean();
 int yyerror(const char *s);
 %}
 
@@ -45,10 +49,22 @@ with_or_without_sp :
 		   |SP with_or_without_sp
 		   ;
 
-note_length : V1_NL {printf("found note1 at line %d\n", dats_line);}
-            | V2_NL {printf("found note2 at line %d\n", dats_line);}
-            | V4_NL {printf("found note4 at line %d\n", dats_line);}
-            | V8_NL {printf("found note8 at line %d\n", dats_line);}
+note_length : V1_NL {
+	    WAV_ALLOC += WAV_BPM_PERIOD*4;
+	    printf("found note1 at line %d\n", dats_line);
+	    }
+            | V2_NL {
+	    WAV_ALLOC += WAV_BPM_PERIOD*2;
+	    printf("found note2 at line %d\n", dats_line);
+	    }
+            | V4_NL {
+	    WAV_ALLOC += WAV_BPM_PERIOD;
+	    printf("found note4 at line %d\n", dats_line);
+	    }
+            | V8_NL {
+	    WAV_ALLOC += WAV_BPM_PERIOD/2;
+	    printf("found note8 at line %d\n", dats_line);
+	    }
             ;                                                 
 
 note_key : C3_NK {printf("note c3 at line %d\n", dats_line);}
@@ -64,24 +80,32 @@ note_key : C3_NK {printf("note c3 at line %d\n", dats_line);}
 int main(int argc, char *argv[]){
 
    if (argc < 2) {
-      fprintf(stderr, "ye may try %s [filename]\n", argv[0]);
+      fprintf(stderr, "ye may try \'%s [filename]\'\n", argv[0]);
       yyin = stdin;
-      goto dats_parse;
-      
+      goto parse;
+
    }
-   if (!(yyin = fopen(argv[1], "r"))){
+
+   FILE *fp;
+
+   if (!(fp = fopen(argv[1], "r"))) {
       perror(argv[1]);
       return 1;
+
    }
-   dats_parse:
-   yyparse();
+   yyin = fp;
+
+   parse:
+   printf("return of yyparse %d\n", yyparse());
+
+   printf("size of wav %llu\n", WAV_ALLOC);
 
    return 0;
 }
 
 int yyerror(const char *s){
    fprintf(stderr, "parser: %s at line %d\n", s, dats_line-1);
-   return 1;
+   exit(1);
 }
 
 

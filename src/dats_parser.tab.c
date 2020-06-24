@@ -70,6 +70,9 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include "dats_note.h"
+#include "wav.h"
 
 extern FILE *yyin;
 extern int yylex();
@@ -78,7 +81,7 @@ extern uint32_t dats_line;
 
 int yyerror(const char *s);
 
-#line 82 "dats_parser.tab.c"
+#line 85 "dats_parser.tab.c"
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus
@@ -443,9 +446,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    25,    25,    28,    29,    32,    33,    36,    39,    40,
-      41,    44,    45,    48,    49,    50,    51,    54,    55,    56,
-      57,    58,    59,    60
+       0,    28,    28,    31,    32,    35,    36,    39,    42,    43,
+      44,    47,    48,    51,    55,    59,    63,    69,    70,    71,
+      72,    73,    74,    75
 };
 #endif
 
@@ -1242,73 +1245,85 @@ yyreduce:
   switch (yyn)
     {
   case 13:
-#line 48 "dats_parser.y"
-    {printf("found note1 at line %d\n", dats_line);}
-#line 1248 "dats_parser.tab.c"
-    break;
-
-  case 14:
-#line 49 "dats_parser.y"
-    {printf("found note2 at line %d\n", dats_line);}
+#line 51 "dats_parser.y"
+    {
+	    WAV_ALLOC += WAV_BPM_PERIOD*4;
+	    printf("found note1 at line %d\n", dats_line);
+	    }
 #line 1254 "dats_parser.tab.c"
     break;
 
+  case 14:
+#line 55 "dats_parser.y"
+    {
+	    WAV_ALLOC += WAV_BPM_PERIOD*2;
+	    printf("found note2 at line %d\n", dats_line);
+	    }
+#line 1263 "dats_parser.tab.c"
+    break;
+
   case 15:
-#line 50 "dats_parser.y"
-    {printf("found note4 at line %d\n", dats_line);}
-#line 1260 "dats_parser.tab.c"
-    break;
-
-  case 16:
-#line 51 "dats_parser.y"
-    {printf("found note8 at line %d\n", dats_line);}
-#line 1266 "dats_parser.tab.c"
-    break;
-
-  case 17:
-#line 54 "dats_parser.y"
-    {printf("note c3 at line %d\n", dats_line);}
+#line 59 "dats_parser.y"
+    {
+	    WAV_ALLOC += WAV_BPM_PERIOD;
+	    printf("found note4 at line %d\n", dats_line);
+	    }
 #line 1272 "dats_parser.tab.c"
     break;
 
+  case 16:
+#line 63 "dats_parser.y"
+    {
+	    WAV_ALLOC += WAV_BPM_PERIOD/2;
+	    printf("found note8 at line %d\n", dats_line);
+	    }
+#line 1281 "dats_parser.tab.c"
+    break;
+
+  case 17:
+#line 69 "dats_parser.y"
+    {printf("note c3 at line %d\n", dats_line);}
+#line 1287 "dats_parser.tab.c"
+    break;
+
   case 18:
-#line 55 "dats_parser.y"
+#line 70 "dats_parser.y"
     {printf("bote d3 at line %d\n", dats_line);}
-#line 1278 "dats_parser.tab.c"
+#line 1293 "dats_parser.tab.c"
     break;
 
   case 19:
-#line 56 "dats_parser.y"
+#line 71 "dats_parser.y"
     {printf("note e3 at line %d\n", dats_line);}
-#line 1284 "dats_parser.tab.c"
+#line 1299 "dats_parser.tab.c"
     break;
 
   case 20:
-#line 57 "dats_parser.y"
+#line 72 "dats_parser.y"
     {printf("note f3 at line %d\n", dats_line);}
-#line 1290 "dats_parser.tab.c"
+#line 1305 "dats_parser.tab.c"
     break;
 
   case 21:
-#line 58 "dats_parser.y"
+#line 73 "dats_parser.y"
     {printf("note f3 at line %d\n", dats_line);}
-#line 1296 "dats_parser.tab.c"
+#line 1311 "dats_parser.tab.c"
     break;
 
   case 22:
-#line 59 "dats_parser.y"
+#line 74 "dats_parser.y"
     {printf("note a3 at line %d\n", dats_line);}
-#line 1302 "dats_parser.tab.c"
+#line 1317 "dats_parser.tab.c"
     break;
 
   case 23:
-#line 60 "dats_parser.y"
+#line 75 "dats_parser.y"
     {printf("note b3 at line %d\n", dats_line);}
-#line 1308 "dats_parser.tab.c"
+#line 1323 "dats_parser.tab.c"
     break;
 
 
-#line 1312 "dats_parser.tab.c"
+#line 1327 "dats_parser.tab.c"
 
       default: break;
     }
@@ -1540,30 +1555,38 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 62 "dats_parser.y"
+#line 77 "dats_parser.y"
 
 
 int main(int argc, char *argv[]){
 
    if (argc < 2) {
-      fprintf(stderr, "ye may try %s [filename]\n", argv[0]);
+      fprintf(stderr, "ye may try \'%s [filename]\'\n", argv[0]);
       yyin = stdin;
-      goto dats_parse;
-      
+      goto parse;
+
    }
-   if (!(yyin = fopen(argv[1], "r"))){
+
+   FILE *fp;
+
+   if (!(fp = fopen(argv[1], "r"))) {
       perror(argv[1]);
       return 1;
+
    }
-   dats_parse:
-   yyparse();
+   yyin = fp;
+
+   parse:
+   printf("return of yyparse %d\n", yyparse());
+
+   printf("size of wav %llu\n", WAV_ALLOC);
 
    return 0;
 }
 
 int yyerror(const char *s){
    fprintf(stderr, "parser: %s at line %d\n", s, dats_line-1);
-   return 1;
+   exit(1);
 }
 
 
