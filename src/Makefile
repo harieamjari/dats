@@ -3,19 +3,19 @@ OBJ = dats.tab.o lex.yy.o wav.o
 BIFLEX = dats.tab.c dats.tab.h lex.yy.c
 
 
-all : $(BIFLEX) lex
+all : $(BIFLEX) dats
 .PHONY : all
 
-$(BIFLEX) : dats.y lexer.l
+$(BIFLEX) : dats.y dats.l
 	bison -d dats.y
-	flex lexer.l
+	flex dats.l
 
 %.o : %.c
 	$(CC) -c -o $@ $^
 
-lex : $(OBJ)
+dats : $(OBJ)
 	$(CC) -o $@ $^ -lfl -lm
 
 .PHONY : clean
-clean: $(OBJ) $(BIFLEX) lex
+clean: $(OBJ) $(BIFLEX) dats
 	rm -f $^
