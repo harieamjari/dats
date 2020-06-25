@@ -15,7 +15,13 @@ int dats_clean();
 int yyerror(const char *s);
 %}
 
+%union {
+   int val_in;
+}
+
 %token D_BEG D_END
+%token K_BPM
+%token <val_in> V_BPM
 %token C3_NK D3_NK E3_NK F3_NK G3_NK A3_NK B3_NK
 %token K_NL
 %token K_NK
@@ -27,8 +33,16 @@ int yyerror(const char *s);
 
 %%
 
-file_struct : beginning note D_END end_line
+file_struct : bpm beginning note D_END end_line
 	    ;
+
+bpm :
+    | K_BPM SP V_BPM end_line {
+    WAV_BPM = $3;
+    printf("bpm = %d\n", WAV_BPM);
+    WAV_BPM_PERIOD = (double) 60.0*WAV_SAMPLE_RATE/WAV_BPM;
+    }
+    ;
 
 note : K_NL SP note_length SP note_key with_or_without_sp end_line
      | K_NL SP note_length SP note_key with_or_without_sp end_line note
@@ -51,7 +65,7 @@ with_or_without_sp :
 		   ;
 
 note_length : V1_NL {
-	    WAV_ALLOC += WAV_BPM_PERIOD*4;
+	    WAV_ALLOC += (int) WAV_BPM_PERIOD*4;
 	    printf("found note1 at line %d\n", dats_line);
 	    }
             | V2_NL {
@@ -63,7 +77,7 @@ note_length : V1_NL {
 	    printf("found note4 at line %d\n", dats_line);
 	    }
             | V8_NL {
-	    WAV_ALLOC += WAV_BPM_PERIOD/2;
+	    WAV_ALLOC += (int) WAV_BPM_PERIOD/2;
 	    printf("found note8 at line %d\n", dats_line);
 	    }
             ;                                                 
@@ -76,6 +90,7 @@ note_key : C3_NK {printf("note c3 at line %d\n", dats_line);}
 	 | A3_NK {printf("note a3 at line %d\n", dats_line);}
 	 | B3_NK {printf("note b3 at line %d\n", dats_line);}
 	 ;
+
 %%
 
 int main(int argc, char *argv[]){
@@ -97,9 +112,10 @@ int main(int argc, char *argv[]){
    yyin = fp;
 
    parse:
+   WAV_SAMPLE_RATE = 44100;
    printf("return of yyparse %d\n", yyparse());
 
-   printf("size of wav %llu\n", WAV_ALLOC);
+   printf("size of wav %d period bpm %f\n", WAV_ALLOC, WAV_BPM_PERIOD);
 
    return 0;
 }

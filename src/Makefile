@@ -2,7 +2,6 @@ CC = gcc
 OBJ = dats.tab.o lex.yy.o wav.o
 BIFLEX = dats.tab.c dats.tab.h lex.yy.c
 
-
 all : $(BIFLEX) dats
 .PHONY : all
 
@@ -10,8 +9,8 @@ $(BIFLEX) : dats.y dats.l
 	bison -d dats.y
 	flex dats.l
 
-%.o : %.c
-	$(CC) -c -o $@ $^
+%.o : %.c wav.h notes.h
+	$(CC) -c -o $@ $<
 
 dats : $(OBJ)
 	$(CC) -o $@ $^ -lfl -lm

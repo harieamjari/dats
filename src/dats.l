@@ -9,9 +9,11 @@ uint32_t dats_line = 1;
 
 
 %%
+"BPM"   {return K_BPM;}
+[0-9]{2,3} {yylval.val_in = atoi(yytext); return V_BPM;}
+
 "BEGIN" {return D_BEG;}
 "END"   {return D_END;}
-
 "NL"    {return K_NL;}
 "1"     {return V1_NL;}
 "2"     {return V2_NL;}
@@ -26,7 +28,7 @@ uint32_t dats_line = 1;
 "A3"    {return A3_NK;}
 "B3"    {return B3_NK;}
 [ \t]+    {return SP;}
-[0-9a-zA-Z]+  {printf("lexer: unknown \'%s\' at line %d\n", yytext, dats_line);}
+. {printf("lexer: unknown \'%s\' at line %d\n", yytext, dats_line);}
 \n  {dats_line++; return EOL;}
 %%
 
