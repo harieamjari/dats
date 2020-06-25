@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "dats_note.h"
+
+#include "notes.h"
 #include "wav.h"
 
 extern FILE *yyin;

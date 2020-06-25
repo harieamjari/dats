@@ -1,11 +1,21 @@
 CC = gcc
-CFLAGS = -O3
-LIBS = -lfl 
-DEPS = dats_note.h
+OBJ = dats.tab.o lex.yy.o wav.o
+BIFLEX = dats.tab.c dats.tab.h lex.yy.c
 
 
-lex : dats_parser.y dats_parser.l $(DEPS)
-	bison -d dats_parser.y
-	flex dats_parser.l
-	$(CC) -o $@ dats_parser.tab.c lex.yy.c $(LIBS) $(CFLAGS)
+all : $(BIFLEX) lex
+.PHONY : all
 
+$(BIFLEX) : dats.y lexer.l
+	bison -d dats.y
+	flex lexer.l
+
+%.o : %.c
+	$(CC) -c -o $@ $^
+
+lex : $(OBJ)
+	$(CC) -o $@ $^ -lfl -lm
+
+.PHONY : clean
+clean: $(OBJ) $(BIFLEX) lex
+	rm -f $^

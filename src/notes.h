@@ -27,10 +27,13 @@
 
 #define NOTE_C4 (double) 261.63
 
-uint32_t WAV_BPM = 120;
-uint64_t WAV_ALLOC = 0;
-uint32_t WAV_SAMPLE_RATE = 44100;
+uint32_t WAV_BPM;
+uint64_t WAV_ALLOC;
+uint32_t WAV_SAMPLE_RATE;;
+uint32_t WAV_TIME;;
 
+
+int16_t *raw_PCM;;
 #define WAV_BPM_PERIOD (double) 60*WAV_SAMPLE_RATE/WAV_BPM
 
 #endif

@@ -4,9 +4,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "dats_note.h"
+#include "notes.h"
 #include "wav.h"
-
 
 int dats_create_wav(){
    wav_header_struct wav_struct;
@@ -23,7 +22,7 @@ int dats_create_wav(){
    strncpy(wav_struct.Subchunk2ID, "data", 4);
 
    uint16_t BitsPerSample = 16;
-   uint32_t NumSamples = WAV_TIME*SAMPLE_RATE;
+   uint32_t NumSamples = WAV_TIME*WAV_SAMPLE_RATE;
 
    wav_struct.Subchunk1Size = 16;
    wav_struct.AudioFormat = 1;
@@ -42,6 +41,7 @@ int dats_create_wav(){
    fwrite(&filesize, sizeof(uint32_t), 1, fp);
 
    fclose(fp);
+
 
 
    free(raw_PCM);

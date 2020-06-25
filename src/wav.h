@@ -1,8 +1,6 @@
 #ifndef DATS_WAV
 #define DATS_WAV
 
-int16_t *raw_PCM = NULL;
-
 typedef struct __attribute__((__packed__)) {
    char     ChunkID[4];
    uint32_t ChunkSize;

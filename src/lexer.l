@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdint.h>
-#include "dats_parser.tab.h"
+#include "dats.tab.h"
 
 #define YY_DECL int yylex()
 uint32_t dats_line = 1;
