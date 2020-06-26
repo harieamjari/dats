@@ -170,6 +170,8 @@ int main(int argc, char *argv[]){
 
    printf("size of wav %d period bpm %f\n", WAV_ALLOC, WAV_BPM_PERIOD);
 
+   fclose(yyin);
+   fclose(fp);
 #ifdef DATS_DEBUG
    for (int i = 0; i < WAV_ALLOC; i++){
       printf("sample at %d: %d\n", i, raw_PCM[i]);
