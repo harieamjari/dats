@@ -16,7 +16,7 @@ dats can be easily be built by running make inside the src directory.
 If dats was executed without arguments, the default is stdin.
 
 Once executed, dats's output is a wav file playing the text sheet.
-For the moment, the default soundfont is a sine wave. Bear with me.
+For the moment, the default soundfont is a sine wave. Beer with me.
 
 
 
