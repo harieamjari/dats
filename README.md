@@ -18,12 +18,12 @@ To test dats, execute `./dats < example.dats` or `./dats example.dats`.
 Both would work anyhow.
 
 ## TODO
-Able to export wav files.
+- [x] Able to export wav files.
 
-Add diagnostic message.
+- [ ] Add diagnostic message.
 
-Able to take arguments (getopt.h)
+- [ ] Able to take arguments (getopt.h)
 
-Sanity check.
+- [x] Sanity check.
 
 
