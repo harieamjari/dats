@@ -1,5 +1,4 @@
-BPM 120
-
+BPM 300
 BEGIN   
 
 NL 8   C3

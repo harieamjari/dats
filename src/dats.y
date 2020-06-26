@@ -11,7 +11,7 @@ extern int yylex();
 extern int yyparse();
 extern uint32_t dats_line;
 
-int dats_clean();
+void dats_clean(void);
 int yyerror(const char *s);
 %}
 
@@ -29,6 +29,9 @@ int yyerror(const char *s);
 %token EOL
 %token SP
 
+%type <ival> note_length
+%type <ival> note_key
+
 %start file_struct
 
 %%
@@ -36,7 +39,11 @@ int yyerror(const char *s);
 file_struct : bpm beginning note D_END end_line
 	    ;
 
-bpm :
+bpm : {
+    WAV_BPM = 120;
+    WAV_BPM_PERIOD = (double) 60.0*WAV_SAMPLE_RATE/WAV_BPM;
+    printf("bpm default = %d\n", WAV_BPM);
+    }
     | K_BPM SP V_BPM end_line {
     WAV_BPM = $3;
     printf("bpm = %d\n", WAV_BPM);
@@ -65,7 +72,7 @@ with_or_without_sp :
 		   ;
 
 note_length : V1_NL {
-	    WAV_ALLOC += (int) WAV_BPM_PERIOD*4;
+	    WAV_ALLOC += WAV_BPM_PERIOD*4;
 	    printf("found note1 at line %d\n", dats_line);
 	    }
             | V2_NL {
@@ -77,7 +84,7 @@ note_length : V1_NL {
 	    printf("found note4 at line %d\n", dats_line);
 	    }
             | V8_NL {
-	    WAV_ALLOC += (int) WAV_BPM_PERIOD/2;
+	    WAV_ALLOC += WAV_BPM_PERIOD/2;
 	    printf("found note8 at line %d\n", dats_line);
 	    }
             ;                                                 
@@ -117,12 +124,18 @@ int main(int argc, char *argv[]){
 
    printf("size of wav %d period bpm %f\n", WAV_ALLOC, WAV_BPM_PERIOD);
 
+   dats_clean();
    return 0;
 }
 
 int yyerror(const char *s){
    fprintf(stderr, "parser: %s at line %d\n", s, dats_line-1);
+   dats_clean();
    exit(1);
+}
+
+void dats_clean(void){
+   free(raw_PCM);
 }
 
 

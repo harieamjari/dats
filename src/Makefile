@@ -9,8 +9,8 @@ $(BIFLEX) : dats.y dats.l
 	bison -d dats.y
 	flex dats.l
 
-%.o : %.c wav.h notes.h
-	$(CC) -c -o $@ $<
+%.o : %.c ../include/wav.h ../include/notes.h
+	$(CC) -c -I../include -o $@ $<
 
 dats : $(OBJ)
 	$(CC) -o $@ $^ -lfl -lm

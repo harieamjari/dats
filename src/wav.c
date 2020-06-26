@@ -7,7 +7,7 @@
 #include "notes.h"
 #include "wav.h"
 
-int dats_create_wav(){
+int dats_create_wav(void){
    wav_header_struct wav_struct;
 
    FILE *fp = fopen("write.wav", "wb+");
