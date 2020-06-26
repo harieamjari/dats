@@ -17,6 +17,7 @@ int yyerror(const char *s);
 
 %union {
    int val_in;
+   double val_double;
 }
 
 %token D_BEG D_END
@@ -29,8 +30,8 @@ int yyerror(const char *s);
 %token EOL
 %token SP
 
-%type <ival> note_length
-%type <ival> note_key
+%type <val_in> note_length
+%type <val_double> note_key
 
 %start file_struct
 
@@ -51,7 +52,7 @@ bpm : {
     }
     ;
 
-note : K_NL SP note_length SP note_key with_or_without_sp end_line
+note : K_NL SP note_length SP note_key with_or_without_sp end_line 
      | K_NL SP note_length SP note_key with_or_without_sp end_line note
      ;
 
@@ -73,29 +74,58 @@ with_or_without_sp :
 
 note_length : V1_NL {
 	    WAV_ALLOC += WAV_BPM_PERIOD*4;
-	    printf("found note1 at line %d\n", dats_line);
+	    $$ = WAV_BPM_PERIOD*4;
+	    raw_PCM = realloc(raw_PCM, WAV_ALLOC);
+	    printf("nl %d at line %d\n", $$, dats_line);
 	    }
             | V2_NL {
 	    WAV_ALLOC += WAV_BPM_PERIOD*2;
-	    printf("found note2 at line %d\n", dats_line);
+	    $$ = WAV_BPM_PERIOD*2;
+	    raw_PCM = realloc(raw_PCM, WAV_ALLOC);
+	    printf("nl %d at line %d\n", $$, dats_line);
 	    }
             | V4_NL {
 	    WAV_ALLOC += WAV_BPM_PERIOD;
-	    printf("found note4 at line %d\n", dats_line);
+	    $$ = WAV_BPM_PERIOD;
+	    raw_PCM = realloc(raw_PCM, WAV_ALLOC);
+	    printf("nl %d at line %d\n", $$, dats_line);
 	    }
             | V8_NL {
 	    WAV_ALLOC += WAV_BPM_PERIOD/2;
-	    printf("found note8 at line %d\n", dats_line);
+	    $$ = WAV_BPM_PERIOD/2;
+	    raw_PCM = realloc(raw_PCM, WAV_ALLOC);
+	    printf("nl %d at line %d\n", $$, dats_line);
 	    }
             ;                                                 
 
-note_key : C3_NK {printf("note c3 at line %d\n", dats_line);}
-	 | D3_NK {printf("bote d3 at line %d\n", dats_line);}
-	 | E3_NK {printf("note e3 at line %d\n", dats_line);}
-	 | F3_NK {printf("note f3 at line %d\n", dats_line);}
-	 | G3_NK {printf("note f3 at line %d\n", dats_line);}
-	 | A3_NK {printf("note a3 at line %d\n", dats_line);}
-	 | B3_NK {printf("note b3 at line %d\n", dats_line);}
+note_key : C3_NK {
+	 $$ = NOTE_C3;
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | D3_NK {
+	 $$ = NOTE_D3;
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | E3_NK {
+	 $$ = NOTE_E3;
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | F3_NK {
+	 $$ = NOTE_F3;
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | G3_NK {
+	 $$ = NOTE_G3;
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | A3_NK {
+	 $$ = NOTE_A3;
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | B3_NK {
+	 $$ = NOTE_B3;
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
 	 ;
 
 %%
@@ -110,7 +140,7 @@ int main(int argc, char *argv[]){
    }
 
    FILE *fp;
-
+   raw_PCM = malloc(sizeof(int16_t));
    if (!(fp = fopen(argv[1], "r"))) {
       perror(argv[1]);
       return 1;
