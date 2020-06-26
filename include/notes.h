@@ -26,6 +26,20 @@
 #define NOTE_B3 (double) 246.94
 
 #define NOTE_C4 (double) 261.63
+#define NOTE_D4 (double) 293.66
+#define NOTE_E4 (double) 329.62
+#define NOTE_F4 (double) 349.23
+#define NOTE_G4 (double) 391.99
+#define NOTE_A4 (double) 440.00
+#define NOTE_B4 (double) 493.88
+
+#define NOTE_C5 (double) 523.25
+#define NOTE_D5 (double) 587.33
+#define NOTE_E5 (double) 659.25
+#define NOTE_F5 (double) 698.45
+#define NOTE_G5 (double) 783.99
+#define NOTE_A5 (double) 880.00
+#define NOTE_B5 (double) 987.76
 
 uint32_t WAV_BPM;
 uint32_t WAV_ALLOC;

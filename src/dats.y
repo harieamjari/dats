@@ -23,10 +23,13 @@ int yyerror(const char *s);
 %token D_BEG D_END
 %token K_BPM
 %token <val_in> V_BPM
+
 %token C3_NK D3_NK E3_NK F3_NK G3_NK A3_NK B3_NK
-%token K_NL
-%token K_NK
-%token V1_NL V2_NL V4_NL V8_NL
+%token C4_NK D4_NK E4_NK F4_NK G4_NK A4_NK B4_NK
+%token C5_NK D5_NK E5_NK F5_NK G5_NK A5_NK B5_NK
+
+%token K_NL K_NK
+%token V1_NL V2_NL V4_NL V8_NL V16_NL
 %token EOL
 %token SP
 
@@ -93,6 +96,12 @@ note_length : V1_NL {
             | V8_NL {
 	    WAV_ALLOC += WAV_BPM_PERIOD/2;
 	    $$ = WAV_BPM_PERIOD/2;
+	    raw_PCM = realloc(raw_PCM, sizeof(int16_t)*WAV_ALLOC);
+	    printf("nl %d at line %d\n", $$, dats_line);
+	    }
+	    | V16_NL {
+	    WAV_ALLOC += WAV_BPM_PERIOD/4;
+	    $$ = WAV_BPM_PERIOD/4;
 	    raw_PCM = realloc(raw_PCM, sizeof(int16_t)*WAV_ALLOC);
 	    printf("nl %d at line %d\n", $$, dats_line);
 	    }
