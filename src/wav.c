@@ -50,8 +50,14 @@ int dats_create_wav(void){
 
 void dats_construct_pcm(double frequency){
    static int i = 0;
-   for (; i < WAV_ALLOC; i++){
-      raw_PCM[i] = (int16_t) (sin(2.0*M_PI*frequency*i/WAV_SAMPLE_RATE)*28000);
-   }
+   int b = 0;
 
+   double periodw = (double) 1.0/WAV_SAMPLE_RATE;
+
+   for (; i < WAV_ALLOC; i++, b++){
+#ifdef DATS_DEBUG
+      printf("myb %d\n", b);
+#endif
+      raw_PCM[i] = (pow(M_E, -b*periodw*3)*28000.0*sin(2.0*M_PI*frequency*b*periodw));
+   }
 }

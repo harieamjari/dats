@@ -5,7 +5,8 @@
 
 #include "notes.h"
 #include "wav.h"
-
+/*
+#define DATS_DEBUG */
 extern FILE *yyin;
 extern int yylex();
 extern int yyparse();
@@ -173,7 +174,7 @@ int main(int argc, char *argv[]){
    fclose(yyin);
    fclose(fp);
 #ifdef DATS_DEBUG
-   for (int i = 0; i < WAV_ALLOC; i++){
+   for (int i = 0; i < 100; i++){
       printf("sample at %d: %d\n", i, raw_PCM[i]);
    }
 #endif
