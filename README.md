@@ -11,7 +11,7 @@ NL 4 D3
 
 # Building
 - Assuming you have flex and bison already installed,
-dats can be easily build by running make inside the src directory.
+dats can be easily be built by running make inside the src directory.
 
 
 
