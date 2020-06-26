@@ -20,6 +20,10 @@ Both would work anyhow.
 ## TODO
 Able to export wav files.
 
+Add diagnostic message.
+
 Able to take arguments (getopt.h)
+
+Sanity check.
 
 
