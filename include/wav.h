@@ -19,9 +19,9 @@ typedef struct __attribute__((__packed__)) {
 } wav_header_struct;
 
 
-void dats_construct_pcm();
+void dats_construct_pcm(double frequency);
 
-int dats_create_wav();
+int dats_create_wav(void);
 
 
 #endif

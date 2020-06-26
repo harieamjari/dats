@@ -22,7 +22,7 @@ int dats_create_wav(void){
    strncpy(wav_struct.Subchunk2ID, "data", 4);
 
    uint16_t BitsPerSample = 16;
-   uint32_t NumSamples = WAV_TIME*WAV_SAMPLE_RATE;
+   uint32_t NumSamples = WAV_ALLOC;
 
    wav_struct.Subchunk1Size = 16;
    wav_struct.AudioFormat = 1;
@@ -31,10 +31,10 @@ int dats_create_wav(void){
    wav_struct.ByteRate = (uint32_t) wav_struct.SampleRate*wav_struct.NumChannels*BitsPerSample/8;
    wav_struct.BlockAlign = (uint16_t) wav_struct.NumChannels*BitsPerSample/8;
    wav_struct.BitsPerSample = BitsPerSample;
-   wav_struct.Subchunk2Size = (uint32_t) NumSamples*wav_struct.NumChannels*BitsPerSample/8;
+   wav_struct.Subchunk2Size = (uint32_t) WAV_ALLOC*wav_struct.NumChannels*BitsPerSample/8;
 
    fwrite(&wav_struct, sizeof(wav_struct), 1, fp);
-   fwrite(raw_PCM, sizeof(int16_t), NumSamples, fp);
+   fwrite(raw_PCM, sizeof(int16_t), WAV_ALLOC, fp);
 
    uint32_t filesize = ftell(fp) - 8;
    fseek(fp, 4, SEEK_SET);
@@ -46,4 +46,12 @@ int dats_create_wav(void){
 
    free(raw_PCM);
    return 0;
+}
+
+void dats_construct_pcm(double frequency){
+   static int i = 0;
+   for (; i < WAV_ALLOC; i++){
+      raw_PCM[i] = (int16_t) (sin(2.0*M_PI*frequency*i/WAV_SAMPLE_RATE)*28000);
+   }
+
 }

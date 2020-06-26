@@ -75,55 +75,62 @@ with_or_without_sp :
 note_length : V1_NL {
 	    WAV_ALLOC += WAV_BPM_PERIOD*4;
 	    $$ = WAV_BPM_PERIOD*4;
-	    raw_PCM = realloc(raw_PCM, WAV_ALLOC);
+	    raw_PCM = realloc(raw_PCM, sizeof(int16_t)*WAV_ALLOC);
 	    printf("nl %d at line %d\n", $$, dats_line);
 	    }
             | V2_NL {
 	    WAV_ALLOC += WAV_BPM_PERIOD*2;
 	    $$ = WAV_BPM_PERIOD*2;
-	    raw_PCM = realloc(raw_PCM, WAV_ALLOC);
+	    raw_PCM = realloc(raw_PCM, sizeof(int16_t)*WAV_ALLOC);
 	    printf("nl %d at line %d\n", $$, dats_line);
 	    }
             | V4_NL {
 	    WAV_ALLOC += WAV_BPM_PERIOD;
 	    $$ = WAV_BPM_PERIOD;
-	    raw_PCM = realloc(raw_PCM, WAV_ALLOC);
+	    raw_PCM = realloc(raw_PCM, sizeof(int16_t)*WAV_ALLOC);
 	    printf("nl %d at line %d\n", $$, dats_line);
 	    }
             | V8_NL {
 	    WAV_ALLOC += WAV_BPM_PERIOD/2;
 	    $$ = WAV_BPM_PERIOD/2;
-	    raw_PCM = realloc(raw_PCM, WAV_ALLOC);
+	    raw_PCM = realloc(raw_PCM, sizeof(int16_t)*WAV_ALLOC);
 	    printf("nl %d at line %d\n", $$, dats_line);
 	    }
             ;                                                 
 
 note_key : C3_NK {
 	 $$ = NOTE_C3;
+	 dats_construct_pcm($$);
 	 printf("nk %f at line %d\n", $$, dats_line);
 	 }
 	 | D3_NK {
 	 $$ = NOTE_D3;
+	 dats_construct_pcm($$);
 	 printf("nk %f at line %d\n", $$, dats_line);
 	 }
 	 | E3_NK {
 	 $$ = NOTE_E3;
+	 dats_construct_pcm($$);
 	 printf("nk %f at line %d\n", $$, dats_line);
 	 }
 	 | F3_NK {
 	 $$ = NOTE_F3;
+	 dats_construct_pcm($$);
 	 printf("nk %f at line %d\n", $$, dats_line);
 	 }
 	 | G3_NK {
 	 $$ = NOTE_G3;
+	 dats_construct_pcm($$);
 	 printf("nk %f at line %d\n", $$, dats_line);
 	 }
 	 | A3_NK {
 	 $$ = NOTE_A3;
+	 dats_construct_pcm($$);
 	 printf("nk %f at line %d\n", $$, dats_line);
 	 }
 	 | B3_NK {
 	 $$ = NOTE_B3;
+	 dats_construct_pcm($$);
 	 printf("nk %f at line %d\n", $$, dats_line);
 	 }
 	 ;
@@ -154,7 +161,12 @@ int main(int argc, char *argv[]){
 
    printf("size of wav %d period bpm %f\n", WAV_ALLOC, WAV_BPM_PERIOD);
 
-   dats_clean();
+#ifdef DATS_DEBUG
+   for (int i = 0; i < WAV_ALLOC; i++){
+      printf("sample at %d: %d\n", i, raw_PCM[i]);
+   }
+#endif
+   dats_create_wav();
    return 0;
 }
 
