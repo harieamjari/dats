@@ -143,6 +143,76 @@ note_key : C3_NK {
 	 dats_construct_pcm($$);
 	 printf("nk %f at line %d\n", $$, dats_line);
 	 }
+	 | C4_NK {
+	 $$ = NOTE_C4;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | D4_NK {
+	 $$ = NOTE_D4;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | E4_NK {
+	 $$ = NOTE_E4;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | F4_NK {
+	 $$ = NOTE_F4;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | G4_NK {
+	 $$ = NOTE_G4;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | A4_NK {
+	 $$ = NOTE_A4;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | B4_NK {
+	 $$ = NOTE_B4;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | C5_NK {
+	 $$ = NOTE_C5;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | D5_NK {
+	 $$ = NOTE_D5;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | E5_NK {
+	 $$ = NOTE_E5;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | F5_NK {
+	 $$ = NOTE_F5;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | G5_NK {
+	 $$ = NOTE_G5;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | A5_NK {
+	 $$ = NOTE_A5;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 }
+	 | B5_NK {
+	 $$ = NOTE_B5;
+	 dats_construct_pcm($$);
+	 printf("nk %f at line %d\n", $$, dats_line);
+	 } 
 	 ;
 
 %%
