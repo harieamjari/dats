@@ -26,10 +26,14 @@ Both would work anyhow.
 ## TODO
 - [x] Able to export wav files.
 
+- [x] Add more keys.
+
 - [ ] Add diagnostic message.
 
 - [ ] Able to take arguments (getopt.h)
 
-- [x] Sanity check.
+- [ ] Rewrite the parser for ambiguities.
+
+- [ ] Sanity check.
 
 
