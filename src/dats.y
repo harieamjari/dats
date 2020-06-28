@@ -227,14 +227,11 @@ int main(int argc, char *argv[]){
 
    }
 
-   FILE *fp;
-   raw_PCM = malloc(sizeof(int16_t));
-   if (!(fp = fopen(argv[1], "r"))) {
+   if (!(yyin = fopen(argv[1], "r"))) {
       perror(argv[1]);
       return 1;
 
    }
-   yyin = fp;
 
    parse:
    WAV_SAMPLE_RATE = 44100;
@@ -243,7 +240,6 @@ int main(int argc, char *argv[]){
    printf("size of wav %d period bpm %f\n", WAV_ALLOC, WAV_BPM_PERIOD);
 
    fclose(yyin);
-   fclose(fp);
 #ifdef DATS_DEBUG
    for (int i = 0; i < 100; i++){
       printf("sample at %d: %d\n", i, raw_PCM[i]);

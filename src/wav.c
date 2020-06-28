@@ -51,6 +51,10 @@ int dats_create_wav(void){
 void dats_construct_pcm(double frequency){
    static int i = 0;
    int b = 0;
+   if (raw_PCM == NULL) {
+      fprintf(stderr, "allocating sound failed\n");
+      exit(1);
+   }
 
    double periodw = (double) 1.0/WAV_SAMPLE_RATE;
 
@@ -59,6 +63,6 @@ void dats_construct_pcm(double frequency){
       printf("myb %d\n", b);
 #endif
       raw_PCM[i] = (pow(M_E, -b*periodw*3)*18000.0*sin(2.0*M_PI*frequency*b*periodw))+(pow(M_E, -b*periodw*7)*9000.0*cos(4.0*M_PI*frequency*b*periodw))
-	      +2+(pow(M_E, -b*periodw*0.5)*1900.0*sin(3*M_PI*frequency*b*periodw));
+	      +(pow(M_E, -b*periodw*7)*1900.0*sin(8.0*M_PI*frequency*b*periodw+1.5));
    }
 }
