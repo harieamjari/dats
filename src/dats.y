@@ -219,8 +219,9 @@ note_key : C3_NK {
 
 int main(int argc, char *argv[]){
 
+   fclose(stdout);
    if (argc < 2) {
-      fprintf(stderr, "ye may try \'%s [filename]\'\n", argv[0]);
+      fprintf(stdout, "ye may try \'%s [filename]\'\n", argv[0]);
       yyin = stdin;
       goto parse;
 
