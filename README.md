@@ -4,9 +4,14 @@ Compose music in a text editor.
 
 Example:
 ```
+BPM 120.0
+
+BEGIN
+
 NL 1 C3
 NL 4 D3
-...
+
+END
 ```
 
 # Building
