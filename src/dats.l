@@ -9,6 +9,8 @@ uint32_t dats_line = 1;
 
 
 %%
+
+(\/\/).*  {/* comment */}
 "BPM"   {return K_BPM;}
 [0-9]{2,3}\.[0-9]+ {yylval.val_in = atoi(yytext); return V_BPM;}
 

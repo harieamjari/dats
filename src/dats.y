@@ -49,8 +49,8 @@ bpm : {
     WAV_BPM_PERIOD = (double) 60.0*WAV_SAMPLE_RATE/WAV_BPM;
     printf("bpm default = %d\n", WAV_BPM);
     }
-    | K_BPM SP V_BPM end_line {
-    WAV_BPM = $3;
+    | with_or_without_sp_endl K_BPM SP V_BPM end_line {
+    WAV_BPM = $4;
     printf("bpm = %d\n", WAV_BPM);
     WAV_BPM_PERIOD = (double) 60.0*WAV_SAMPLE_RATE/WAV_BPM;
     }
