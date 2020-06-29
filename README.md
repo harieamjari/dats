@@ -33,7 +33,9 @@ If dats was executed without arguments, the default is stdin.
 
 Once executed, dats's output is a wav file named "write.wav" playing the text sheet.
 For the moment, the default soundfont is a sine wave. Technically,
-an attenuation of sine wave: $$S(t)=A_0sin(\omega{f}t)e^{-t/T}$$Beer with me.
+an attenuation of sine wave:
+![equation](http://www.sciweavers.org/upload/Tex2Img_1593430143/render.png)
+Beer with me.
 
 To test dats, execute `./dats < example.dats` or `./dats example.dats`.
 Both would work anyhow.
