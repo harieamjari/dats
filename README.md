@@ -32,7 +32,7 @@ If dats was executed without arguments, the default is stdin.
 
 Once executed, dats's output is a wav file named "write.wav" playing the text sheet.
 For the moment, the default soundfont is a sine wave. Technically,
-an attenuation of sine wave: ![equation](http://www.sciweavers.org/upload/Tex2Img_1593430763/render.png)
+an attenuation of sine wave: ![damped_sine](https://www.sciweavers.org/upload/Tex2Img_1593430763/render.png)
 
 Beer with me.
 
@@ -40,16 +40,16 @@ To test dats, execute `./dats < example.dats` or `./dats example.dats`.
 Both would work anyhow.
 
 ## TODO
-- [x] Able to export wav files.
+- [ ] Able to export midi files
 
-- [x] Add more keys.
+- [ ] Add more keys.
 
-- [ ] Add diagnostic message.
+- [ ] Add diagnostic message. (omitted)
 
 - [ ] Able to take arguments (getopt.h)
 
 - [ ] Rewrite the parser for ambiguities.
 
-- [ ] Sanity check.
+
 
 
