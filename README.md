@@ -15,8 +15,8 @@ END
 ```
 - A note begins by declaring the note length with
 the keyword, "NL". "NL" must be immediately followed by it's
-value either, "1", "2", "4", "8" or "16",<sup>1</sup> followed
-by a "key"<sup>2</sup> and then terminated by a `newline`.
+value; either "1", "2", "4", "8" or "16".<sup>1</sup> Then a "key"<sup>2</sup>
+and then terminated by a `newline`. 
 
 <sup>1</sup>Other values are being considered to be implemented.
 
