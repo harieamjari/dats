@@ -15,13 +15,14 @@ END
 ```
 - A note begins by declaring the note length with
 the keyword, "NL". "NL" must be immediately followed by it's
-value either, "1", "2", "4", "8" or "16"<sup>1</sup> followed
-by "key"<sup>2</sup> and then terminated by a `newline`.
+value either, "1", "2", "4", "8" or "16",<sup>1</sup> followed
+by a "key"<sup>2</sup> and then terminated by a `newline`.
 
 <sup>1</sup>Other notes are being considered
 to be implemented.
 
-<sup>2</sup>Accidentals are still in development.
+<sup>2</sup>Accidentals are still in development while keys in the
+octave 0, 1 and 2 are not implemented.
 
 
 # Building
@@ -31,7 +32,8 @@ Dats can be built by running `make` inside the src directory.
 If dats was executed without arguments, the default is stdin.
 
 Once executed, dats's output is a wav file named "write.wav" playing the text sheet.
-For the moment, the default soundfont is a sine wave. Beer with me.
+For the moment, the default soundfont is a sine wave. Technically,
+an attenuation of sine wave: $$S(t)=A_0sin(\omega{f}t)e^{-t/T}$$Beer with me.
 
 To test dats, execute `./dats < example.dats` or `./dats example.dats`.
 Both would work anyhow.
