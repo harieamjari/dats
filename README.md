@@ -18,8 +18,7 @@ the keyword, "NL". "NL" must be immediately followed by it's
 value either, "1", "2", "4", "8" or "16",<sup>1</sup> followed
 by a "key"<sup>2</sup> and then terminated by a `newline`.
 
-<sup>1</sup>Other notes are being considered
-to be implemented.
+<sup>1</sup>Other values are being considered to be implemented.
 
 <sup>2</sup>Accidentals are still in development while keys in the
 octave 0, 1 and 2 are not implemented.
