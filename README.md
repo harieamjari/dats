@@ -1,8 +1,8 @@
-# dats
+# dats 
 Compose music in a text editor.
 
 
-Example:
+Example: 
 ```
 BPM 120.0
 
@@ -11,32 +11,29 @@ BEGIN
 NL 1 C3
 NL 4 D3
 
-END
+END 
 ```
-- A note begins by declaring the note length with
-the keyword, "NL". "NL" must be immediately followed by it's
-value; either "1", "2", "4", "8" or "16".<sup>1</sup> Then a "key"<sup>2</sup>
-and then terminated by a `newline`. 
+- A note begins by declaring the note length with the keyword,
+"NL". "NL" must be immediately followed by it's value; either "1", "2",
+"4", "8" or "16".<sup>1</sup> then a "key"<sup>2</sup>, then a `newline`.
 
 <sup>1</sup>Other values are being considered to be implemented.
 
-<sup>2</sup>Accidentals are still in development while keys in the
-octave 0, 1 and 2 are not implemented.
+<sup>2</sup>Accidentals are still in development while keys in the octave
+0, 1 and 2 are not implemented.
 
 
-# Building
-Assuming you have flex and bison already installed,
-Dats can be built by running `make` inside the src directory.
+# Building 
+Assuming you have flex and bison already installed, Dats can
+be built by running `make` inside the src directory.
 
 If dats was executed without arguments, the default is stdin.
 
-Once executed, dats's output is a wav file named "write.wav" playing the text sheet.
-For the moment, the default soundfont is a sine wave. Technically,
-an attenuation of sine wave: ![damped_sine](https://www.sciweavers.org/upload/Tex2Img_1593430763/render.png)
+Once executed, dats's output is a wav file named "write.wav" playing
+the text sheet.  For the moment, the default soundfont is a sine
+wave. Technically, the attenuation of a sine wave.
 
-Beer with me.
-
-To test dats, execute `./dats < example.dats` or `./dats example.dats`.
+To test dats, execute `./dats example.dats`.
 Both would work anyhow.
 
 ## TODO
