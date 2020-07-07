@@ -30,11 +30,27 @@ be built by running `make` inside the src directory.
 If dats was executed without arguments, the default is stdin.
 
 Once executed, dats's output is a wav file named "write.wav" playing
-the text sheet.  For the moment, the default soundfont is a sine
-wave. Technically, the attenuation of a sine wave.
+the text sheet. It's a s16le mono WAV file .  For the moment, the default
+soundfont is a sine wave. Technically, the attenuation of a sine wave.
 
 To test dats, execute `./dats example.dats`.
-Both would work anyhow.
+
+# Modifying the mathematical soundfont
+
+The pointer, `int16_t *raw_PCM;` is used to store the raw values of the
+PCM. The declaration is found at `include/notes.h` and allocated on the
+heap when the parser finds a syntatically valid note. The function tasked
+to assign the value to this pointer is, `void dats_construct_pcm(double frequency)`
+which is defined at wav.c.
+
+If you'd like to modify the soundfont to a simple sine wave, I would recommend,
+`raw_PCM[i] = 10000*sin(2*M_PI*frequency*b*periodw);` 
+
+The variables `b` and `i` share a similarity to what they're for. `b` is a
+automatic variable which traverses the mathematical sine wave (and resetted to zero
+when the function exits). `i` on the other hand, is a static variable and traverses
+time.
+
 
 ## TODO
 - [ ] Able to export midi files
