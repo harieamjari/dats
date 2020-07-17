@@ -10,10 +10,10 @@ $(BIFLEX) : dats.y dats.l
 	flex dats.l
 
 %.o : %.c ../include/wav.h ../include/notes.h
-	$(CC) -c -I../include -ggdb3 -o $@ $<
+	$(CC) -c -I../include -O3 -o $@ $<
 
 dats : $(OBJ)
-	$(CC) -o $@ $^ -lfl -ggdb3 -lm
+	$(CC) -o $@ $^ -lfl -ggdb3 -O3 -lm
 
 .PHONY : clean
 clean: $(OBJ) $(BIFLEX) dats
