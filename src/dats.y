@@ -35,24 +35,44 @@ int yyerror(const char *s);
 %}
 
 %union {
-   double val_double;
+   double dddouble;
+   int ddint;
 }
 
 %token BEG BPM NOTE END
-%token C D E F G
-%token SHARP FLAT
-%token <val_double> VALUE
+%token C D E F G A B
+%token SHARP FLAT EQUAL
 
+%token <ddint> VALUE
+%token <ddouble> BPM_VALUE
+%token NL_1 NL_2 NL_4 NL_8 NL_16
 %token SEMICOLON
 
 %start S
 
 %%
 S : BEG notes END
-notes : note SEMICOLON
- | notes note SEMICOLON
-note : bpm NOTE VALUE note_key
- | bpm
+ ;
+notes : bpm NOTE note_length note_key VALUE SEMICOLON
+ | notes bpm NOTE note_length note_key VALUE SEMICOLON
+ ;
+bpm :
+ | BPM BPM_VALUE SEMICOLON
+ ;
+note_length : NL_1
+ | NL_2
+ | NL_4
+ | NL_8
+ | NL_16
+ ;
+note_key : C
+ | D
+ | E
+ | F
+ | G
+ | A
+ | B
+ ;
 %%
 
 int main(int argc, char *argv[]){
