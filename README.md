@@ -4,23 +4,17 @@ Compose music in a text editor.
 
 Example: 
 ```
-BPM 120.0
-
 BEGIN
+BPM 120.0;
 
-NL 1 C3
-NL 4 D3
+NOTE 1 C3;
+NOTE 4 D3;
 
 END 
 ```
 - A note begins by declaring the note length with the keyword,
-"NL". "NL" must be immediately followed by it's value; either "1", "2",
-"4", "8" or "16".<sup>1</sup> then a "key"<sup>2</sup>, then a `newline`.
-
-<sup>1</sup>Other values are being considered to be implemented.
-
-<sup>2</sup>Accidentals are still in development while keys in the octave
-0, 1 and 2 are not implemented.
+"NOTE". "NOTE" must be immediately followed by it's value; either "1", "2",
+"4", "8" or "16".<sup>1</sup> then a key<sup>2</sup>, then a `newline`.
 
 
 # Building 
@@ -44,8 +38,6 @@ Both would work anyhow.
 - [ ] Add diagnostic message. (omitted)
 
 - [ ] Able to take arguments (getopt.h)
-
-- [ ] Rewrite the parser for ambiguities.
 
 
 

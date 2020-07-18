@@ -1,3 +1,4 @@
+%define parse.error verbose
 %{
 /*  Copyright (c) 2020 Al-buharie Amjari <healer.harie@gmail.com>
  *
