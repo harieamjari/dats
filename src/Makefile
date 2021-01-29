@@ -3,7 +3,7 @@ CC = gcc
 
 
 dats : dats.c 
-	$(CC) $^ -g -o $@
+	$(CC) $^ -g -fsanitize=address-o $@
 
 .PHONY : clean
 

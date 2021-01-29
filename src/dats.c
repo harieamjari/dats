@@ -95,14 +95,14 @@ w:
     {
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
-	case 'k': case 'l': case 'm': case 'n': case 'o':
+    case 'k': case 'l': case 'm': case 'n': case 'o':
     case 'p': case 'q': case 'r': case 's': case 't':
     case 'u': case 'v': case 'w': case 'x': case 'y':
     case 'z':
       {
 	int nchar;
 	ungetc (c, t->fp);
-	fscanf (t->fp, "%99[a-z]%n", buff, &nchar);
+	fscanf (t->fp, "%99[a-zA-Z0-9]%n", buff, &nchar);
 	if (!strcmp ("staff", buff))
 	  {
 	    symrec_t *s = malloc (sizeof (symrec_t));
@@ -241,7 +241,7 @@ main (int argc, char **argv)
 	  printf ("found TOK_STAFF\n");
 	  break;
 	case TOK_IDENTIFIER:
-	  printf ("found TOK_IDENTIFIER\n");
+	  printf ("found TOK_IDENTIFIER = %s\n", dats_files->sym_table->value.staff.identifier);
 	  break;
 	case TOK_N:
 	  printf ("found TOK_N\n");
