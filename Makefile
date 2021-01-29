@@ -1,0 +1,4 @@
+
+dats :
+	cd src
+	make

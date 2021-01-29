@@ -1,0 +1,7 @@
+BNF for Dats v2
+
+
+<staff> := | "staff" <identifier> "{" <nr>";" "}" | <staff> <staff> ;
+<staff_name> := [A-Za-z0-9_]+;
+<nrb> := "n" <value> <key> | "r" <value> | "bpm" <value> ;
+
