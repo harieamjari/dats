@@ -24,6 +24,7 @@ typedef struct symrec_t symrec_t;
 struct symrec_t
 {
   token_t type;			//0=staff 1=sound
+  int line, column;
   union
   {
     struct
@@ -46,8 +47,8 @@ typedef struct dats_t dats_t;
 struct dats_t
 {
   FILE *fp;
-  int line;
-  int column;
+  char *fname;
+  int line, column;
   uint32_t numsamples;
   symrec_t *sym_table;
 

@@ -62,7 +62,8 @@ clean_dats_t (void)
   do
     {
       p = n->next;
-      free (n);
+      free (n->fname);
+	  free(n);
       n = p;
     }
   while (n != NULL);
@@ -135,21 +136,6 @@ w:
       goto w;
     }
 
-  /* read character by character */
-  /*
-     int i = 0;
-     do {
-     if (c == EOF) return TOK_EOF;
-     buff[i++] = (char)c;
-     c = fgetc(dp.fp);
-     ++dp.column;
-     if (i==99){
-     fprintf(stderr, "Buffer exhausted\n");
-     fclose(dp.fp);
-     return TOK_EOF;
-     }
-     }while (c!=(int)' '); */
-
   switch (c)
     {
     case 'a':
@@ -204,6 +190,9 @@ w:
 	      {
 		if (t->sym_table->type == TOK_STAFF)
 		  {
+			t->sym_table->line = t->line;
+			t->sym_table->column = t-> column;
+			t->column += nchar - 1;
 		    t->sym_table->value.staff.identifier = strdup (buff);
 		    assert (t->sym_table->value.staff.identifier != NULL);
 		    return TOK_IDENTIFIER;
@@ -216,12 +205,14 @@ w:
 	      }
 	    else
 	      {
-		fprintf (stderr, "previous declaration of \"%s\" exist\n",
-			 buff);
+		int length = snprintf (NULL, "%s:%d:%d: ",/*"error: redefinition of the staff \"%s\"\n"
+		                 "%*s %d:%d\n",*/t->fname, t->line, t->column/*, buff, 2*(int)strlen(t->fname),"previous definition at", s->line, s->column*/);
+						 fprintf(stderr, "%s:%d:%d: error: redefinition of the stadd \"%s\"\n"
+						 "%*s");
 		fclose_dats_t (dats_files);
 		clean_symrec_t (dats_files);
 		clean_dats_t ();
-		exit (1);
+		exit(1);
 	      }
 	  }
       }
@@ -271,6 +262,8 @@ init_dats_t (int argc, char **argv)
 	  return 1;
 	}
       p->fp = fp;
+	  p->fname = strdup(argv[i]);
+	  assert(p->fname!=NULL);
       p->line = 1;
       p->column = 1;
       p->numsamples = 0;
@@ -339,6 +332,5 @@ main (int argc, char **argv)
   print_sym_table (dats_files);
   clean_symrec_t (dats_files);
   clean_dats_t ();
-
   return 0;
 }
