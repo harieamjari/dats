@@ -8,7 +8,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
-
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -47,6 +47,46 @@ symrec_t *putsym(dats_t *t, char *identifier, token_t type) {
   t->sym_table = s;
   return s;
 }*/
+void
+fclose_dats_t (dats_t * t)
+{
+  for (dats_t * p = t; p != NULL; p = p->next)
+    fclose (p->fp);
+}
+
+void
+clean_dats_t (void)
+{
+  dats_t *n = dats_files;
+  dats_t *p;
+  do
+    {
+      p = n->next;
+      free (n);
+      n = p;
+    }
+  while (n != NULL);
+
+  dats_files = NULL;
+}
+
+void
+clean_symrec_t (dats_t * t)
+{
+  symrec_t *n;
+  for (symrec_t * p = t->sym_table; p != NULL;)
+    {
+      if (p->type == TOK_STAFF)
+	free (p->value.staff.identifier);
+      if (p->type == TOK_IDENTIFIER)
+	free (p->value.env.identifier);
+      n = p->next;
+      free (p);
+      p = n;
+    }
+
+}
+
 int
 count_dats_t (void)
 {
@@ -66,17 +106,18 @@ count_symrec_t (dats_t * t)
 }
 
 symrec_t *
-getsym (dats_t * t, char const *id, token_t type)
+getsym (dats_t * t, const char *id)
 {
-  if (type == TOK_STAFF)
+  symrec_t *n;
+  for (symrec_t * p = t->sym_table->next; p != NULL; p = n)
     {
+      n = p->next;
 
-      for (symrec_t * p = t->sym_table;
-	   p->value.staff.identifier != NULL && p != NULL; p = p->next)
-	if (!strcmp (p->value.staff.identifier, id))
-	  return p;
-      return NULL;
+      if (!strcmp (p->value.staff.identifier, id))
+	return p;
     }
+  return NULL;
+
 }
 
 token_t
@@ -111,16 +152,36 @@ w:
 
   switch (c)
     {
-    case 'a': case 'b': case 'c': case 'd': case 'e':
-    case 'f': case 'g': case 'h': case 'i': case 'j':
-    case 'k': case 'l': case 'm': case 'n': case 'o':
-    case 'p': case 'q': case 'r': case 's': case 't':
-    case 'u': case 'v': case 'w': case 'x': case 'y':
+    case 'a':
+    case 'b':
+    case 'c':
+    case 'd':
+    case 'e':
+    case 'f':
+    case 'g':
+    case 'h':
+    case 'i':
+    case 'j':
+    case 'k':
+    case 'l':
+    case 'm':
+    case 'n':
+    case 'o':
+    case 'p':
+    case 'q':
+    case 'r':
+    case 's':
+    case 't':
+    case 'u':
+    case 'v':
+    case 'w':
+    case 'x':
+    case 'y':
     case 'z':
       {
 	int nchar;
 	ungetc (c, t->fp);
-	(void)fscanf (t->fp, "%99[a-zA-Z0-9]%n", buff, &nchar);
+	(void) fscanf (t->fp, "%99[a-zA-Z0-9_]%n", buff, &nchar);
 	if (!strcmp ("staff", buff))
 	  {
 	    symrec_t *s = malloc (sizeof (symrec_t));
@@ -132,18 +193,19 @@ w:
 	    t->column += nchar - 1;
 	    return TOK_STAFF;
 	  }
-	else if (buff[0]=='n' && !buff[1])
+	else if (buff[0] == 'n' && !buff[1])
 	  return TOK_N;
-	else if (buff[0]=='r' && !buff[1])
+	else if (buff[0] == 'r' && !buff[1])
 	  return TOK_R;
 	else
 	  {
-	    symrec_t *s = getsym (t, buff, TOK_STAFF);
+	    symrec_t *s = getsym (t, buff);
 	    if (s == NULL)
 	      {
 		if (t->sym_table->type == TOK_STAFF)
 		  {
 		    t->sym_table->value.staff.identifier = strdup (buff);
+		    assert (t->sym_table->value.staff.identifier != NULL);
 		    return TOK_IDENTIFIER;
 		  }
 		else
@@ -154,7 +216,11 @@ w:
 	      }
 	    else
 	      {
-		fprintf (stderr, "previous declaration of %s exist\n", buff);
+		fprintf (stderr, "previous declaration of \"%s\" exist\n",
+			 buff);
+		fclose_dats_t (dats_files);
+		clean_symrec_t (dats_files);
+		clean_dats_t ();
 		exit (1);
 	      }
 	  }
@@ -174,43 +240,21 @@ w:
   return TOK_EOF;
 }
 
-void
-clean_dats_t (void)
-{
-  dats_t *n = dats_files;
-  dats_t *p;
-  do
-    {
-      p = n->next;
-      free (n);
-      n = p;
-    }
-  while (n != NULL);
 
-  dats_files = NULL;
-}
+
 
 void
-clean_symrec_t (dats_t * t)
+print_sym_table (dats_t * t)
 {
   symrec_t *n;
-  for (symrec_t * p = t->sym_table; p != NULL;)
+  for (symrec_t * p = t->sym_table; p != NULL; p = n)
     {
-      if (p->type == TOK_STAFF)
-	free (p->value.staff.identifier);
       n = p->next;
-      free (p);
-      p = n;
+      printf ("%s\n", p->value.staff.identifier);
     }
 
 }
 
-/*
-void print_sym_table(dats_t *t){
-
-
-
-}*/
 int
 init_dats_t (int argc, char **argv)
 {
@@ -219,6 +263,7 @@ init_dats_t (int argc, char **argv)
   for (int i = 1; i < argc; i++)
     {
       p = malloc (sizeof (dats_t));
+      assert (p != NULL);
       fp = fopen (argv[i], "r");
       if (fp == NULL)
 	{
@@ -228,7 +273,15 @@ init_dats_t (int argc, char **argv)
       p->fp = fp;
       p->line = 1;
       p->column = 1;
-      p->sym_table = NULL;
+      p->numsamples = 0;
+      symrec_t *t = malloc (sizeof (symrec_t));
+      assert (t != NULL);
+      t->type = TOK_IDENTIFIER;
+      t->value.env.identifier = strdup ("bpm");
+      assert (t->value.env.identifier != NULL);
+      t->value.env.val = 120.0;
+      t->next = NULL;
+      p->sym_table = t;
       p->next = dats_files;
       dats_files = p;
     }
@@ -246,7 +299,8 @@ main (int argc, char **argv)
   ret = init_dats_t (argc, argv);	// passed
   if (ret)
     {
-      fprintf (stderr, "Error occured\n");
+      clean_symrec_t (dats_files);
+      clean_dats_t ();
       return 1;
     }
 
@@ -259,13 +313,14 @@ main (int argc, char **argv)
 	  printf ("found TOK_STAFF\n");
 	  break;
 	case TOK_IDENTIFIER:
-	  printf ("found TOK_IDENTIFIER = %s\n", dats_files->sym_table->value.staff.identifier);
+	  printf ("found TOK_IDENTIFIER = %s\n",
+		  dats_files->sym_table->value.staff.identifier);
 	  break;
 	case TOK_N:
 	  printf ("found TOK_N\n");
 	  break;
 	case TOK_R:
-	  printf ("foun TOK_R\n");
+	  printf ("found TOK_R\n");
 	  break;
 	case TOK_LCURLY_BRACE:
 	  printf ("found TOK_LCURLY_BRACE\n");
@@ -281,7 +336,7 @@ main (int argc, char **argv)
 	}
     }
 
-
+  print_sym_table (dats_files);
   clean_symrec_t (dats_files);
   clean_dats_t ();
 
