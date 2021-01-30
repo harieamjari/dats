@@ -126,9 +126,10 @@ read_next_tok (dats_t * t)
 {
   int c;
   char buff[100] = { 0 };
+  /* eat whitespace */
 w:
   while ((c = fgetc (t->fp)) == (int) ' ')
-    t->column++;		/* eat whitespace */
+    t->column++;
   if (c == (int) '\n')
     {
       ++t->line;
@@ -205,10 +206,9 @@ w:
 	      }
 	    else
 	      {
-		int length = snprintf (NULL, "%s:%d:%d: ",/*"error: redefinition of the staff \"%s\"\n"
-		                 "%*s %d:%d\n",*/t->fname, t->line, t->column/*, buff, 2*(int)strlen(t->fname),"previous definition at", s->line, s->column*/);
-						 fprintf(stderr, "%s:%d:%d: error: redefinition of the stadd \"%s\"\n"
-						 "%*s");
+		int length = snprintf (NULL,0,"%s:%d:%d: ",t->fname, t->line, t->column);
+		fprintf(stderr, "%s:%d:%d: error: redefinition of the stadd \"%s\"\n"
+				 "%*s previous definition at %d:%d\n",t->fname, t->line, t->column, buff, length+5, "note:",s->line, s->column);
 		fclose_dats_t (dats_files);
 		clean_symrec_t (dats_files);
 		clean_dats_t ();
