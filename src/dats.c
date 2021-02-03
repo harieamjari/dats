@@ -207,7 +207,7 @@ w:
 	    else
 	      {
 		int length = snprintf (NULL,0,"%s:%d:%d: ",t->fname, t->line, t->column);
-		fprintf(stderr, "%s:%d:%d: error: redefinition of the stadd \"%s\"\n"
+		fprintf(stderr, "%s:%d:%d: error: redefinition of \"%s\"\n"
 				 "%*s previous definition at %d:%d\n",t->fname, t->line, t->column, buff, length+5, "note:",s->line, s->column);
 		fclose_dats_t (dats_files);
 		clean_symrec_t (dats_files);
