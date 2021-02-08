@@ -1,0 +1,97 @@
+use ../../plugins/libpsg.so guitar
+
+BEGIN
+BPM 100.0;
+
+NOTE 8. Eb3;
+NOTE 16 Eb4;
+REST 16;
+NOTE 16 Eb3;
+NOTE 8  Eb4;
+REST 8;
+NOTE 8  Eb3;
+NOTE 16 Db4;
+NOTE 16 Eb4;
+REST 8;
+
+//Measure 2
+NOTE 8. C#3;
+NOTE 16 C#4;
+REST 16;
+NOTE 16 B3;
+NOTE 8  C#4;
+REST 16;
+NOTE 16 C#3;
+NOTE 8  C#3;
+NOTE 8  C3;
+NOTE 8  B2;
+
+//Measure 3
+NOTE 8. A#2;
+NOTE 16 A#3;
+REST 16;
+NOTE 16 G#3;
+NOTE 8  A#3;
+NOTE 8  A#2;
+NOTE 8  A#3;
+NOTE 8  F#2;
+NOTE 8  F#3;
+
+//Masure 4
+NOTE 8. B2;
+NOTE 16 B3;
+REST 16;
+NOTE 16 C#3;
+NOTE 8  B3;
+NOTE 8  B2;
+NOTE 8  B3;
+NOTE 8  C#2;
+NOTE 8  C#3;
+
+//Measure 5
+NOTE 8. Eb3;
+NOTE 16 Eb4;
+REST 16;
+NOTE 16 Eb3;
+NOTE 8  Eb4;
+REST 8;
+NOTE 8  Eb3;
+NOTE 16 Db4;
+NOTE 16 Eb4;
+REST 8;
+
+//Measure 6
+NOTE 8. C#3;
+NOTE 16 C#4;
+REST 16;
+NOTE 16 B3;
+NOTE 8  C#4;
+REST 16;
+NOTE 16 C#3;
+NOTE 8  C#3;
+NOTE 8  C3;
+NOTE 8  B2;
+
+//Measure 7
+NOTE 8. A#2;
+NOTE 16 A#3;
+REST 16;
+NOTE 16 G#3;
+NOTE 8  A#3;
+NOTE 8  A#2;
+NOTE 8  A#3;
+NOTE 8  F#2;
+NOTE 8  F#3;
+
+//Masure 8
+NOTE 8. B2;
+NOTE 16 B3;
+REST 16;
+NOTE 16 C#3;
+NOTE 8  B3;
+NOTE 8  B2;
+NOTE 8  B3;
+NOTE 8  C#2;
+NOTE 8  C#3;
+
+END
