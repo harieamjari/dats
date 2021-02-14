@@ -9,7 +9,7 @@
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * Dats is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
@@ -25,9 +25,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <getopt.h>
 #include "dats.h"
 
+#define ERROR(...) fprintf(stderr, __VA_ARGS__)
+#define PRINT_FUNC_ADDRESS(...) \
+  printf("\x1b[1;32m[%s @ %p]\x1b[0m\n", __func__, __VA_ARGS__)
 /*#include "parser.h"
 
 #include "../libpsg/psg.h"
@@ -48,13 +51,6 @@ symrec_t *putsym(dats_t *t, char *identifier, token_t type) {
   return s;
 }*/
 void
-fclose_dats_t (dats_t * t)
-{
-  for (dats_t * p = t; p != NULL; p = p->next)
-    fclose (p->fp);
-}
-
-void
 clean_dats_t (void)
 {
   dats_t *n = dats_files;
@@ -63,7 +59,8 @@ clean_dats_t (void)
     {
       p = n->next;
       free (n->fname);
-	  free(n);
+      fclose (n->fp);
+      free (n);
       n = p;
     }
   while (n != NULL);
@@ -74,6 +71,8 @@ clean_dats_t (void)
 void
 clean_symrec_t (dats_t * t)
 {
+  if (t == NULL)
+    return;
   symrec_t *n;
   for (symrec_t * p = t->sym_table; p != NULL;)
     {
@@ -106,6 +105,7 @@ count_symrec_t (dats_t * t)
   return ret;
 }
 
+/* only works for "staff" types.*/
 symrec_t *
 getsym (dats_t * t, const char *id)
 {
@@ -121,6 +121,9 @@ getsym (dats_t * t, const char *id)
 
 }
 
+/*---------.
+ | Scanner |
+ `--------*/
 token_t
 read_next_tok (dats_t * t)
 {
@@ -180,6 +183,8 @@ w:
 	    t->column += nchar - 1;
 	    return TOK_STAFF;
 	  }
+	else if (!strcmp ("repeat", buff))
+	  return TOK_REPEAT;
 	else if (buff[0] == 'n' && !buff[1])
 	  return TOK_N;
 	else if (buff[0] == 'r' && !buff[1])
@@ -191,9 +196,9 @@ w:
 	      {
 		if (t->sym_table->type == TOK_STAFF)
 		  {
-			t->sym_table->line = t->line;
-			t->sym_table->column = t-> column;
-			t->column += nchar - 1;
+		    t->sym_table->line = t->line;
+		    t->sym_table->column = t->column;
+		    t->column += nchar - 1;
 		    t->sym_table->value.staff.identifier = strdup (buff);
 		    assert (t->sym_table->value.staff.identifier != NULL);
 		    return TOK_IDENTIFIER;
@@ -206,13 +211,16 @@ w:
 	      }
 	    else
 	      {
-		int length = snprintf (NULL,0,"%s:%d:%d: ",t->fname, t->line, t->column);
-		fprintf(stderr, "%s:%d:%d: error: redefinition of \"%s\"\n"
-				 "%*s previous definition at %d:%d\n",t->fname, t->line, t->column, buff, length+5, "note:",s->line, s->column);
-		fclose_dats_t (dats_files);
+		int length =
+		  snprintf (NULL, 0, "%s:%d:%d: ", t->fname, t->line,
+			    t->column);
+		ERROR
+		  ("%s:%d:%d: \x1b[1;31merror\x1b[0m: redefinition of \"%s\"\n"
+		   "%*s previous definition at %d:%d\n", t->fname, t->line,
+		   t->column, buff, length + 5, "note:", s->line, s->column);
 		clean_symrec_t (dats_files);
 		clean_dats_t ();
-		exit(1);
+		exit (1);
 	      }
 	  }
       }
@@ -222,6 +230,8 @@ w:
       return TOK_LCURLY_BRACE;
     case '}':
       return TOK_RCURLY_BRACE;
+    case ';':
+      return TOK_SEMICOLON;
     case EOF:
       fclose (t->fp);
       return TOK_EOF;
@@ -233,7 +243,7 @@ w:
 
 
 
-
+/* prints symbol table of dats_t */
 void
 print_sym_table (dats_t * t)
 {
@@ -246,38 +256,101 @@ print_sym_table (dats_t * t)
 
 }
 
+/* process_args returns the value 0 if sucesss and nonzero if
+ * failed. */
 int
-init_dats_t (int argc, char **argv)
+process_args (int argc, char **argv)
 {
-  dats_t *p;
-  FILE *fp;
-  for (int i = 1; i < argc; i++)
+  if (argc == 1)
     {
-      p = malloc (sizeof (dats_t));
-      assert (p != NULL);
-      fp = fopen (argv[i], "r");
-      if (fp == NULL)
-	{
-	  perror (argv[i]);
-	  return 1;
-	}
-      p->fp = fp;
-	  p->fname = strdup(argv[i]);
-	  assert(p->fname!=NULL);
-      p->line = 1;
-      p->column = 1;
-      p->numsamples = 0;
-      symrec_t *t = malloc (sizeof (symrec_t));
-      assert (t != NULL);
-      t->type = TOK_IDENTIFIER;
-      t->value.env.identifier = strdup ("bpm");
-      assert (t->value.env.identifier != NULL);
-      t->value.env.val = 120.0;
-      t->next = NULL;
-      p->sym_table = t;
-      p->next = dats_files;
-      dats_files = p;
+      ERROR ("No argument supplied!\nUse -h to print help\n");
+      return 1;
     }
+  FILE *fp;
+  int c, option_index;
+
+  const struct option long_options[] = {
+    {"dats-file", required_argument, 0, 'i'},
+    {0, 0, 0, 0}
+  };
+
+  /* Makes sure that all files entered exist and other arguments
+   * are correct, so I won't have to deal with figuring out how to
+   * deallocate dats_t* and symrec_t* in an error.
+   *
+   */
+  while (1)
+    {
+      option_index = 0;
+      c = getopt_long (argc, argv, "i:h", long_options, NULL);
+      if (c == -1)
+	break;
+      switch (c)
+	{
+	case 'i':
+	  fp = fopen (optarg, "r");
+	  if (fp == NULL)
+	    {
+	      perror (optarg);
+	      return 1;
+	    }
+	  fclose (fp);
+	  break;
+	case 'h':
+	  puts ("<Help here>\n");
+	  return 1;
+	default:
+	  return 1;
+
+	}
+    }
+  if (optind < argc)
+    {
+      while (optind < argc)
+	ERROR ("unknown option: '%s'\n", argv[optind++]);
+      return 1;
+    }
+
+  dats_t *p;
+  optind = 1;
+  while (1)
+    {
+      c = getopt_long (argc, argv, "i:", long_options, NULL);
+      if (c == -1)
+	break;
+      switch (c)
+	{
+	case 'i':
+	  fp = fopen (optarg, "r");
+	  if (fp == NULL)
+	    {
+	      perror (optarg);
+	      return 1;
+	    }
+	  p = malloc (sizeof (dats_t));
+	  assert (p != NULL);
+	  p->fp = fp;
+	  p->fname = strdup (optarg);
+	  assert (p->fname != NULL);
+	  p->line = 1;
+	  p->column = 1;
+	  p->numsamples = 0;
+	  symrec_t *t = malloc (sizeof (symrec_t));
+	  assert (t != NULL);
+	  t->type = TOK_IDENTIFIER;
+
+	  t->value.env.identifier = strdup ("bpm");
+	  assert (t->value.env.identifier != NULL);
+
+	  t->value.env.val = 120.0;
+	  t->next = NULL;
+	  p->sym_table = t;
+	  p->next = dats_files;
+	  dats_files = p;
+	  break;
+	}
+    }
+
   return 0;
 }
 
@@ -287,17 +360,11 @@ int
 main (int argc, char **argv)
 {
   int ret;
-  assert (argc == 2);
-
-  ret = init_dats_t (argc, argv);	// passed
+  PRINT_FUNC_ADDRESS (main);
+  ret = process_args (argc, argv);
   if (ret)
-    {
-      clean_symrec_t (dats_files);
-      clean_dats_t ();
-      return 1;
-    }
-
-  token_t tok;			// = read_next_tok(dats_files);
+    return 1;
+  token_t tok;
   while ((tok = read_next_tok (dats_files)) != TOK_EOF)
     {
       switch (tok)

@@ -1,9 +1,9 @@
 
 CC = gcc
-
+CFLAGS = -Wall -Wextra -g -fsanitize=address
 
 dats : dats.c 
-	$(CC) $^ -g -o $@
+	$(CC) $(CFLAGS) $^ -g -o $@
 
 .PHONY : clean
 

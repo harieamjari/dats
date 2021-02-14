@@ -2,10 +2,10 @@
 
 Compose a music in a text editor.
 
-[ ] Scanner
+[] Scanner
 
-[ ] Parser
+[] Parser
 
-[ ] libpsg
+[] libpsg
 
-[ ] libwavfilter
+[] libwavfilter
