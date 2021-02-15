@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -g -fsanitize=address
+CFLAGS = -Wall -Wextra -g -fsanitize=address 
 
 dats : dats.c 
 	$(CC) $(CFLAGS) $^ -g -o $@

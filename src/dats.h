@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 typedef enum token_t token_t;
+
 enum token_t
 {
   TOK_STAFF,
@@ -12,11 +13,11 @@ enum token_t
   TOK_N,
   TOK_R,
   TOK_IDENTIFIER,
+  TOK_ENV,
   TOK_KEY,
   TOK_FLAT,
   TOK_SHARP,
   TOK_SEMICOLON,
-
   TOK_EOF
 };
 
@@ -31,12 +32,12 @@ struct symrec_t
     {
       char *identifier;
       int16_t *pcm_s16le;
-    } staff;
+    } staff; /* staff variables */
     struct
     {
       char *identifier;
       float val;
-    } env;
+    } env; /* environment variables */
   } value;
 
   symrec_t *next;

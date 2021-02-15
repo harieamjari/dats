@@ -7,6 +7,4 @@ staff nb {
 
 }
 
-staff pol {
-  n r n;
-}
+staff na {}

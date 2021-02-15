@@ -2,10 +2,18 @@
 
 Compose a music in a text editor.
 
-[] Scanner
+```
+staff pol {
+  n 4 c4;
+  n 4 d4;
+  n 4 e4;
+}
+```
+Compile dats file as `dats -i file.dats`
 
-[] Parser
+### TODO
 
-[] libpsg
+- libpsg - library for producing raw PCM s16le data.
 
-[] libwavfilter
+- libwavfilter - library for manipulating raw PCM s16le data.
+
