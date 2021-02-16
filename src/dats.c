@@ -15,13 +15,11 @@
  * Lesser General Public License for more details.
  * 
  * You should have received a copy of the GNU Lesser General Public
- * License along with FFmpeg; if not, write to the Free Software
+ * License along with Dats; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <assert.h>
-#include <math.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,6 +57,7 @@ clean_all_dats_t (void)
     {
       p = n->next;
       free (n->fname);
+      if (n->fp!=NULL)
       fclose (n->fp);
       free (n);
       n = p;
@@ -70,11 +69,9 @@ clean_all_dats_t (void)
 
 /* clean all symrec_t* and its next, of the current dats_t* */
 void
-clean_all_symrec_t_cur_dats_t(dats_t * t)
-{
-  if (t == NULL)
-    return;
-  symrec_t *n;
+clean_all_symrec_t_cur_dats_t (dats_t * t)
+{ 
+  symrec_t*n;
   for (symrec_t * p = t->sym_table; p != NULL;)
     {
       if (p->type == TOK_STAFF)
@@ -98,7 +95,7 @@ count_dats_t (void)
 }
 
 int
-count_symrec_t_cur_dats_t(dats_t * t)
+count_symrec_t_cur_dats_t (dats_t * t)
 {
   int ret = 0;
   for (dats_t * p = t; p != NULL; p = p->next)
@@ -127,7 +124,7 @@ getsym (dats_t * t, const char *id)
  `--------*/
 /* Read next token of current dats_t* instead of all `next` */
 token_t
-read_next_tok_cur_dats_t (dats_t * t)
+read_next_tok_cur_dats_t (dats_t * const t)
 {
   int c;
   char buff[100] = { 0 };
@@ -198,6 +195,8 @@ w:
 	    symrec_t *s = getsym (t, buff);
 	    if (s == NULL)
 	      {
+		/* if the name at buff is new (it doesn't have a previous definition.
+		 */
 		if (t->sym_table->type == TOK_STAFF)
 		  {
 		    t->sym_table->line = t->line;
@@ -213,8 +212,8 @@ w:
 		    exit (1);
 		  }
 	      }
-	    else
-	      {
+	    else{
+		/* if the name at buff has a previous definition */
 		int length =
 		  snprintf (NULL, 0, "%s:%d:%d: ", t->fname, t->line,
 			    t->column);
@@ -222,7 +221,16 @@ w:
 		  ("%s:%d:%d: \x1b[1;31merror\x1b[0m: redefinition of \"%s\"\n"
 		   "%*s previous definition at %d:%d\n", t->fname, t->line,
 		   t->column, buff, length + 5, "note:", s->line, s->column);
-		clean_all_symrec_t_cur_dats_t(dats_files);
+	/*	switch(s->type){
+		   case TOK_STAFF: free(s->value.staff.identifier); break;
+		}
+
+		 pop unfinished sym_table
+		s = t->sym_table;
+		t->sym_table = t->sym_table->next;
+		free(s);*/
+
+		clean_all_symrec_t_cur_dats_t (t);
 		clean_all_dats_t ();
 		exit (1);
 	      }
@@ -237,7 +245,7 @@ w:
     case ';':
       return TOK_SEMICOLON;
     case EOF:
-      fclose (t->fp);
+      //fclose (t->fp);
       return TOK_EOF;
     }
 
@@ -245,21 +253,32 @@ w:
   return TOK_EOF;
 }
 
-char *token_t_to_str(token_t t){
-   switch(t){
-      case TOK_STAFF: return "staff";
-      case TOK_ENV:   return "env";
-      case TOK_IDENTIFIER: return "identifier";
-      case TOK_EOF: return "end of file";
-      case TOK_LCURLY_BRACE: return "{";
-      case TOK_RCURLY_BRACE: return "}";
-      case TOK_SEMICOLON:    return ";";
-      default: PRINT_FUNC_ADDRESS(token_t_to_str); 
-	       ERROR("Unknown token\n");
-	       return __func__;
+const char *
+token_t_to_str (token_t t)
+{
+  switch (t)
+    {
+    case TOK_STAFF:
+      return "staff";
+    case TOK_ENV:
+      return "env";
+    case TOK_IDENTIFIER:
+      return "identifier";
+    case TOK_EOF:
+      return "end of file";
+    case TOK_LCURLY_BRACE:
+      return "{";
+    case TOK_RCURLY_BRACE:
+      return "}";
+    case TOK_SEMICOLON:
+      return ";";
+    default:
+      PRINT_FUNC_ADDRESS (token_t_to_str);
+      ERROR ("Unknown token\n");
+      return __func__;
 
 
-  }
+    }
 
 }
 
@@ -267,24 +286,29 @@ char *token_t_to_str(token_t t){
 /* prints the symbol table of the current dats_t* t
  */
 void
-print_all_symrec_t_cur_dats_t(dats_t * t)
+print_all_symrec_t_cur_dats_t (dats_t * t)
 {
-  printf("Symbol table of %s\n", t->fname);
+  printf ("Symbol table of %s\n%-20s    %-20s\n\n", t->fname,
+	  "  IDENTIFIER", "  TYPE");
   symrec_t *n;
   for (symrec_t * p = t->sym_table; p != NULL; p = n)
     {
       n = p->next;
-      switch(p->type){
-        case TOK_STAFF:
-	   printf("%-20s type %-20s\n",p->value.staff.identifier, token_t_to_str(TOK_STAFF));
-	   break;
+      switch (p->type)
+	{
+	case TOK_STAFF:
+	  printf ("  %-20s    %-20s\n", p->value.staff.identifier,
+		  token_t_to_str (TOK_STAFF));
+	  break;
 	case TOK_ENV:
-	   printf("%-20s type %-20s\n",p->value.env.identifier, token_t_to_str(TOK_ENV));
-	   break;
-	default: PRINT_FUNC_ADDRESS(print_all_symrec_t_cur_dats_t);
-		 ERROR("Unknow token\n");
+	  printf ("  %-20s    %-20s\n", p->value.env.identifier,
+		  token_t_to_str (TOK_ENV));
+	  break;
+	default:
+	  PRINT_FUNC_ADDRESS (print_all_symrec_t_cur_dats_t);
+	  ERROR ("Unknow token\n");
 
-      }
+	}
     }
 
 }
@@ -313,7 +337,7 @@ process_args (int argc, char **argv)
    *
    */
 
-  /* Pass 1*/
+  /* Pass 1 */
   while (1)
     {
       option_index = 0;
@@ -346,7 +370,8 @@ process_args (int argc, char **argv)
   if (optind < argc)
     {
       while (optind < argc)
-	ERROR ("\x1b[1;31merror\x1b[0m: unknown option '%s'\n", argv[optind++]);
+	ERROR ("\x1b[1;31merror\x1b[0m: unknown option '%s'\n",
+	       argv[optind++]);
       return 1;
     }
   optind = 1;
@@ -373,7 +398,7 @@ process_args (int argc, char **argv)
 	  p->line = 1;
 	  p->column = 1;
 	  p->numsamples = 0;
-	
+
 	  symrec_t *t = malloc (sizeof (symrec_t));
 	  assert (t != NULL);
 	  t->type = TOK_ENV;
@@ -402,47 +427,57 @@ main (int argc, char **argv)
   if (ret)
     return 1;
 #ifndef DATS_NDEBUG
-  for (dats_t *p = dats_files; p!=NULL; p=p->next){
-  printf("---------%s---------\n", p->fname);
-  token_t tok;
-  while ((tok = read_next_tok_cur_dats_t (p)) != TOK_EOF)
+  for (dats_t * p = dats_files; p != NULL; p = p->next)
     {
-      switch (tok)
+      printf ("==========FILE: [%s]==========\n", p->fname);
+      token_t tok;
+      while ((tok = read_next_tok_cur_dats_t (p)) != TOK_EOF)
 	{
-	case TOK_STAFF:
-	  printf ("%s:%d:%d: found TOK_STAFF\n",p->fname, p->sym_table->line, p->sym_table->column);
-	  break;
-	case TOK_IDENTIFIER:
-	  printf ("%s:%d:%d: found TOK_IDENTIFIER = %s\n", p->fname, p->sym_table->line, p->sym_table->column, p->sym_table->value.staff.identifier);
-	  break;
-	case TOK_N:
-	  printf ("%s:%d:%d found TOK_N\n", p->fname, p->sym_table->line, p->sym_table->column);
-	  break;
-	case TOK_R:
-	  printf ("%s:%d:%d found TOK_R\n", p->fname, p->sym_table->line, p->sym_table->column);
-	  break;
-	case TOK_LCURLY_BRACE:
-	  printf ("%s:%d:%d: found TOK_LCURLY_BRACE\n", p->fname, p->sym_table->line, p->sym_table->column);
-	  break;
-	case TOK_RCURLY_BRACE:
-	  printf ("%s:%d:%d: found TOK_RCURLY_BRACE\n", p->fname, p->sym_table->line, p->sym_table->column);
-	  break;
-	case TOK_SEMICOLON:
-	  printf ("%s:%d:%d: found TOK_SEMICOLON\n", p->fname, p->sym_table->line, p->sym_table->column);
-	  break;
-	default:
-	  printf ("TOK not defined\n");
+	  switch (tok)
+	    {
+	    case TOK_STAFF:
+	      printf ("%s:%d:%d: found TOK_STAFF\n", p->fname,
+		      p->sym_table->line, p->sym_table->column);
+	      break;
+	    case TOK_IDENTIFIER:
+	      printf ("%s:%d:%d: found TOK_IDENTIFIER = %s\n", p->fname,
+		      p->sym_table->line, p->sym_table->column,
+		      p->sym_table->value.staff.identifier);
+	      break;
+	    case TOK_N:
+	      printf ("%s:%d:%d found TOK_N\n", p->fname, p->sym_table->line,
+		      p->sym_table->column);
+	      break;
+	    case TOK_R:
+	      printf ("%s:%d:%d found TOK_R\n", p->fname, p->sym_table->line,
+		      p->sym_table->column);
+	      break;
+	    case TOK_LCURLY_BRACE:
+	      printf ("%s:%d:%d: found TOK_LCURLY_BRACE\n", p->fname,
+		      p->sym_table->line, p->sym_table->column);
+	      break;
+	    case TOK_RCURLY_BRACE:
+	      printf ("%s:%d:%d: found TOK_RCURLY_BRACE\n", p->fname,
+		      p->sym_table->line, p->sym_table->column);
+	      break;
+	    case TOK_SEMICOLON:
+	      printf ("%s:%d:%d: found TOK_SEMICOLON\n", p->fname,
+		      p->sym_table->line, p->sym_table->column);
+	      break;
+	    default:
+	      printf ("TOK not defined\n");
+	    }
 	}
+      p->fp = NULL;
+      putchar('\n');
+      print_all_symrec_t_cur_dats_t (p);
+      clean_all_symrec_t_cur_dats_t (p);
+
+      printf ("===========EOF : [%s]===========\n\n", p->fname);
     }
-  
-  print_all_symrec_t_cur_dats_t (p);
-  clean_all_symrec_t_cur_dats_t(p);
-  
-  printf("===========END OF FILE:%s============\n", p->fname);
-  }
 #endif
 
-  printf("Number of dats_t: %d\n", count_dats_t());
+  printf ("Number of dats_t: %d\n", count_dats_t ());
   clean_all_dats_t ();
   return 0;
 }

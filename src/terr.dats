@@ -1,10 +1,10 @@
-staff na {
-n r n n r 
+staff foo {
+n r n  r r 
 }
 
-staff nb {
+staff barr {
 
 
 }
 
-staff na {}
+staff barr {}
