@@ -13,10 +13,8 @@ enum token_t
   TOK_N,
   TOK_R,
   TOK_IDENTIFIER,
-  TOK_ENV,
-  TOK_KEY,
-  TOK_FLAT,
-  TOK_SHARP,
+  TOK_ENV,   /* Environment variables */
+  TOK_NUM,
   TOK_SEMICOLON,
   TOK_EOF
 };
@@ -38,6 +36,7 @@ struct symrec_t
       char *identifier;
       float val;
     } env; /* environment variables */
+    float  num;
   } value;
 
   symrec_t *next;
@@ -56,4 +55,12 @@ struct dats_t
   dats_t *next;
 };
 
+#ifdef DATS_EXTERN 
+#define EXTERN extern
+#else
+#define EXTERN
+#endif
+
+EXTERN token_t read_next_tok_cur_dats_t(dats_t  * const t);
+EXTERN const char *tok_to_str(const token_t t);
 #endif /* DATS_H */

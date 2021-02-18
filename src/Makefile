@@ -1,11 +1,11 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -g -fsanitize=address 
+CFLAGS = -Wall -Wextra -ggdb3 -fsanitize=address 
 
 all : dats
 
 dats : dats.c
-	$(CC) $(CFLAGS) $^ -g -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 .PHONY : clean test
 
