@@ -12,11 +12,13 @@ enum token_t
   TOK_RCURLY_BRACE,
   TOK_N,
   TOK_R,
+  TOK_NOTE,
   TOK_IDENTIFIER,
   TOK_ENV,   /* Environment variables */
   TOK_NUM,
   TOK_SEMICOLON,
-  TOK_EOF
+  TOK_EOF,
+  TOK_ERR
 };
 
 typedef struct symrec_t symrec_t;
@@ -62,5 +64,19 @@ struct dats_t
 #endif
 
 EXTERN token_t read_next_tok_cur_dats_t(dats_t  * const t);
-EXTERN const char *tok_to_str(const token_t t);
+EXTERN const char *token_t_to_str(const token_t t);
+EXTERN void clean_all_symrec_t_cur_dats_t(const dats_t * const t);
+EXTERN void clean_all_dats_t(void);
+
+#define ERROR(...) fprintf(stderr, __VA_ARGS__)
+#define UNEXPECTED(x) {\
+  if (x!=TOK_ERR) \
+    ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected '%s'\n",\
+     __FILE__,__LINE__, __func__,d->fname,  d->sym_table->line,\
+    d->sym_table->column, token_t_to_str(x));\
+   }
+
+#define PRINT_FUNC_ADDRESS(...) \
+  printf("\x1b[1;32m[%s @ %p]\x1b[0m ", __func__, __VA_ARGS__)
+
 #endif /* DATS_H */

@@ -1,16 +1,19 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -ggdb3 -fsanitize=address 
-
+CFLAGS = -Wall -Wextra -O0 -ggdb3 -fsanitize=address
+OBJ := dats.o parse.o
 all : dats
 
-dats : dats.c
-	$(CC) $(CFLAGS) $^ -o $@
+dats : $(OBJ)
+	$(CC) $(CFLAGS)  $^ -o $@
+
+
+$(OBJ) :%.o:%.c
+	gcc -c $(CFLAGS) $< -o $@
 
 .PHONY : clean test
-
 clean: 
-	rm dats
+	rm dats $(OBJ)
 
 test : dats
 	./dats -i t.dats -i l.dats

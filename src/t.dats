@@ -1,12 +1,4 @@
 staff na {
-n r n n r 
-}
-
-staff nb {
- 92902 299
-
-}
-
-staff pol {
-  n r n;
+  n 82 c8;
+  n 2  a#7;
 }

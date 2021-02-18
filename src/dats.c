@@ -30,11 +30,7 @@
 
 #include "dats.h"
 
-#define ERROR(...) fprintf(stderr, __VA_ARGS__)
-#define PRINT_FUNC_ADDRESS(...) \
-  printf("\x1b[1;32m[%s @ %p]\x1b[0m ", __func__, __VA_ARGS__)
-
-//extern int parse_cur_dats_t(dats_t * const t);
+extern int parse_cur_dats_t(dats_t * const t);
 
 dats_t *dats_files = NULL;
 
@@ -180,6 +176,14 @@ w:
 	    t->column += nchar;
 	    return TOK_STAFF;
 	  }
+	else if (buff[0]>='a'&&buff[0]<='g'){
+           if (buff[1]=='#'||buff[1]=='b'){
+	     if (buff[1]>='0'&&buff[1]<='9')
+	       return TOK_NOTE;
+           }
+	   else if (buff[1]>='0'&&buff[1]<='9') return TOK_NOTE;
+
+        }
 	else if (!strcmp ("repeat", buff))
 	  return TOK_REPEAT;
 	else if (buff[0] == 'n' && !buff[1])
@@ -222,7 +226,7 @@ w:
 		   t->column, buff, length + 5, "note:", s->line, s->column);
 
 		clean_all_symrec_t_cur_dats_t (t);
-		clean_all_dats_t ();
+		//clean_all_dats_t ();
 		exit (1);
 	      }
 	  }
@@ -259,6 +263,11 @@ w:
     case EOF:
       //fclose (t->fp);
       return TOK_EOF;
+    default:
+      ERROR("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected character '%c'\n", __FILE__, __LINE__, read_next_tok_cur_dats_t, t->fname,
+	t->line, t->column, c);
+      return TOK_ERR;
+
     }
 
   fclose (t->fp);
@@ -286,6 +295,10 @@ token_t_to_str (const token_t t)
       return ";";
     case TOK_NUM:
       return "numeric";
+    case TOK_N:
+      return "n";
+    case TOK_R:
+      return "r";
     default:
       PRINT_FUNC_ADDRESS (token_t_to_str);
       ERROR ("Unknown token\n");
@@ -452,6 +465,7 @@ main (int argc, char **argv)
   ret = process_args (argc, argv);
   if (ret)
     return 1;
+#define DATS_NDEBUG
 #ifndef DATS_NDEBUG
   for (dats_t * p = dats_files; p != NULL; p = p->next)
     {
@@ -507,7 +521,7 @@ main (int argc, char **argv)
       printf ("===========EOF : [%s]===========\n\n", p->fname);
     }
 #endif
-  //parse_cur_dats_t(dats_files);
+  parse_cur_dats_t(dats_files);
   printf ("Number of dats_t: %d\n", count_dats_t ());
   clean_all_dats_t ();
   return 0;
