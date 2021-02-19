@@ -30,7 +30,7 @@
 
 #include "dats.h"
 
-extern int parse_cur_dats_t(dats_t * const t);
+extern int parse_cur_dats_t (dats_t * const t);
 
 dats_t *dats_files = NULL;
 
@@ -161,7 +161,8 @@ w:
       {
 	int nchar;
 	ungetc (c, t->fp);
-	(void) fscanf (t->fp, "%99[a-zA-Z0-9_]%n", buff, &nchar);
+	(void) fscanf (t->fp, "%[a-zA-Z0-9_#]%n", buff, &nchar);
+	//puts (buff);
 	if (!strcmp ("staff", buff))
 	  {
 	    /* put symbol */
@@ -176,20 +177,40 @@ w:
 	    t->column += nchar;
 	    return TOK_STAFF;
 	  }
-	else if (buff[0]>='a'&&buff[0]<='g'){
-           if (buff[1]=='#'||buff[1]=='b'){
-	     if (buff[1]>='0'&&buff[1]<='9')
-	       return TOK_NOTE;
-           }
-	   else if (buff[1]>='0'&&buff[1]<='9') return TOK_NOTE;
+	else if (t->expecting==TOK_NOTE)
+	switch (buff[0]){
+          case 'a': case 'b': case 'c': case 'd':
+          case 'e': case 'f': case 'g':{
+          if ((buff[1]=='#'||buff[1]=='b')
+             &&(buff[2]>='0'&&buff[2]<='9')
+             &&!buff[3]) return TOK_NOTE;
+	  else if ((buff[1]>='0'&&buff[1]<='9')
+             &&!buff[2]) return TOK_NOTE;
 
-        }
+
+	}
+	default:
+ERROR("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n", t->fname, t->line,
+                   t->column, buff);
+      return TOK_ERR;
+
+
+	}
 	else if (!strcmp ("repeat", buff))
-	  return TOK_REPEAT;
+	  {
+	    t->column += nchar;
+	    return TOK_REPEAT;
+	  }
 	else if (buff[0] == 'n' && !buff[1])
-	  return TOK_N;
+	  {
+	    t->column += nchar;
+	    return TOK_N;
+	  }
 	else if (buff[0] == 'r' && !buff[1])
-	  return TOK_R;
+	  {
+	    t->column += nchar;
+	    return TOK_R;
+	  }
 	else
 	  {
 	    symrec_t *s = getsym (t, buff);
@@ -245,6 +266,7 @@ w:
 	int nchar;
 	ungetc (c, t->fp);
 	symrec_t *s = malloc (sizeof (symrec_t));
+	assert (s != NULL);
 	s->type = TOK_NUM;
 	(void) fscanf (t->fp, "%f%n", &(s->value.num), &nchar);
 	s->column = t->column;
@@ -255,17 +277,22 @@ w:
 	return TOK_NUM;
       }
     case '{':
+      t->column += 1;
       return TOK_LCURLY_BRACE;
     case '}':
+      t->column += 1;
       return TOK_RCURLY_BRACE;
     case ';':
+      t->column += 1;
       return TOK_SEMICOLON;
     case EOF:
       //fclose (t->fp);
       return TOK_EOF;
     default:
-      ERROR("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected character '%c'\n", __FILE__, __LINE__, read_next_tok_cur_dats_t, t->fname,
-	t->line, t->column, c);
+      ERROR
+	("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected '%c'\n",
+	 __FILE__, __LINE__, read_next_tok_cur_dats_t, t->fname, t->line,
+	 t->column, c);
       return TOK_ERR;
 
     }
@@ -369,6 +396,7 @@ process_args (const int argc, char *const *argv)
    */
 
   /* Pass 1 */
+  int err = 0;
   while (1)
     {
       option_index = 0;
@@ -382,15 +410,16 @@ process_args (const int argc, char *const *argv)
 	  if (fp == NULL)
 	    {
 	      perror (optarg);
-	      return 1;
+	      err++;;
 	    }
-	  fclose (fp);
+	  else
+	    fclose (fp);
 	  struct stat path_stat;
 	  stat (optarg, &path_stat);
 	  if (!S_ISREG (path_stat.st_mode))
 	    {
 	      ERROR ("%s: %s: not a regular file\n", argv[0], optarg);
-	      return 1;
+	      err++;
 
 	    }
 	  break;
@@ -413,6 +442,9 @@ process_args (const int argc, char *const *argv)
 	       argv[optind++]);
       return 1;
     }
+  if (err)
+    return 1;
+
   optind = 1;
   /* Pass 2 */
   while (1)
@@ -521,7 +553,8 @@ main (int argc, char **argv)
       printf ("===========EOF : [%s]===========\n\n", p->fname);
     }
 #endif
-  parse_cur_dats_t(dats_files);
+  for (dats_t * p = dats_files; p != NULL; p = p->next)
+    parse_cur_dats_t (p);
   printf ("Number of dats_t: %d\n", count_dats_t ());
   clean_all_dats_t ();
   return 0;

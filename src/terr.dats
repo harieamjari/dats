@@ -1,10 +1,4 @@
-staff foo {
+staff fo {
 n r n  r r 
 }
 
-staff barr {
-
-
-}
-
-staff barr {}

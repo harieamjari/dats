@@ -29,18 +29,18 @@ dats_t *d;
 
 /* Returns 0 if success. Non-zero if failed. */
 int parse_notes_rests(){
-  tok = read_next_tok_cur_dats_t(d);
 
   if (tok==TOK_N){
     tok = read_next_tok_cur_dats_t(d);
     if (tok!=TOK_NUM){
-      UNEXPECTED(tok);
+      UNEXPECTED(tok, d);
       clean_all_symrec_t_cur_dats_t(d);
       return 1;
     }
+    d->expecting = TOK_NOTE;
     tok = read_next_tok_cur_dats_t(d);
     if (tok!=TOK_NOTE){
-      UNEXPECTED(tok);
+      UNEXPECTED(tok, d);
       clean_all_symrec_t_cur_dats_t(d);
       return 1;
     }
@@ -48,7 +48,7 @@ int parse_notes_rests(){
   else if (tok==TOK_R) {
     tok = read_next_tok_cur_dats_t(d);
     if (tok!=TOK_NUM){
-      UNEXPECTED(tok);
+      UNEXPECTED(tok, d);
       clean_all_symrec_t_cur_dats_t(d);
       return 1;
     }
@@ -57,10 +57,11 @@ int parse_notes_rests(){
 
   tok = read_next_tok_cur_dats_t(d);
   if (tok!=TOK_SEMICOLON){
-    UNEXPECTED(tok);
+    UNEXPECTED(tok, d);
     clean_all_symrec_t_cur_dats_t(d);
     return 1;
   }
+  d->expecting = TOK_NULL;
   tok = read_next_tok_cur_dats_t(d);
   return parse_notes_rests();
 }
@@ -71,7 +72,7 @@ parse_staff ()
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_IDENTIFIER)
     {
-      UNEXPECTED (tok);
+      UNEXPECTED (tok, d);
       clean_all_symrec_t_cur_dats_t (d);
       return 1;
     }
@@ -79,7 +80,7 @@ parse_staff ()
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_LCURLY_BRACE)
     {
-      UNEXPECTED (tok);
+      UNEXPECTED (tok, d);
       clean_all_symrec_t_cur_dats_t (d);
       return 1;
     }
@@ -89,7 +90,7 @@ parse_staff ()
 
   if (tok != TOK_RCURLY_BRACE)
     {
-      UNEXPECTED (tok);
+      UNEXPECTED (tok, d);
       clean_all_symrec_t_cur_dats_t (d);
       return 1;
 
@@ -103,7 +104,7 @@ start ()
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_STAFF)
     {
-      UNEXPECTED (tok);
+      UNEXPECTED (tok, d);
       clean_all_symrec_t_cur_dats_t (d);
       return 1;
     }
@@ -123,6 +124,7 @@ parse_cur_dats_t (dats_t * const t)
   /* Pass 1: Syntax analysis */
   if (start ())
     return 1;
-  printf ("%s: success\n", __func__);
+  printf ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s: parsing successful\n", __FILE__, __LINE__, parse_cur_dats_t, d->fname);
+  clean_all_symrec_t_cur_dats_t(d);
   return 0;
 }

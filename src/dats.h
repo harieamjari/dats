@@ -18,7 +18,8 @@ enum token_t
   TOK_NUM,
   TOK_SEMICOLON,
   TOK_EOF,
-  TOK_ERR
+  TOK_ERR,
+  TOK_NULL
 };
 
 typedef struct symrec_t symrec_t;
@@ -53,7 +54,7 @@ struct dats_t
   int line, column;
   uint32_t numsamples;
   symrec_t *sym_table;
-
+  token_t expecting;
   dats_t *next;
 };
 
@@ -69,13 +70,15 @@ EXTERN void clean_all_symrec_t_cur_dats_t(const dats_t * const t);
 EXTERN void clean_all_dats_t(void);
 
 #define ERROR(...) fprintf(stderr, __VA_ARGS__)
-#define UNEXPECTED(x) {\
+#define UNEXPECTED(x, d) {\
   if (x!=TOK_ERR) \
-    ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected '%s'\n",\
+    ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected %s\n",\
      __FILE__,__LINE__, __func__,d->fname,  d->sym_table->line,\
     d->sym_table->column, token_t_to_str(x));\
    }
-
+#define REPORT(...) \
+   ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s\n",__FILE__, __LINE__,\
+   __func__, __VA_ARGS__)
 #define PRINT_FUNC_ADDRESS(...) \
   printf("\x1b[1;32m[%s @ %p]\x1b[0m ", __func__, __VA_ARGS__)
 

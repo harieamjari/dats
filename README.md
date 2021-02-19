@@ -13,7 +13,7 @@ Compile dats file as `dats -i file.dats`
 
 ### TODO
 
-- libpsg - library for producing raw PCM s16le data.
+- libpsg - Programmed sound generator.
 
 - libwavfilter - library for manipulating raw PCM s16le data.
 
