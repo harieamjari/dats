@@ -69,6 +69,12 @@ int parse_notes_rests(){
 int
 parse_staff ()
 {
+  if (tok != TOK_STAFF)
+    {
+      UNEXPECTED (tok, d);
+      clean_all_symrec_t_cur_dats_t (d);
+      return 1;
+    }
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_IDENTIFIER)
     {
@@ -95,23 +101,17 @@ parse_staff ()
       return 1;
 
     }
+  tok = read_next_tok_cur_dats_t(d);
+  if (tok!=TOK_EOF) return parse_staff();
   return 0;
 }
 
 int
 start ()
 {
+
   tok = read_next_tok_cur_dats_t (d);
-  if (tok != TOK_STAFF)
-    {
-      UNEXPECTED (tok, d);
-      clean_all_symrec_t_cur_dats_t (d);
-      return 1;
-    }
-
-  if (parse_staff ())
-    return 1;
-
+  if (parse_staff()) return 1;
   return 0;
 }
 

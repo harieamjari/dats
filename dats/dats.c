@@ -49,6 +49,7 @@ clean_all_dats_t (void)
 	    perror (n->fname);
 	  }
       free (n->fname);
+      free(n->pcm_s16le);
       free (n);
       n = p;
     }
@@ -64,9 +65,11 @@ clean_all_symrec_t_cur_dats_t (const dats_t * const t)
   symrec_t *n;
   for (symrec_t * p = t->sym_table; p != NULL;)
     {
-      if (p->type == TOK_STAFF)
+      if (p->type == TOK_STAFF){
 	free (p->value.staff.identifier);
-      if (p->type == TOK_IDENTIFIER)
+        free(p->value.staff.pcm_s16le);
+       }
+      else if (p->type == TOK_IDENTIFIER)
 	free (p->value.env.identifier);
       n = p->next;
       free (p);
@@ -74,7 +77,13 @@ clean_all_symrec_t_cur_dats_t (const dats_t * const t)
     }
 
 }
-
+void clean_all_symrec_t_all_dats_t(){
+for (dats_t *d = dats_files; d!=NULL; d=d->next){
+symrec_t *n;                                                                            for (symrec_t * p = d->sym_table; p != NULL;)
+    {                                                                                         if (p->type == TOK_STAFF)                                                                 free (p->value.staff.identifier);                                                     if (p->type == TOK_IDENTIFIER)                                                            free (p->value.env.identifier);                                                       n = p->next;
+      free (p);                                                                               p = n;
+    }                                                                                                                                                                           }
+}
 int
 count_dats_t (void)
 {
@@ -93,7 +102,6 @@ count_symrec_t_cur_dats_t (dats_t * t)
   return ret;
 }
 
-/* only works for "staff" types.*/
 symrec_t *
 getsym (const dats_t * const t, char const *const id)
 {
@@ -129,6 +137,8 @@ w:
       t->column = 1;
       goto w;
     }
+  line_token_found = t->line;
+  column_token_found = t->column;
 
   switch (c)
     {
@@ -162,6 +172,7 @@ w:
 	int nchar;
 	ungetc (c, t->fp);
 	(void) fscanf (t->fp, "%[a-zA-Z0-9_#]%n", buff, &nchar);
+	t->column += nchar;
 	//puts (buff);
 	if (!strcmp ("staff", buff))
 	  {
@@ -170,45 +181,47 @@ w:
 	    assert (s != NULL);
 	    s->type = TOK_STAFF;	//0 = staff
 	    s->value.staff.identifier = NULL;
-	    s->column = t->column;
-	    s->line = t->line;
+	    s->value.staff.pcm_s16le = NULL;
 	    s->next = t->sym_table;
 	    t->sym_table = s;
-	    t->column += nchar;
 	    return TOK_STAFF;
 	  }
-	else if (t->expecting==TOK_NOTE)
-	switch (buff[0]){
-          case 'a': case 'b': case 'c': case 'd':
-          case 'e': case 'f': case 'g':{
-          if ((buff[1]=='#'||buff[1]=='b')
-             &&(buff[2]>='0'&&buff[2]<='9')
-             &&!buff[3]) return TOK_NOTE;
-	  else if ((buff[1]>='0'&&buff[1]<='9')
-             &&!buff[2]) return TOK_NOTE;
+	else if (t->expecting == TOK_NOTE)
+	  switch (buff[0])
+	    {
+	    case 'a':
+	    case 'b':
+	    case 'c':
+	    case 'd':
+	    case 'e':
+	    case 'f':
+	    case 'g':
+	      {
+		if ((buff[1] == '#' || buff[1] == 'b')
+		    && (buff[2] >= '0' && buff[2] <= '9') && !buff[3])
+		  return TOK_NOTE;
+		else if ((buff[1] >= '0' && buff[1] <= '9') && !buff[2])
+		  return TOK_NOTE;
 
 
-	}
-	default:
-ERROR("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n", t->fname, t->line,
-                   t->column, buff);
-      return TOK_ERR;
+	      }
+	    default:
+	      ERROR ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
+		     t->fname, t->line, t->column, buff);
+	      return TOK_ERR;
 
 
-	}
+	    }
 	else if (!strcmp ("repeat", buff))
 	  {
-	    t->column += nchar;
 	    return TOK_REPEAT;
 	  }
 	else if (buff[0] == 'n' && !buff[1])
 	  {
-	    t->column += nchar;
 	    return TOK_N;
 	  }
 	else if (buff[0] == 'r' && !buff[1])
 	  {
-	    t->column += nchar;
 	    return TOK_R;
 	  }
 	else
@@ -220,9 +233,8 @@ ERROR("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n", t->fname, t->lin
 		 */
 		if (t->sym_table->type == TOK_STAFF)
 		  {
-		    t->sym_table->line = t->line;
-		    t->sym_table->column = t->column;
-		    t->column += nchar;
+		    t->sym_table->line = line_token_found;
+		    t->sym_table->column = column_token_found;
 		    t->sym_table->value.staff.identifier = strdup (buff);
 		    assert (t->sym_table->value.staff.identifier != NULL);
 		    return TOK_IDENTIFIER;
@@ -243,12 +255,10 @@ ERROR("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n", t->fname, t->lin
 			    t->column);
 		ERROR
 		  ("%s:%d:%d: \x1b[1;31merror\x1b[0m: redefinition of \"%s\"\n"
-		   "%*s previous definition at %d:%d\n", t->fname, t->line,
-		   t->column, buff, length + 5, "note:", s->line, s->column);
+		   "%*s previous definition at %d:%d\n", t->fname, line_token_found,
+		   column_token_found, buff, length + 5, "note:", s->line, s->column);
 
-		clean_all_symrec_t_cur_dats_t (t);
-		//clean_all_dats_t ();
-		exit (1);
+	        return TOK_ERR;
 	      }
 	  }
       }
@@ -315,17 +325,17 @@ token_t_to_str (const token_t t)
     case TOK_EOF:
       return "end of file";
     case TOK_LCURLY_BRACE:
-      return "{";
+      return "'{'";
     case TOK_RCURLY_BRACE:
-      return "}";
+      return "'}'";
     case TOK_SEMICOLON:
-      return ";";
+      return "';'";
     case TOK_NUM:
       return "numeric";
     case TOK_N:
-      return "n";
+      return "'n'";
     case TOK_R:
-      return "r";
+      return "'r'";
     default:
       PRINT_FUNC_ADDRESS (token_t_to_str);
       ERROR ("Unknown token\n");
@@ -382,8 +392,7 @@ process_args (const int argc, char *const *argv)
       return 1;
     }
   FILE *fp;
-  int c, option_index;
-
+  int c, option_index, num_outfile = 0;
   const struct option long_options[] = {
     {"dats-file", required_argument, 0, 'i'},
     {0, 0, 0, 0}
@@ -400,7 +409,7 @@ process_args (const int argc, char *const *argv)
   while (1)
     {
       option_index = 0;
-      c = getopt_long (argc, argv, "i:h", long_options, NULL);
+      c = getopt_long (argc, argv, "i:o:h", long_options, NULL);
       if (c == -1)
 	break;
       switch (c)
@@ -410,18 +419,36 @@ process_args (const int argc, char *const *argv)
 	  if (fp == NULL)
 	    {
 	      perror (optarg);
-	      err++;;
+	      err++;
+	      break;
 	    }
 	  else
-	    fclose (fp);
-	  struct stat path_stat;
-	  stat (optarg, &path_stat);
-	  if (!S_ISREG (path_stat.st_mode))
 	    {
-	      ERROR ("%s: %s: not a regular file\n", argv[0], optarg);
+	      fclose (fp);
+	      struct stat path_stat;
+	      stat (optarg, &path_stat);
+	      if (!S_ISREG (path_stat.st_mode))
+		{
+		  ERROR ("%s: %s: not a regular file\n", argv[0], optarg);
+		  err++;
+		}
+	    }break;
+	case 'o':
+	  if (num_outfile>0)
+	    {
+	      ERROR ("Too many output file %s\n", optarg);
 	      err++;
-
+	      break;
 	    }
+          num_outfile++;
+	  fp = fopen (optarg, "wb");
+	  if (fp == NULL)
+	    {
+		  perror (optarg);
+		  err++;
+		  break;
+	    }
+	  fclose (fp);
 	  break;
 	case 'h':
 	  puts ("Dats compiler 2.0.0\n"
@@ -442,14 +469,19 @@ process_args (const int argc, char *const *argv)
 	       argv[optind++]);
       return 1;
     }
-  if (err)
+  if (!num_outfile){
+    ERROR("No output file supplied!\n");
+    err++;
+  }
+  if (err){
     return 1;
+  }
 
   optind = 1;
   /* Pass 2 */
   while (1)
     {
-      c = getopt_long (argc, argv, "i:", long_options, NULL);
+      c = getopt_long (argc, argv, "i:o:", long_options, NULL);
       if (c == -1)
 	break;
       switch (c)
@@ -469,6 +501,7 @@ process_args (const int argc, char *const *argv)
 	  p->line = 1;
 	  p->column = 1;
 	  p->numsamples = 0;
+          p->pcm_s16le = NULL;
 
 	  symrec_t *t = malloc (sizeof (symrec_t));
 	  assert (t != NULL);
@@ -481,6 +514,16 @@ process_args (const int argc, char *const *argv)
 	  p->sym_table = t;
 	  p->next = dats_files;
 	  dats_files = p;
+	  break;
+	case 'o':
+	  fp = fopen (optarg, "wb");
+	  if (fp == NULL)
+	    {
+	      perror (optarg);
+	      /* clean this */
+	      return 1;
+	    }
+	  dats_wav_out = fp;
 	  break;
 	}
     }
@@ -497,8 +540,7 @@ main (int argc, char **argv)
   ret = process_args (argc, argv);
   if (ret)
     return 1;
-#define DATS_NDEBUG
-#ifndef DATS_NDEBUG
+/*
   for (dats_t * p = dats_files; p != NULL; p = p->next)
     {
       printf ("==========FILE: [%s]==========\n", p->fname);
@@ -553,6 +595,7 @@ main (int argc, char **argv)
       printf ("===========EOF : [%s]===========\n\n", p->fname);
     }
 #endif
+*/
   for (dats_t * p = dats_files; p != NULL; p = p->next)
     parse_cur_dats_t (p);
   printf ("Number of dats_t: %d\n", count_dats_t ());
