@@ -31,6 +31,7 @@
 #include "dats.h"
 
 extern int parse_cur_dats_t (dats_t * const t);
+extern int global_errors;
 
 dats_t *dats_files = NULL;
 
@@ -49,7 +50,7 @@ clean_all_dats_t (void)
 	    perror (n->fname);
 	  }
       free (n->fname);
-      free(n->pcm_s16le);
+      free (n->pcm_s16le);
       free (n);
       n = p;
     }
@@ -65,10 +66,11 @@ clean_all_symrec_t_cur_dats_t (const dats_t * const t)
   symrec_t *n;
   for (symrec_t * p = t->sym_table; p != NULL;)
     {
-      if (p->type == TOK_STAFF){
-	free (p->value.staff.identifier);
-        free(p->value.staff.pcm_s16le);
-       }
+      if (p->type == TOK_STAFF)
+	{
+	  free (p->value.staff.identifier);
+	  free (p->value.staff.pcm_s16le);
+	}
       else if (p->type == TOK_IDENTIFIER)
 	free (p->value.env.identifier);
       n = p->next;
@@ -77,13 +79,29 @@ clean_all_symrec_t_cur_dats_t (const dats_t * const t)
     }
 
 }
-void clean_all_symrec_t_all_dats_t(){
-for (dats_t *d = dats_files; d!=NULL; d=d->next){
-symrec_t *n;                                                                            for (symrec_t * p = d->sym_table; p != NULL;)
-    {                                                                                         if (p->type == TOK_STAFF)                                                                 free (p->value.staff.identifier);                                                     if (p->type == TOK_IDENTIFIER)                                                            free (p->value.env.identifier);                                                       n = p->next;
-      free (p);                                                                               p = n;
-    }                                                                                                                                                                           }
+
+void
+clean_all_symrec_t_all_dats_t ()
+{
+  for (dats_t * d = dats_files; d != NULL; d = d->next)
+    {
+      symrec_t *n;
+      for (symrec_t * p = d->sym_table; p != NULL;)
+	{
+	  if (p->type == TOK_STAFF)
+	    {
+	      free (p->value.staff.identifier);
+	      free (p->value.staff.pcm_s16le);
+	    }
+	  if (p->type == TOK_IDENTIFIER)
+	    free (p->value.env.identifier);
+	  n = p->next;
+	  free (p);
+	  p = n;
+	}
+    }
 }
+
 int
 count_dats_t (void)
 {
@@ -110,6 +128,8 @@ getsym (const dats_t * const t, char const *const id)
     {
       n = p->next;
       if (p->type == TOK_NUM)
+	continue;
+      if (p->value.staff.identifier == NULL)
 	continue;
       if (!strcmp (p->value.staff.identifier, id))
 	return p;
@@ -143,31 +163,57 @@ w:
   switch (c)
     {
     case 'a':
+    case 'A':
     case 'b':
+    case 'B':
     case 'c':
+    case 'C':
     case 'd':
+    case 'D':
     case 'e':
+    case 'E':
     case 'f':
+    case 'F':
     case 'g':
+    case 'G':
     case 'h':
+    case 'H':
     case 'i':
+    case 'I':
     case 'j':
+    case 'J':
     case 'k':
+    case 'K':
     case 'l':
+    case 'L':
     case 'm':
+    case 'M':
     case 'n':
+    case 'N':
     case 'o':
+    case 'O':
     case 'p':
+    case 'P':
     case 'q':
+    case 'Q':
     case 'r':
+    case 'R':
     case 's':
+    case 'S':
     case 't':
+    case 'T':
     case 'u':
+    case 'U':
     case 'v':
+    case 'V':
     case 'w':
+    case 'W':
     case 'x':
+    case 'X':
     case 'y':
+    case 'Y':
     case 'z':
+    case 'Z':
       {
 	int nchar;
 	ungetc (c, t->fp);
@@ -250,15 +296,28 @@ w:
 	    else
 	      {
 		/* if the name at buff has a previous definition */
+		if (s->type == TOK_ENV)
+		  {
+		    ERROR
+		      ("%s:%d:%d: \x1b[1;31merror\x1b[0m: Dats prohibits the redifinition of environment "
+		       "variables '%s'\n", t->fname, line_token_found,
+		       column_token_found, buff);
+		    return TOK_ERR;
+
+		  }
 		int length =
-		  snprintf (NULL, 0, "%s:%d:%d: ", t->fname, t->line,
+		  snprintf (NULL, 0, "[%s:%d @ %p] %s:%d:%d: ", __FILE__,
+			    __LINE__, read_next_tok_cur_dats_t, t->fname,
+			    t->line,
 			    t->column);
 		ERROR
-		  ("%s:%d:%d: \x1b[1;31merror\x1b[0m: redefinition of \"%s\"\n"
-		   "%*s previous definition at %d:%d\n", t->fname, line_token_found,
-		   column_token_found, buff, length + 5, "note:", s->line, s->column);
+		  ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d: \x1b[1;31merror\x1b[0m: redefinition of \"%s\"\n"
+		   "%*s previous definition at %d:%d\n", __FILE__, __LINE__,
+		   read_next_tok_cur_dats_t, t->fname, line_token_found,
+		   column_token_found, buff, length + 5, "note:", s->line,
+		   s->column);
 
-	        return TOK_ERR;
+		return TOK_ERR;
 	      }
 	  }
       }
@@ -392,7 +451,7 @@ process_args (const int argc, char *const *argv)
       return 1;
     }
   FILE *fp;
-  int c, option_index, num_outfile = 0;
+  int c, option_index, out_files = 0;
   const struct option long_options[] = {
     {"dats-file", required_argument, 0, 'i'},
     {0, 0, 0, 0}
@@ -432,21 +491,22 @@ process_args (const int argc, char *const *argv)
 		  ERROR ("%s: %s: not a regular file\n", argv[0], optarg);
 		  err++;
 		}
-	    }break;
+	    }
+	  break;
 	case 'o':
-	  if (num_outfile>0)
+	  if (out_files > 0)
 	    {
 	      ERROR ("Too many output file %s\n", optarg);
 	      err++;
 	      break;
 	    }
-          num_outfile++;
+	  out_files++;
 	  fp = fopen (optarg, "wb");
 	  if (fp == NULL)
 	    {
-		  perror (optarg);
-		  err++;
-		  break;
+	      perror (optarg);
+	      err++;
+	      break;
 	    }
 	  fclose (fp);
 	  break;
@@ -469,13 +529,15 @@ process_args (const int argc, char *const *argv)
 	       argv[optind++]);
       return 1;
     }
-  if (!num_outfile){
-    ERROR("No output file supplied!\n");
-    err++;
-  }
-  if (err){
-    return 1;
-  }
+  if (!out_files)
+    {
+      ERROR ("No output file supplied!\n");
+      return 1;
+    }
+  if (err)
+    {
+      return 1;
+    }
 
   optind = 1;
   /* Pass 2 */
@@ -501,7 +563,7 @@ process_args (const int argc, char *const *argv)
 	  p->line = 1;
 	  p->column = 1;
 	  p->numsamples = 0;
-          p->pcm_s16le = NULL;
+	  p->pcm_s16le = NULL;
 
 	  symrec_t *t = malloc (sizeof (symrec_t));
 	  assert (t != NULL);
@@ -540,65 +602,14 @@ main (int argc, char **argv)
   ret = process_args (argc, argv);
   if (ret)
     return 1;
-/*
-  for (dats_t * p = dats_files; p != NULL; p = p->next)
-    {
-      printf ("==========FILE: [%s]==========\n", p->fname);
-      token_t tok;
-      while ((tok = read_next_tok_cur_dats_t (p)) != TOK_EOF)
-	{
-	  switch (tok)
-	    {
-	    case TOK_STAFF:
-	      printf ("%s:%d:%d: found TOK_STAFF\n", p->fname,
-		      p->sym_table->line, p->sym_table->column);
-	      break;
-	    case TOK_IDENTIFIER:
-	      printf ("%s:%d:%d: found TOK_IDENTIFIER = %s\n", p->fname,
-		      p->sym_table->line, p->sym_table->column,
-		      p->sym_table->value.staff.identifier);
-	      break;
-	    case TOK_N:
-	      printf ("%s:%d:%d found TOK_N\n", p->fname, p->sym_table->line,
-		      p->sym_table->column);
-	      break;
-	    case TOK_R:
-	      printf ("%s:%d:%d found TOK_R\n", p->fname, p->sym_table->line,
-		      p->sym_table->column);
-	      break;
-	    case TOK_LCURLY_BRACE:
-	      printf ("%s:%d:%d: found TOK_LCURLY_BRACE\n", p->fname,
-		      p->sym_table->line, p->sym_table->column);
-	      break;
-	    case TOK_RCURLY_BRACE:
-	      printf ("%s:%d:%d: found TOK_RCURLY_BRACE\n", p->fname,
-		      p->sym_table->line, p->sym_table->column);
-	      break;
-	    case TOK_SEMICOLON:
-	      printf ("%s:%d:%d: found TOK_SEMICOLON\n", p->fname,
-		      p->sym_table->line, p->sym_table->column);
-	      break;
-	    case TOK_NUM:
-	      printf ("%s:%d:%d: found TOK_NUM = %f\n", p->fname,
-		      p->sym_table->line, p->sym_table->column,
-		      p->sym_table->value.num);
-	      break;
-	    default:
-	      printf ("TOK not defined\n");
-	    }
-	}
-      p->fp = NULL;
-      putchar ('\n');
-      print_all_symrec_t_cur_dats_t (p);
-      clean_all_symrec_t_cur_dats_t (p);
-
-      printf ("===========EOF : [%s]===========\n\n", p->fname);
-    }
-#endif
-*/
   for (dats_t * p = dats_files; p != NULL; p = p->next)
     parse_cur_dats_t (p);
-  printf ("Number of dats_t: %d\n", count_dats_t ());
+
+  if (global_errors)
+    ERROR ("%d global errors generated%s", global_errors,
+	   (global_errors >
+	    9) ? "\nP.S You can find tutorials on youtube :-)\n" : "\n");
+  clean_all_symrec_t_all_dats_t ();
   clean_all_dats_t ();
   return 0;
 }

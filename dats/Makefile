@@ -16,7 +16,7 @@ clean:
 	rm dats $(OBJ)
 
 test : dats
-	./dats -i t.dats -i l.dats
-	./dats -i terr.dats -i t.dats
+	./dats -i t.dats -i l.dats -o f
+	./dats -i terr.dats -i t.dats  -o f
 
 

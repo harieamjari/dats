@@ -6,6 +6,7 @@ r 8;
 n 3 f7;
 }
 
-staff ks{
+staff rest_24_measure{
 n 83 cb1;
 }
+

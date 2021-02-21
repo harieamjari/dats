@@ -1,3 +1,0 @@
-staff ks{
-nn kks;
-}
