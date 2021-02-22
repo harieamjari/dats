@@ -20,8 +20,8 @@
  */
 #include <stdio.h>
 
-#define DATS_EXTERN
-#include "dats.h"
+#define SCANNER_EXTERN
+#include "scanner.h"
 
 static token_t tok;
 static symrec_t *staff;
