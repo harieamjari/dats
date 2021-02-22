@@ -1,3 +1,3 @@
 .PHONY : dats
 dats :
-	cd src && make
+	cd dats && make

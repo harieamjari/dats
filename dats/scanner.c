@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include "scanner.h"
 
 
@@ -63,7 +64,7 @@ clean_all_symrec_t_all_dats_t ()
 	      free (p->value.staff.identifier);
 	      free (p->value.staff.pcm_s16le);
 	    }
-	  if (p->type == TOK_IDENTIFIER)
+	  if (p->type == TOK_ENV)
 	    free (p->value.env.identifier);
 	  n = p->next;
 	  free (p);
