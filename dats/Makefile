@@ -1,11 +1,11 @@
 
 CC = gcc
 CFLAGS = -Wall -Wextra -O0 -ggdb3 -fsanitize=address
-OBJ := dats.o parse.o scanner.o
+OBJ := dats.o parser.o scanner.o notes.o
 all : dats
 
 dats : $(OBJ)
-	$(CC) $(CFLAGS)  $^ -o $@
+	$(CC) $(CFLAGS) $^ -lm -o $@
 
 
 $(OBJ) :%.o:%.c

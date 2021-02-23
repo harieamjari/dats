@@ -8,5 +8,6 @@ n 3 f7;
 
 staff rest_24_measure{
 n 83 cb1;
+r 2;
 }
 

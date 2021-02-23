@@ -19,52 +19,75 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include <stdio.h>
+#include <stdlib.h>
 
 #define SCANNER_EXTERN
 #include "scanner.h"
 
+#include "notes.h"
+
+extern void print_all_list_n_r(list_n_r *nr);
+
 static token_t tok;
 static symrec_t *staff;
-static int local_errors = 0; /* count of errors generated single dats file*/
+static list_n_r **cur_n_r;
+int local_errors = 0; /* count of errors generated single dats file*/
 int global_errors = 0; /* total count generated errors from all dats file*/
 dats_t *d;
 
 
 /* Returns 0 if success. Non-zero if failed. */
-int
+static int
 parse_notes_rests ()
 {
 
   if (tok == TOK_N)
     {
+      list_n_r *n_r = malloc(sizeof(list_n_r));
+      n_r->type = SYM_NOTE; 
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
 	{
 	  EXPECTING (TOK_NUM, d);
 	}
-      d->expecting = TOK_NOTE;
+
+      symrec_t *p = getsym(d, "BPM");
+      n_r->length = 60.0*44100.0*4.0/( p->value.env.val * tok_num);
+      expecting = TOK_NOTE;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NOTE)
 	{
 	  UNEXPECTED (tok, d);
 	}
+      n_r->frequency = tok_num;
+      *cur_n_r = n_r;
+      n_r->next = NULL;
+      cur_n_r = &(n_r->next);
     }
   else if (tok == TOK_R)
     {
+      list_n_r *n_r = malloc(sizeof(list_n_r));
+      n_r->type =  SYM_REST;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
 	{
 	  UNEXPECTED (tok, d);
 	}
+      symrec_t *p = getsym(d, "BPM");
+      n_r->length = 60.0*44100.0*4.0/(p->value.env.val*tok_num);
+      *cur_n_r = n_r;
+      n_r->next = NULL;
+      cur_n_r = &(n_r->next);
     }
   else
     return 0;
-  d->expecting = TOK_NULL;
+  expecting = TOK_NULL;
 
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_SEMICOLON)
     {
-      UNEXPECTED (tok, d);
+      EXPECTING (TOK_SEMICOLON, d);
+      return 1;
     }
   tok = read_next_tok_cur_dats_t (d);
   return parse_notes_rests ();
@@ -83,7 +106,7 @@ parse_staff ()
       EXPECTING(TOK_IDENTIFIER, d);
     }
   staff = d->sym_table;
-
+  cur_n_r = &(staff->value.staff.n_r);
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_LCURLY_BRACE)
     {
@@ -100,8 +123,11 @@ parse_staff ()
 
     }
   tok = read_next_tok_cur_dats_t (d);
-  if (tok != TOK_EOF)
+  if (tok != TOK_EOF){
+  print_all_list_n_r(staff->value.staff.n_r);
     return parse_staff ();
+  }
+  print_all_list_n_r(staff->value.staff.n_r);
   return 0;
 }
 
@@ -131,7 +157,7 @@ parse_cur_dats_t (dats_t * const t)
   }
   printf ("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s: parsing successful\n", __FILE__,
 	  __LINE__, __func__, d->fname);
-  //clean_all_symrec_t_cur_dats_t (d);
+  
   local_errors = 0;
   return 0;
 }

@@ -28,12 +28,12 @@
 
 #include <sys/stat.h>
 
+#define SCANNER_EXTERN
 #include "scanner.h"
 
 extern int parse_cur_dats_t (dats_t * const t);
 extern int global_errors;
 
-dats_t *dats_files = NULL;
 /* process_args returns the value 0 if sucesss and nonzero if
  * failed. */
 int
@@ -201,8 +201,7 @@ main (int argc, char **argv)
 
   if (global_errors)
     ERROR ("%d global errors generated%s\n", global_errors,
-	   (global_errors >
-	    9) ? "\nToo many errors. I hate your file" : " ");
+	   (global_errors > 9) ? "\nToo many errors. I hate your file" : " ");
   clean_all_symrec_t_all_dats_t ();
   clean_all_dats_t ();
   return 0;

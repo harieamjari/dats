@@ -1,10 +1,31 @@
+/*  Dats compiler 
+ *
+ * Copyright (c) 2021 Al-buharie Amjari
+ *
+ * This file is part of Dats.
+ * 
+ * Dats is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * Dats is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with Dats; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 #include "scanner.h"
 
-
+dats_t *dats_files = NULL;
 void
 clean_all_dats_t (void)
 {
@@ -63,6 +84,13 @@ clean_all_symrec_t_all_dats_t ()
 	    {
 	      free (p->value.staff.identifier);
 	      free (p->value.staff.pcm_s16le);
+	      list_n_r *mem_n_r;
+	      for (list_n_r * n_r = p->value.staff.n_r; n_r != NULL;)
+		{
+		  mem_n_r = n_r->next;
+		  free (n_r);
+		  n_r = mem_n_r;
+		}
 	    }
 	  if (p->type == TOK_ENV)
 	    free (p->value.env.identifier);
@@ -103,6 +131,8 @@ getsym (const dats_t * const t, char const *const id)
       if (p->value.staff.identifier == NULL)
 	continue;
       if (!strcmp (p->value.staff.identifier, id))
+	return p;
+      else if (!strcmp (p->value.env.identifier, id))
 	return p;
     }
   return NULL;
@@ -199,36 +229,77 @@ w:
 	    s->type = TOK_STAFF;	//0 = staff
 	    s->value.staff.identifier = NULL;
 	    s->value.staff.pcm_s16le = NULL;
+	    s->value.staff.n_r = NULL;
 	    s->next = t->sym_table;
 	    t->sym_table = s;
 	    return TOK_STAFF;
 	  }
-	else if (t->expecting == TOK_NOTE)
-	  switch (buff[0])
-	    {
-	    case 'a':
-	    case 'b':
-	    case 'c':
-	    case 'd':
-	    case 'e':
-	    case 'f':
-	    case 'g':
+	else if (expecting == TOK_NOTE)
+	  {
+	    switch (buff[0])
 	      {
-		if ((buff[1] == '#' || buff[1] == 'b')
-		    && (buff[2] >= '0' && buff[2] <= '9') && !buff[3])
-		  return TOK_NOTE;
-		else if ((buff[1] >= '0' && buff[1] <= '9') && !buff[2])
-		  return TOK_NOTE;
+	      case 'a':
+		tok_num = 27.50;
+		break;
+	      case 'b':
+		tok_num = 30.86;
+		break;
+	      case 'c':
+		tok_num = 16.35;
+		break;
+	      case 'd':
+		tok_num = 18.35;
+		break;
+	      case 'e':
+		tok_num = 20.50;
+		break;
+	      case 'f':
+		tok_num = 21.82;
+		break;
+	      case 'g':
+		tok_num = 24.49;
+		break;
+	      default:
+		ERROR
+		  ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
+		   t->fname, t->line, t->column, buff);
+		return TOK_ERR;
 
 
 	      }
-	    default:
+	    if ((buff[1] == '#' || buff[1] == 'b')
+		&& (buff[2] >= '0' && buff[2] <= '9') && !buff[3])
+	      {
+		switch (buff[1])
+		  {
+		  case '#':
+		    tok_num *= pow (2.0, 1.0 / 12.0);
+		    break;
+		  case 'b':
+		    tok_num /= pow (2.0, 1.0 / 12.0);
+		    break;
+
+		  }
+		char *end;
+		tok_num *= pow (2.0, strtof (buff + 2, &end));
+		if (*end)
+		  ERROR ("Warning: non numreric character/s %s\n", end);
+		return TOK_NOTE;
+	      }
+	    else if ((buff[1] >= '0' && buff[1] <= '9') && !buff[2])
+	      {
+		char *end;
+		tok_num *= pow (2.0, strtof (buff + 1, &end));
+		if (*end)
+		  ERROR ("Warning: non numreric character/s %s\n", end);
+		return TOK_NOTE;
+	      }
+	    else
 	      ERROR ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
 		     t->fname, t->line, t->column, buff);
-	      return TOK_ERR;
+	    return TOK_ERR;
 
-
-	    }
+	  }
 	else if (!strcmp ("repeat", buff))
 	  {
 	    return TOK_REPEAT;
@@ -305,14 +376,7 @@ w:
       {
 	int nchar;
 	ungetc (c, t->fp);
-	symrec_t *s = malloc (sizeof (symrec_t));
-	assert (s != NULL);
-	s->type = TOK_NUM;
-	(void) fscanf (t->fp, "%f%n", &(s->value.num), &nchar);
-	s->column = t->column;
-	s->line = t->line;
-	s->next = t->sym_table;
-	t->sym_table = s;
+	(void) fscanf (t->fp, "%f%n", &tok_num, &nchar);
 	t->column += nchar;
 	return TOK_NUM;
       }
@@ -367,7 +431,7 @@ token_t_to_str (const token_t t)
     case TOK_R:
       return "'r'";
     default:
-      REPORT("Unknown token\n");
+      REPORT ("Unknown token\n");
       return __FILE__;
 
 
@@ -397,17 +461,11 @@ print_all_symrec_t_cur_dats_t (const dats_t * const t)
 	  printf ("  %-20s    %-20s\n", p->value.env.identifier,
 		  token_t_to_str (TOK_ENV));
 	  break;
-	case TOK_NUM:
-	  printf ("  %-20f    %-20s\n", p->value.num,
-		  token_t_to_str (TOK_NUM));
-	  break;
 	default:
-      REPORT("Unknown token\n");
-	  
+	  REPORT ("Unknown token\n");
+
 
 	}
     }
 
 }
-
-

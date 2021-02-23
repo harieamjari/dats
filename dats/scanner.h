@@ -2,9 +2,9 @@
 #define SCANNER_H
 #include <stdio.h>
 #include <stdint.h>
+#include "notes.h"
 
 typedef enum token_t token_t;
-
 enum token_t
 {
   TOK_STAFF,
@@ -33,6 +33,7 @@ struct symrec_t
     struct
     {
       char *identifier;
+      list_n_r *n_r; 
       uint32_t numsamples;
       int16_t *pcm_s16le;
     } staff;			/* staff variables */
@@ -41,7 +42,6 @@ struct symrec_t
       char *identifier;
       float val;
     } env;			/* environment variables */
-    float num;
   } value;
 
   symrec_t *next;
@@ -56,7 +56,6 @@ struct dats_t
   char *fname;
   int line, column;
 
-  token_t expecting;
   dats_t *next;
 
   uint32_t numsamples;
@@ -99,8 +98,12 @@ print_all_symrec_t_cur_dats_t (const dats_t * const t);
 EXTERN FILE *dats_wav_out;
 EXTERN int line_token_found;
 EXTERN int column_token_found;
-EXTERN dats_t *dats_files;
 
+EXTERN float tok_num;
+EXTERN char  *tok_identifier;
+EXTERN token_t expecting;
+
+EXTERN dats_t *dats_files;
 
 #define ERROR(...) fprintf(stderr, __VA_ARGS__)
 #define UNEXPECTED(x, d) {\
