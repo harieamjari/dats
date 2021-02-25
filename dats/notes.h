@@ -1,6 +1,7 @@
 #ifndef NOTES_H
 #define NOTES_H
 #include <stdint.h>
+#include "scanner.h"
 
 typedef enum music_symbol music_symbol;
 enum music_symbol {
@@ -23,4 +24,5 @@ struct list_n_r {
 
 };
 
+extern int process_nr(symrec_t *s);
 #endif

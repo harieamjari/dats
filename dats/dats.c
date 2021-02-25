@@ -196,12 +196,19 @@ main (int argc, char **argv)
   ret = process_args (argc, argv);
   if (ret)
     return 1;
-  for (dats_t * p = dats_files; p != NULL; p = p->next)
+  for (dats_t * p = dats_files; p != NULL; p = p->next){
     parse_cur_dats_t (p);
+    for (symrec_t *s = p->sym_table; s!=NULL; s = s->next){
+      if (s->type!=TOK_STAFF) continue;
+      process_nr(s);
+
+  }
+  }
 
   if (global_errors)
     ERROR ("%d global errors generated%s\n", global_errors,
 	   (global_errors > 9) ? "\nToo many errors. I hate your file" : " ");
+
   clean_all_symrec_t_all_dats_t ();
   clean_all_dats_t ();
   return 0;

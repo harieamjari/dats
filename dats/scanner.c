@@ -26,6 +26,35 @@
 #include "scanner.h"
 
 dats_t *dats_files = NULL;
+
+void print_all_list_n_r(list_n_r *nr){
+   for (list_n_r *p = nr; p!=NULL; p = p->next){
+     switch(p->type){
+	     case SYM_NOTE:  printf("NOTE length: %u frequency: %f\n", p->length, p->frequency); break;
+     case SYM_REST: printf("REST length: %u\n", p->length); break;
+
+     }
+
+
+   }
+
+}
+
+int process_nr(symrec_t * s){
+  uint32_t numsamples = s->value.staff.numsamples;
+  printf("%u numsamples\n", numsamples);
+  s->value.staff.pcm_s16le = malloc(sizeof(int16_t)*numsamples);
+
+  list_n_r *a = s->value.staff.n_r;
+  for (uint32_t total_samples = 0;
+    total_samples<numsamples||a!=NULL;
+    a=a->next){
+    printf("%d total %u\n", a->length, total_samples );
+    total_samples+=a->length;
+  }
+
+   return 0;
+}
 void
 clean_all_dats_t (void)
 {
@@ -228,6 +257,7 @@ w:
 	    assert (s != NULL);
 	    s->type = TOK_STAFF;	//0 = staff
 	    s->value.staff.identifier = NULL;
+	    s->value.staff.numsamples = 0;
 	    s->value.staff.pcm_s16le = NULL;
 	    s->value.staff.n_r = NULL;
 	    s->next = t->sym_table;

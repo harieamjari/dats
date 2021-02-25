@@ -24,13 +24,12 @@
 #define SCANNER_EXTERN
 #include "scanner.h"
 
-#include "notes.h"
 
 extern void print_all_list_n_r(list_n_r *nr);
 
 static token_t tok;
 static symrec_t *staff;
-static list_n_r **cur_n_r;
+static list_n_r *cnr;
 int local_errors = 0; /* count of errors generated single dats file*/
 int global_errors = 0; /* total count generated errors from all dats file*/
 dats_t *d;
@@ -43,8 +42,7 @@ parse_notes_rests ()
 
   if (tok == TOK_N)
     {
-      list_n_r *n_r = malloc(sizeof(list_n_r));
-      n_r->type = SYM_NOTE; 
+      cnr->type = SYM_NOTE; 
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
 	{
@@ -52,36 +50,35 @@ parse_notes_rests ()
 	}
 
       symrec_t *p = getsym(d, "BPM");
-      n_r->length = 60.0*44100.0*4.0/( p->value.env.val * tok_num);
+      cnr->length = (uint32_t)(60.0*44100.0*4.0/( p->value.env.val * tok_num));
+      staff->value.staff.numsamples += cnr->length;
       expecting = TOK_NOTE;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NOTE)
 	{
 	  UNEXPECTED (tok, d);
 	}
-      n_r->frequency = tok_num;
-      *cur_n_r = n_r;
-      n_r->next = NULL;
-      cur_n_r = &(n_r->next);
+      cnr->frequency = tok_num;
     }
   else if (tok == TOK_R)
     {
-      list_n_r *n_r = malloc(sizeof(list_n_r));
-      n_r->type =  SYM_REST;
+      cnr->type =  SYM_REST;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
 	{
 	  UNEXPECTED (tok, d);
 	}
       symrec_t *p = getsym(d, "BPM");
-      n_r->length = 60.0*44100.0*4.0/(p->value.env.val*tok_num);
-      *cur_n_r = n_r;
-      n_r->next = NULL;
-      cur_n_r = &(n_r->next);
+      cnr->length = (uint32_t)(60.0*44100.0*4.0/(p->value.env.val*tok_num));
+      staff->value.staff.numsamples += cnr->length;
     }
-  else
+  else {
+    expecting = TOK_NULL;
+    cnr->next=NULL;
     return 0;
+  }
   expecting = TOK_NULL;
+    cnr->next=NULL;
 
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_SEMICOLON)
@@ -90,6 +87,8 @@ parse_notes_rests ()
       return 1;
     }
   tok = read_next_tok_cur_dats_t (d);
+  cnr->next = malloc(sizeof(list_n_r));
+  cnr = cnr->next;
   return parse_notes_rests ();
 }
 
@@ -100,13 +99,14 @@ parse_staff ()
     {
       UNEXPECTED (tok, d);
     }
+  staff = d->sym_table;
+  staff->value.staff.n_r = malloc(sizeof(list_n_r));
+  cnr = staff->value.staff.n_r;
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_IDENTIFIER)
     {
       EXPECTING(TOK_IDENTIFIER, d);
     }
-  staff = d->sym_table;
-  cur_n_r = &(staff->value.staff.n_r);
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_LCURLY_BRACE)
     {
@@ -122,11 +122,14 @@ parse_staff ()
       UNEXPECTED (tok, d);
 
     }
+  //cnr->next = NULL;
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_EOF){
   print_all_list_n_r(staff->value.staff.n_r);
+  ERROR("num parser %d\n", staff->value.staff.numsamples);
     return parse_staff ();
   }
+  ERROR("num parser %d\n", staff->value.staff.numsamples);
   print_all_list_n_r(staff->value.staff.n_r);
   return 0;
 }
