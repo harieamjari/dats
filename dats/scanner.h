@@ -135,7 +135,7 @@ EXTERN dats_t *dats_files;
     ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected %s\n",\
      __FILE__,__LINE__, __func__,d->fname, line_token_found,\
     column_token_found, token_t_to_str(x));\
-    if (x==TOK_EOF) return 1;\
+    return 1;\
    }
 #define EXPECTING(x, d) { \
     local_errors++; \
@@ -143,7 +143,7 @@ EXTERN dats_t *dats_files;
       ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: expecting %s\n",\
      __FILE__,__LINE__, __func__,d->fname, line_token_found,\
     column_token_found, token_t_to_str(x));\
-    if (x==TOK_EOF) return 1; \
+    return 1; \
    }
 #define REPORT(...) \
    ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s\n",__FILE__, __LINE__,\

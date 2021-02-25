@@ -64,63 +64,63 @@ process_args (const int argc, char *const *argv)
       option_index = 0;
       c = getopt_long (argc, argv, "i:o:h", long_options, NULL);
       if (c == -1)
-	break;
+        break;
       switch (c)
-	{
-	case 'i':
-	  fp = fopen (optarg, "r");
-	  if (fp == NULL)
-	    {
-	      perror (optarg);
-	      err++;
-	      break;
-	    }
-	  else
-	    {
-	      fclose (fp);
-	      struct stat path_stat;
-	      stat (optarg, &path_stat);
-	      if (!S_ISREG (path_stat.st_mode))
-		{
-		  ERROR ("%s: %s: not a regular file\n", argv[0], optarg);
-		  err++;
-		}
-	    }
-	  break;
-	case 'o':
-	  if (out_files > 0)
-	    {
-	      ERROR ("Too many output file %s\n", optarg);
-	      err++;
-	      break;
-	    }
-	  out_files++;
-	  fp = fopen (optarg, "wb");
-	  if (fp == NULL)
-	    {
-	      perror (optarg);
-	      err++;
-	      break;
-	    }
-	  fclose (fp);
-	  break;
-	case 'h':
-	  puts ("Dats compiler 2.0.0\n"
-		"\n"
-		"options:\n"
-		"-i                   input dats files\n"
-		"-o                   output file\n");
-	  return 1;
-	default:
-	  return 1;
+        {
+        case 'i':
+          fp = fopen (optarg, "r");
+          if (fp == NULL)
+            {
+              perror (optarg);
+              err++;
+              break;
+            }
+          else
+            {
+              fclose (fp);
+              struct stat path_stat;
+              stat (optarg, &path_stat);
+              if (!S_ISREG (path_stat.st_mode))
+                {
+                  ERROR ("%s: %s: not a regular file\n", argv[0], optarg);
+                  err++;
+                }
+            }
+          break;
+        case 'o':
+          if (out_files > 0)
+            {
+              ERROR ("Too many output file %s\n", optarg);
+              err++;
+              break;
+            }
+          out_files++;
+          fp = fopen (optarg, "wb");
+          if (fp == NULL)
+            {
+              perror (optarg);
+              err++;
+              break;
+            }
+          fclose (fp);
+          break;
+        case 'h':
+          puts ("Dats compiler 2.0.0\n"
+                "\n"
+                "options:\n"
+                "-i                   input dats files\n"
+                "-o                   output file\n");
+          return 1;
+        default:
+          return 1;
 
-	}
+        }
     }
   if (optind < argc)
     {
       while (optind < argc)
-	ERROR ("\x1b[1;31merror\x1b[0m: unknown option '%s'\n",
-	       argv[optind++]);
+        ERROR
+          ("\x1b[1;31merror\x1b[0m: unknown option '%s'\n", argv[optind++]);
       return 1;
     }
   if (!out_files)
@@ -139,55 +139,53 @@ process_args (const int argc, char *const *argv)
     {
       c = getopt_long (argc, argv, "i:o:", long_options, NULL);
       if (c == -1)
-	break;
+        break;
       switch (c)
-	{
-	case 'i':
-	  fp = fopen (optarg, "r");
-	  if (fp == NULL)
-	    {
-	      perror (optarg);
-	      return 1;
-	    }
-	  dats_t *p = malloc (sizeof (dats_t));
-	  assert (p != NULL);
-	  p->fp = fp;
-	  p->fname = strdup (optarg);
-	  assert (p->fname != NULL);
-	  p->line = 1;
-	  p->column = 1;
-	  p->numsamples = 0;
-	  p->pcm_s16le = NULL;
+        {
+        case 'i':
+          fp = fopen (optarg, "r");
+          if (fp == NULL)
+            {
+              perror (optarg);
+              return 1;
+            }
+          dats_t *p = malloc (sizeof (dats_t));
+          assert (p != NULL);
+          p->fp = fp;
+          p->fname = strdup (optarg);
+          assert (p->fname != NULL);
+          p->line = 1;
+          p->column = 1;
+          p->numsamples = 0;
+          p->pcm_s16le = NULL;
 
-	  symrec_t *t = malloc (sizeof (symrec_t));
-	  assert (t != NULL);
-	  t->type = TOK_ENV;
-	  t->value.env.identifier = strdup ("BPM");
-	  assert (t->value.env.identifier != NULL);
-	  t->value.env.val = 120.0;
-	  t->next = NULL;
+          symrec_t *t = malloc (sizeof (symrec_t));
+          assert (t != NULL);
+          t->type = TOK_ENV;
+          t->value.env.identifier = strdup ("BPM");
+          assert (t->value.env.identifier != NULL);
+          t->value.env.val = 120.0;
+          t->next = NULL;
 
-	  p->sym_table = t;
-	  p->next = dats_files;
-	  dats_files = p;
-	  break;
-	case 'o':
-	  fp = fopen (optarg, "wb");
-	  if (fp == NULL)
-	    {
-	      perror (optarg);
-	      /* clean this */
-	      return 1;
-	    }
-	  dats_wav_out = fp;
-	  break;
-	}
+          p->sym_table = t;
+          p->next = dats_files;
+          dats_files = p;
+          break;
+        case 'o':
+          fp = fopen (optarg, "wb");
+          if (fp == NULL)
+            {
+              perror (optarg);
+              /* clean this */
+              return 1;
+            }
+          dats_wav_out = fp;
+          break;
+        }
     }
 
   return 0;
 }
-
-
 
 int
 main (int argc, char **argv)
@@ -196,18 +194,26 @@ main (int argc, char **argv)
   ret = process_args (argc, argv);
   if (ret)
     return 1;
-  for (dats_t * p = dats_files; p != NULL; p = p->next){
-    parse_cur_dats_t (p);
-    for (symrec_t *s = p->sym_table; s!=NULL; s = s->next){
-      if (s->type!=TOK_STAFF) continue;
-      process_nr(s);
+  for (dats_t * p = dats_files; p != NULL; p = p->next)
+    {
+      parse_cur_dats_t (p);
+    }
+  if (global_errors)
+    goto err;
+  for (dats_t * p = dats_files; p != NULL; p = p->next)
+    {
+      for (symrec_t * s = p->sym_table; s != NULL; s = s->next)
+        {
+          if (s->type != TOK_STAFF)
+            continue;
+          process_nr (s);
 
-  }
-  }
-
+        }
+    }
+err:
   if (global_errors)
     ERROR ("%d global errors generated%s\n", global_errors,
-	   (global_errors > 9) ? "\nToo many errors. I hate your file" : " ");
+           (global_errors > 9) ? "\nToo many errors. I hate your file" : " ");
 
   clean_all_symrec_t_all_dats_t ();
   clean_all_dats_t ();

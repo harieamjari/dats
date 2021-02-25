@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -O0 -ggdb3
+CFLAGS = -Wall -Wextra -O0 -ggdb3 -fsanitize=address -fsanitize=undefined 
 OBJ := dats.o parser.o scanner.o
 all : dats
 
@@ -11,7 +11,7 @@ dats : $(OBJ)
 $(OBJ) :%.o:%.c $(wildcard *.h)
 	gcc -c $(CFLAGS) $< -o $@
 
-.PHONY : clean test
+.PHONY : clean test indent
 clean: 
 	rm dats $(OBJ)
 

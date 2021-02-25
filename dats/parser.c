@@ -24,16 +24,14 @@
 #define SCANNER_EXTERN
 #include "scanner.h"
 
-
-extern void print_all_list_n_r(list_n_r *nr);
+extern void print_all_list_n_r (list_n_r * nr);
 
 static token_t tok;
 static symrec_t *staff;
 static list_n_r *cnr;
-int local_errors = 0; /* count of errors generated single dats file*/
-int global_errors = 0; /* total count generated errors from all dats file*/
+int local_errors = 0;           /* count of errors generated single dats file */
+int global_errors = 0;          /* total count generated errors from all dats file */
 dats_t *d;
-
 
 /* Returns 0 if success. Non-zero if failed. */
 static int
@@ -42,43 +40,44 @@ parse_notes_rests ()
 
   if (tok == TOK_N)
     {
-      cnr->type = SYM_NOTE; 
+      cnr->type = SYM_NOTE;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
-	{
-	  EXPECTING (TOK_NUM, d);
-	}
+        {
+          EXPECTING (TOK_NUM, d);
+        }
 
-      symrec_t *p = getsym(d, "BPM");
-      cnr->length = (uint32_t)(60.0*44100.0*4.0/( p->value.env.val * tok_num));
+      symrec_t *p = getsym (d, "BPM");
+      cnr->length =
+        (uint32_t) (60.0 * 44100.0 * 4.0 / (p->value.env.val * tok_num));
       staff->value.staff.numsamples += cnr->length;
       expecting = TOK_NOTE;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NOTE)
-	{
-	  UNEXPECTED (tok, d);
-	}
+        {
+          UNEXPECTED (tok, d);
+        }
       cnr->frequency = tok_num;
     }
   else if (tok == TOK_R)
     {
-      cnr->type =  SYM_REST;
+      cnr->type = SYM_REST;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
-	{
-	  UNEXPECTED (tok, d);
-	}
-      symrec_t *p = getsym(d, "BPM");
-      cnr->length = (uint32_t)(60.0*44100.0*4.0/(p->value.env.val*tok_num));
+        {
+          UNEXPECTED (tok, d);
+        }
+      symrec_t *p = getsym (d, "BPM");
+      cnr->length =
+        (uint32_t) (60.0 * 44100.0 * 4.0 / (p->value.env.val * tok_num));
       staff->value.staff.numsamples += cnr->length;
     }
-  else {
-    expecting = TOK_NULL;
-    cnr->next=NULL;
-    return 0;
-  }
+  else
+    {
+      cnr->next = NULL;
+      return 0;
+    }
   expecting = TOK_NULL;
-    cnr->next=NULL;
 
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_SEMICOLON)
@@ -87,7 +86,7 @@ parse_notes_rests ()
       return 1;
     }
   tok = read_next_tok_cur_dats_t (d);
-  cnr->next = malloc(sizeof(list_n_r));
+  cnr->next = malloc (sizeof (list_n_r));
   cnr = cnr->next;
   return parse_notes_rests ();
 }
@@ -100,12 +99,13 @@ parse_staff ()
       UNEXPECTED (tok, d);
     }
   staff = d->sym_table;
-  staff->value.staff.n_r = malloc(sizeof(list_n_r));
+  staff->value.staff.n_r = malloc (sizeof (list_n_r));
   cnr = staff->value.staff.n_r;
+  cnr->next = NULL;
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_IDENTIFIER)
     {
-      EXPECTING(TOK_IDENTIFIER, d);
+      EXPECTING (TOK_IDENTIFIER, d);
     }
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_LCURLY_BRACE)
@@ -124,13 +124,14 @@ parse_staff ()
     }
   //cnr->next = NULL;
   tok = read_next_tok_cur_dats_t (d);
-  if (tok != TOK_EOF){
-  print_all_list_n_r(staff->value.staff.n_r);
-  ERROR("num parser %d\n", staff->value.staff.numsamples);
-    return parse_staff ();
-  }
-  ERROR("num parser %d\n", staff->value.staff.numsamples);
-  print_all_list_n_r(staff->value.staff.n_r);
+  if (tok != TOK_EOF)
+    {
+      ERROR ("num parser %d\n", staff->value.staff.numsamples);
+      print_all_list_n_r (staff->value.staff.n_r);
+      return parse_staff ();
+    }
+  ERROR ("num parser %d\n", staff->value.staff.numsamples);
+  print_all_list_n_r (staff->value.staff.n_r);
   return 0;
 }
 
@@ -151,16 +152,17 @@ parse_cur_dats_t (dats_t * const t)
   d = t;
 
   /* Pass 1: Syntax analysis */
-  if (start ()){
-    ERROR("%d local errors generated\n", local_errors);
-    global_errors+=local_errors;
-    //clean_all_symrec_t_cur_dats_t(d);
-    local_errors = 0;
-    return 1;
-  }
-  printf ("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s: parsing successful\n", __FILE__,
-	  __LINE__, __func__, d->fname);
-  
+  if (start ())
+    {
+      ERROR ("%d local errors generated\n", local_errors);
+      global_errors += local_errors;
+      //clean_all_symrec_t_cur_dats_t(d);
+      local_errors = 0;
+      return 1;
+    }
+  printf ("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s: parsing successful\n",
+          __FILE__, __LINE__, __func__, d->fname);
+
   local_errors = 0;
   return 0;
 }
