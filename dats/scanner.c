@@ -54,7 +54,7 @@ process_nr (symrec_t * s)
   printf ("%u numsamples\n", numsamples);
   s->value.staff.pcm_s16le = malloc (sizeof (int16_t) * numsamples);
 
-  list_n_r *a = s->value.staff.n_r;
+  list_n_r *a = s->value.staff.nr;
   for (uint32_t total_samples = 0; total_samples < numsamples; a = a->next)
     {
       total_samples += a->length;
@@ -122,12 +122,12 @@ clean_all_symrec_t_all_dats_t ()
             {
               free (p->value.staff.identifier);
               free (p->value.staff.pcm_s16le);
-              list_n_r *mem_n_r;
-              for (list_n_r * n_r = p->value.staff.n_r; n_r != NULL;)
+              list_n_r *tmp;
+              for (list_n_r * nr = p->value.staff.nr; nr != NULL;)
                 {
-                  mem_n_r = n_r->next;
-                  free (n_r);
-                  n_r = mem_n_r;
+                  tmp = nr->next;
+                  free (nr);
+                  nr = tmp;
                 }
             }
           if (p->type == TOK_ENV)
@@ -268,7 +268,7 @@ w:
             s->value.staff.identifier = NULL;
             s->value.staff.numsamples = 0;
             s->value.staff.pcm_s16le = NULL;
-            s->value.staff.n_r = NULL;
+            s->value.staff.nr = NULL;
             s->next = t->sym_table;
             t->sym_table = s;
             return TOK_STAFF;

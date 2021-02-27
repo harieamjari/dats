@@ -207,13 +207,11 @@ main (int argc, char **argv)
           if (s->type != TOK_STAFF)
             continue;
           process_nr (s);
-
         }
     }
 err:
   if (global_errors)
-    ERROR ("%d global errors generated%s\n", global_errors,
-           (global_errors > 9) ? "\nToo many errors. I hate your file" : " ");
+    ERROR ("%d global errors generated\n", global_errors);
 
   clean_all_symrec_t_all_dats_t ();
   clean_all_dats_t ();

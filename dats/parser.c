@@ -99,8 +99,8 @@ parse_staff ()
       UNEXPECTED (tok, d);
     }
   staff = d->sym_table;
-  staff->value.staff.n_r = malloc (sizeof (list_n_r));
-  cnr = staff->value.staff.n_r;
+  staff->value.staff.nr = malloc (sizeof (list_n_r));
+  cnr = staff->value.staff.nr;
   cnr->next = NULL;
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_IDENTIFIER)
@@ -127,11 +127,11 @@ parse_staff ()
   if (tok != TOK_EOF)
     {
       ERROR ("num parser %d\n", staff->value.staff.numsamples);
-      print_all_list_n_r (staff->value.staff.n_r);
+      print_all_list_n_r (staff->value.staff.nr);
       return parse_staff ();
     }
   ERROR ("num parser %d\n", staff->value.staff.numsamples);
-  print_all_list_n_r (staff->value.staff.n_r);
+  print_all_list_n_r (staff->value.staff.nr);
   return 0;
 }
 
