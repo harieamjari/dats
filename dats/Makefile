@@ -13,10 +13,10 @@ $(OBJ) :%.o:%.c $(wildcard *.h)
 
 .PHONY : clean test indent
 clean: 
-	rm dats $(OBJ)
+	rm dats $(OBJ) f
 
 test : dats
-	./dats -i t.dats -o f
-	./dats -i terr.dats -i t.dats  -o f
+	./dats -i ../test/t.dats -o f
+	./dats -i ../test/terr.dats -i ../test/t.dats  -o f
 
 

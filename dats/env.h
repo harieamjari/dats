@@ -4,6 +4,7 @@ typedef enum token_t token_t;
 enum token_t
 {
   TOK_STAFF,
+  TOK_TRACK,
   TOK_REPEAT,
   TOK_LCURLY_BRACE,
   TOK_RCURLY_BRACE,
