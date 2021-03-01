@@ -33,15 +33,15 @@ print_all_list_n_r (list_n_r * nr)
   for (list_n_r * p = nr; p != NULL; p = p->next)
     {
       switch (p->type)
-        {
-        case SYM_NOTE:
-          printf ("NOTE length: %u frequency: %f\n", p->length, p->frequency);
-          break;
-        case SYM_REST:
-          printf ("REST length: %u\n", p->length);
-          break;
+	{
+	case SYM_NOTE:
+	  printf ("NOTE length: %u frequency: %f\n", p->length, p->frequency);
+	  break;
+	case SYM_REST:
+	  printf ("REST length: %u\n", p->length);
+	  break;
 
-        }
+	}
 
     }
 
@@ -73,11 +73,11 @@ clean_all_dats_t (void)
     {
       p = n->next;
       if (n->fp != NULL)
-        if (EOF == fclose (n->fp))
-          {
-            ERROR ("warning: ");
-            perror (n->fname);
-          }
+	if (EOF == fclose (n->fp))
+	  {
+	    ERROR ("warning: ");
+	    perror (n->fname);
+	  }
       free (n->fname);
       free (n->pcm_s16le);
       free (n);
@@ -97,12 +97,12 @@ clean_all_symrec_t_cur_dats_t (const dats_t * const t)
   for (symrec_t * p = t->sym_table; p != NULL;)
     {
       if (p->type == TOK_STAFF)
-        {
-          free (p->value.staff.identifier);
-          free (p->value.staff.pcm_s16le);
-        }
+	{
+	  free (p->value.staff.identifier);
+	  free (p->value.staff.pcm_s16le);
+	}
       else if (p->type == TOK_IDENTIFIER)
-        free (p->value.env.identifier);
+	free (p->value.env.identifier);
       n = p->next;
       free (p);
       p = n;
@@ -117,25 +117,25 @@ clean_all_symrec_t_all_dats_t ()
     {
       symrec_t *n;
       for (symrec_t * p = d->sym_table; p != NULL;)
-        {
-          if (p->type == TOK_STAFF)
-            {
-              free (p->value.staff.identifier);
-              free (p->value.staff.pcm_s16le);
-              list_n_r *tmp;
-              for (list_n_r * nr = p->value.staff.nr; nr != NULL;)
-                {
-                  tmp = nr->next;
-                  free (nr);
-                  nr = tmp;
-                }
-            }
-          if (p->type == TOK_ENV)
-            free (p->value.env.identifier);
-          n = p->next;
-          free (p);
-          p = n;
-        }
+	{
+	  if (p->type == TOK_STAFF)
+	    {
+	      free (p->value.staff.identifier);
+	      free (p->value.staff.pcm_s16le);
+	      list_n_r *tmp;
+	      for (list_n_r * nr = p->value.staff.nr; nr != NULL;)
+		{
+		  tmp = nr->next;
+		  free (nr);
+		  nr = tmp;
+		}
+	    }
+	  if (p->type == TOK_ENV)
+	    free (p->value.env.identifier);
+	  n = p->next;
+	  free (p);
+	  p = n;
+	}
     }
 }
 
@@ -165,13 +165,13 @@ getsym (const dats_t * const t, char const *const id)
     {
       n = p->next;
       if (p->type == TOK_NUM)
-        continue;
+	continue;
       if (p->value.staff.identifier == NULL)
-        continue;
+	continue;
       if (!strcmp (p->value.staff.identifier, id))
-        return p;
+	return p;
       else if (!strcmp (p->value.env.identifier, id))
-        return p;
+	return p;
     }
   return NULL;
 
@@ -254,159 +254,159 @@ w:
     case 'z':
     case 'Z':
       {
-        int nchar;
-        ungetc (c, t->fp);
-        (void) fscanf (t->fp, "%[a-zA-Z0-9_#]%n", buff, &nchar);
-        t->column += nchar;
-        //puts (buff);
-        if (!strcmp ("staff", buff))
-          {
-            /* put symbol */
-            symrec_t *s = malloc (sizeof (symrec_t));
-            assert (s != NULL);
-            s->type = TOK_STAFF;        //0 = staff
-            s->value.staff.identifier = NULL;
-            s->value.staff.numsamples = 0;
-            s->value.staff.pcm_s16le = NULL;
-            s->value.staff.nr = NULL;
-            s->next = t->sym_table;
-            t->sym_table = s;
-            return TOK_STAFF;
-          }
-        else if (expecting == TOK_NOTE)
-          {
-            switch (buff[0])
-              {
-              case 'a':
-                tok_num = 27.50;
-                break;
-              case 'b':
-                tok_num = 30.86;
-                break;
-              case 'c':
-                tok_num = 16.35;
-                break;
-              case 'd':
-                tok_num = 18.35;
-                break;
-              case 'e':
-                tok_num = 20.50;
-                break;
-              case 'f':
-                tok_num = 21.82;
-                break;
-              case 'g':
-                tok_num = 24.49;
-                break;
-              default:
-                ERROR
-                  ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
-                   t->fname, t->line, t->column, buff);
-                return TOK_ERR;
+	int nchar;
+	ungetc (c, t->fp);
+	(void) fscanf (t->fp, "%[a-zA-Z0-9_#]%n", buff, &nchar);
+	t->column += nchar;
+	//puts (buff);
+	if (!strcmp ("staff", buff))
+	  {
+	    /* put symbol */
+	    symrec_t *s = malloc (sizeof (symrec_t));
+	    assert (s != NULL);
+	    s->type = TOK_STAFF;	//0 = staff
+	    s->value.staff.identifier = NULL;
+	    s->value.staff.numsamples = 0;
+	    s->value.staff.pcm_s16le = NULL;
+	    s->value.staff.nr = NULL;
+	    s->next = t->sym_table;
+	    t->sym_table = s;
+	    return TOK_STAFF;
+	  }
+	else if (expecting == TOK_NOTE)
+	  {
+	    switch (buff[0])
+	      {
+	      case 'a':
+		tok_num = 27.50;
+		break;
+	      case 'b':
+		tok_num = 30.86;
+		break;
+	      case 'c':
+		tok_num = 16.35;
+		break;
+	      case 'd':
+		tok_num = 18.35;
+		break;
+	      case 'e':
+		tok_num = 20.50;
+		break;
+	      case 'f':
+		tok_num = 21.82;
+		break;
+	      case 'g':
+		tok_num = 24.49;
+		break;
+	      default:
+		ERROR
+		  ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
+		   t->fname, t->line, t->column, buff);
+		return TOK_ERR;
 
-              }
-            if ((buff[1] == '#' || buff[1] == 'b')
-                && (buff[2] >= '0' && buff[2] <= '9') && !buff[3])
-              {
-                switch (buff[1])
-                  {
-                  case '#':
-                    tok_num *= pow (2.0, 1.0 / 12.0);
-                    break;
-                  case 'b':
-                    tok_num /= pow (2.0, 1.0 / 12.0);
-                    break;
+	      }
+	    if ((buff[1] == '#' || buff[1] == 'b')
+		&& (buff[2] >= '0' && buff[2] <= '9') && !buff[3])
+	      {
+		switch (buff[1])
+		  {
+		  case '#':
+		    tok_num *= pow (2.0, 1.0 / 12.0);
+		    break;
+		  case 'b':
+		    tok_num /= pow (2.0, 1.0 / 12.0);
+		    break;
 
-                  }
-                char *end;
-                tok_num *= pow (2.0, strtof (buff + 2, &end));
-                if (*end)
-                  ERROR ("Warning: non numreric character/s %s\n", end);
-                return TOK_NOTE;
-              }
-            else if ((buff[1] >= '0' && buff[1] <= '9') && !buff[2])
-              {
-                char *end;
-                tok_num *= pow (2.0, strtof (buff + 1, &end));
-                if (*end)
-                  ERROR ("Warning: non numreric character/s %s\n", end);
-                return TOK_NOTE;
-              }
-            else
-              ERROR
-                ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
-                 t->fname, t->line, t->column, buff);
-            return TOK_ERR;
+		  }
+		char *end;
+		tok_num *= pow (2.0, strtof (buff + 2, &end));
+		if (*end)
+		  ERROR ("Warning: non numreric character/s %s\n", end);
+		return TOK_NOTE;
+	      }
+	    else if ((buff[1] >= '0' && buff[1] <= '9') && !buff[2])
+	      {
+		char *end;
+		tok_num *= pow (2.0, strtof (buff + 1, &end));
+		if (*end)
+		  ERROR ("Warning: non numreric character/s %s\n", end);
+		return TOK_NOTE;
+	      }
+	    else
+	      ERROR
+		("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
+		 t->fname, t->line, t->column, buff);
+	    return TOK_ERR;
 
-          }
-        else if (!strcmp ("repeat", buff))
-          {
-            return TOK_REPEAT;
-          }
-        else if (buff[0] == 'n' && !buff[1])
-          {
-            return TOK_N;
-          }
-        else if (buff[0] == 'r' && !buff[1])
-          {
-            return TOK_R;
-          }
-        else
-          {
-            symrec_t *s = getsym (t, buff);
-            if (s == NULL)
-              {
-                /* if the name at buff is new (it doesn't have a previous definition.)
-                 */
-                if (t->sym_table->type == TOK_STAFF)
-                  {
-                    t->sym_table->line = line_token_found;
-                    t->sym_table->column = column_token_found;
-                    t->sym_table->value.staff.identifier = strdup (buff);
-                    assert (t->sym_table->value.staff.identifier != NULL);
-                    return TOK_IDENTIFIER;
-                  }
-                else
-                  {
-                    ERROR
-                      ("At %s:%d %s: \x1b[1;31minternal error\x1b[0m\n"
-                       "Please report this error on github.com/harieamjari/dats\n",
-                       __FILE__, __LINE__, __func__);
-                    exit (1);
-                  }
-              }
-            else
-              {
-                /* if the name at buff has a previous definition */
-                if (s->type == TOK_ENV)
-                  {
-                    ERROR
-                      ("%s:%d:%d: \x1b[1;31merror\x1b[0m: Dats prohibits the redifinition of environment "
-                       "variables '%s'\n",
-                       t->fname, line_token_found, column_token_found, buff);
-                    return TOK_ERR;
+	  }
+	else if (!strcmp ("repeat", buff))
+	  {
+	    return TOK_REPEAT;
+	  }
+	else if (buff[0] == 'n' && !buff[1])
+	  {
+	    return TOK_N;
+	  }
+	else if (buff[0] == 'r' && !buff[1])
+	  {
+	    return TOK_R;
+	  }
+	else
+	  {
+	    symrec_t *s = getsym (t, buff);
+	    if (s == NULL)
+	      {
+		/* if the name at buff is new (it doesn't have a previous definition.)
+		 */
+		if (t->sym_table->type == TOK_STAFF)
+		  {
+		    t->sym_table->line = line_token_found;
+		    t->sym_table->column = column_token_found;
+		    t->sym_table->value.staff.identifier = strdup (buff);
+		    assert (t->sym_table->value.staff.identifier != NULL);
+		    return TOK_IDENTIFIER;
+		  }
+		else
+		  {
+		    ERROR
+		      ("At %s:%d %s: \x1b[1;31minternal error\x1b[0m\n"
+		       "Please report this error on github.com/harieamjari/dats\n",
+		       __FILE__, __LINE__, __func__);
+		    exit (1);
+		  }
+	      }
+	    else
+	      {
+		/* if the name at buff has a previous definition */
+		if (s->type == TOK_ENV)
+		  {
+		    ERROR
+		      ("%s:%d:%d: \x1b[1;31merror\x1b[0m: Dats prohibits the redifinition of environment "
+		       "variables '%s'\n",
+		       t->fname, line_token_found, column_token_found, buff);
+		    return TOK_ERR;
 
-                  }
-                int length = snprintf (NULL, 0,
-                                       "[%s:%d @ %p] %s:%d:%d: ",
-                                       __FILE__,
-                                       __LINE__,
-                                       read_next_tok_cur_dats_t,
-                                       t->fname,
-                                       t->line,
-                                       t->column);
-                ERROR
-                  ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d: \x1b[1;31merror\x1b[0m: redefinition of \"%s\"\n"
-                   "%*s previous definition at %d:%d\n",
-                   __FILE__, __LINE__,
-                   read_next_tok_cur_dats_t,
-                   t->fname, line_token_found,
-                   column_token_found, buff,
-                   length + 5, "note:", s->line, s->column);
+		  }
+		int length = snprintf (NULL, 0,
+				       "[%s:%d @ %p] %s:%d:%d: ",
+				       __FILE__,
+				       __LINE__,
+				       read_next_tok_cur_dats_t,
+				       t->fname,
+				       t->line,
+				       t->column);
+		ERROR
+		  ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d: \x1b[1;31merror\x1b[0m: redefinition of \"%s\"\n"
+		   "%*s previous definition at %d:%d\n",
+		   __FILE__, __LINE__,
+		   read_next_tok_cur_dats_t,
+		   t->fname, line_token_found,
+		   column_token_found, buff,
+		   length + 5, "note:", s->line, s->column);
 
-                return TOK_ERR;
-              }
-          }
+		return TOK_ERR;
+	      }
+	  }
       }
     case '0':
     case '1':
@@ -419,11 +419,11 @@ w:
     case '8':
     case '9':
       {
-        int nchar;
-        ungetc (c, t->fp);
-        (void) fscanf (t->fp, "%f%n", &tok_num, &nchar);
-        t->column += nchar;
-        return TOK_NUM;
+	int nchar;
+	ungetc (c, t->fp);
+	(void) fscanf (t->fp, "%f%n", &tok_num, &nchar);
+	t->column += nchar;
+	return TOK_NUM;
       }
     case '{':
       t->column += 1;
@@ -439,9 +439,9 @@ w:
       return TOK_EOF;
     default:
       ERROR
-        ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected '%c'\n",
-         __FILE__, __LINE__, read_next_tok_cur_dats_t,
-         t->fname, t->line, t->column, c);
+	("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected '%c'\n",
+	 __FILE__, __LINE__, read_next_tok_cur_dats_t,
+	 t->fname, t->line, t->column, c);
       return TOK_ERR;
 
     }
@@ -489,25 +489,25 @@ void
 print_all_symrec_t_cur_dats_t (const dats_t * const t)
 {
   printf ("Symbol table of %s\n%-20s    %-20s\n\n", t->fname,
-          "  IDENTIFIER", "  TYPE");
+	  "  IDENTIFIER", "  TYPE");
   symrec_t *n;
   for (symrec_t * p = t->sym_table; p != NULL; p = n)
     {
       n = p->next;
       switch (p->type)
-        {
-        case TOK_STAFF:
-          printf ("  %-20s    %-20s\n",
-                  p->value.staff.identifier, token_t_to_str (TOK_STAFF));
-          break;
-        case TOK_ENV:
-          printf ("  %-20s    %-20s\n",
-                  p->value.env.identifier, token_t_to_str (TOK_ENV));
-          break;
-        default:
-          REPORT ("Unknown token\n");
+	{
+	case TOK_STAFF:
+	  printf ("  %-20s    %-20s\n",
+		  p->value.staff.identifier, token_t_to_str (TOK_STAFF));
+	  break;
+	case TOK_ENV:
+	  printf ("  %-20s    %-20s\n",
+		  p->value.env.identifier, token_t_to_str (TOK_ENV));
+	  break;
+	default:
+	  REPORT ("Unknown token\n");
 
-        }
+	}
     }
 
 }

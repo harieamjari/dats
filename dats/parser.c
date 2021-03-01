@@ -29,8 +29,8 @@ extern void print_all_list_n_r (list_n_r * nr);
 static token_t tok;
 static symrec_t *staff;
 static list_n_r *cnr;
-int local_errors = 0;           /* count of errors generated single dats file */
-int global_errors = 0;          /* total count generated errors from all dats file */
+int local_errors = 0;		/* count of errors generated single dats file */
+int global_errors = 0;		/* total count generated errors from all dats file */
 dats_t *d;
 
 /* Returns 0 if success. Non-zero if failed. */
@@ -43,20 +43,20 @@ parse_notes_rests ()
       cnr->type = SYM_NOTE;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
-        {
-          EXPECTING (TOK_NUM, d);
-        }
+	{
+	  EXPECTING (TOK_NUM, d);
+	}
 
       symrec_t *p = getsym (d, "BPM");
       cnr->length =
-        (uint32_t) (60.0 * 44100.0 * 4.0 / (p->value.env.val * tok_num));
+	(uint32_t) (60.0 * 44100.0 * 4.0 / (p->value.env.val * tok_num));
       staff->value.staff.numsamples += cnr->length;
       expecting = TOK_NOTE;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NOTE)
-        {
-          UNEXPECTED (tok, d);
-        }
+	{
+	  UNEXPECTED (tok, d);
+	}
       cnr->frequency = tok_num;
     }
   else if (tok == TOK_R)
@@ -64,12 +64,12 @@ parse_notes_rests ()
       cnr->type = SYM_REST;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
-        {
-          UNEXPECTED (tok, d);
-        }
+	{
+	  UNEXPECTED (tok, d);
+	}
       symrec_t *p = getsym (d, "BPM");
       cnr->length =
-        (uint32_t) (60.0 * 44100.0 * 4.0 / (p->value.env.val * tok_num));
+	(uint32_t) (60.0 * 44100.0 * 4.0 / (p->value.env.val * tok_num));
       staff->value.staff.numsamples += cnr->length;
     }
   else
@@ -161,7 +161,7 @@ parse_cur_dats_t (dats_t * const t)
       return 1;
     }
   printf ("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s: parsing successful\n",
-          __FILE__, __LINE__, __func__, d->fname);
+	  __FILE__, __LINE__, __func__, d->fname);
 
   local_errors = 0;
   return 0;

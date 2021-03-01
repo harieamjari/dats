@@ -9,7 +9,7 @@ dats : $(OBJ)
 
 
 $(OBJ) :%.o:%.c $(wildcard *.h)
-	gcc -c $(CFLAGS) $< -o $@
+	gcc -c -I.. $(CFLAGS) $< -o $@
 
 .PHONY : clean test indent
 clean: 

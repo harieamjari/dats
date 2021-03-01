@@ -1,5 +1,8 @@
 #ifndef ENV_H
 #define ENV_H
+#include <stdio.h>
+#include <stdint.h>
+
 typedef enum token_t token_t;
 enum token_t
 {

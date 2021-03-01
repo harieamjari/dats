@@ -2,7 +2,7 @@
 #define SCANNER_H
 #include <stdio.h>
 #include <stdint.h>
-#include "env.h"
+#include "libsynth/env.h"
 
 #ifdef SCANNER_EXTERN
 #define EXTERN extern
@@ -10,42 +10,31 @@
 #define EXTERN
 #endif
 
-EXTERN void
-clean_all_dats_t (void);
+EXTERN void clean_all_dats_t (void);
 
-EXTERN void
-clean_all_symrec_t_cur_dats_t (const dats_t * const t);
+EXTERN void clean_all_symrec_t_cur_dats_t (const dats_t * const t);
 
-EXTERN void
-clean_all_symrec_t_all_dats_t (void);
+EXTERN void clean_all_symrec_t_all_dats_t (void);
 
-EXTERN int
-count_dats_t (void);
+EXTERN int count_dats_t (void);
 
-EXTERN const char *
-token_t_to_str(const token_t t);
+EXTERN const char *token_t_to_str (const token_t t);
 
-EXTERN int
-count_symrec_t_cur_dats_t (dats_t * t);
+EXTERN int count_symrec_t_cur_dats_t (dats_t * t);
 
-EXTERN symrec_t *
-getsym (const dats_t * const t, char const *const id);
+EXTERN symrec_t *getsym (const dats_t * const t, char const *const id);
 
-EXTERN token_t
-read_next_tok_cur_dats_t (dats_t * const t);
+EXTERN token_t read_next_tok_cur_dats_t (dats_t * const t);
 
-EXTERN void
-print_all_symrec_t_cur_dats_t (const dats_t * const t);
+EXTERN void print_all_symrec_t_cur_dats_t (const dats_t * const t);
 
-EXTERN int
-process_nr(symrec_t *s);
+EXTERN int process_nr (symrec_t * s);
 
-EXTERN FILE *dats_wav_out;
 EXTERN int line_token_found;
 EXTERN int column_token_found;
 
 EXTERN float tok_num;
-EXTERN char  *tok_identifier;
+EXTERN char *tok_identifier;
 EXTERN token_t expecting;
 
 EXTERN dats_t *dats_files;
