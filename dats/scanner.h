@@ -34,6 +34,7 @@ EXTERN int line_token_found;
 EXTERN int column_token_found;
 
 EXTERN float tok_num;
+EXTERN float tok_bpm;
 EXTERN char *tok_identifier;
 EXTERN token_t expecting;
 
@@ -48,6 +49,11 @@ EXTERN dats_t *dats_files;
     column_token_found, token_t_to_str(x));\
     return 1;\
    }
+#define WARNING(str) \
+       ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s:%d:%d \x1b[1;31mwarning\x1b[0m: %s\n",\
+     __FILE__,__LINE__, __func__,d->fname, line_token_found,\
+     column_token_found, str)
+
 #define EXPECTING(x, d) { \
     local_errors++; \
     if (x!=TOK_ERR) \

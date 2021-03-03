@@ -30,36 +30,49 @@ extern void print_all_list_n_r (list_n_r * nr);
 static token_t tok;
 static symrec_t *staff;
 static list_n_r *cnr;
-int local_errors = 0;		/* count of errors generated single dats file */
-int global_errors = 0;		/* total count generated errors from all dats file */
+int local_errors = 0;           /* count of errors generated single dats file */
+int global_errors = 0;          /* total count generated errors from all dats file */
 dats_t *d;
 
 /* Returns 0 if success. Non-zero if failed. */
 static int
 parse_notes_rests ()
 {
+  if (tok == TOK_BPM)
+    {
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_EQUAL)
+        UNEXPECTED (tok, d);
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_NUM)
+        EXPECTING (TOK_NUM, d);
+      if (tok_num == 0.0)
+        {
+          WARNING ("0 bpm is illegal. Now setting to 120\n");
+          tok_num = 120.0;
+        }
+      tok_bpm = tok_num;
+    }
 
-  if (tok == TOK_N)
+  else if (tok == TOK_N)
     {
       cnr->type = SYM_NOTE;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
-	{
-	  EXPECTING (TOK_NUM, d);
-	}
+        {
+          EXPECTING (TOK_NUM, d);
+        }
 
-      symrec_t *p = getsym (d, "BPM");
-      cnr->length =
-	(uint32_t) (60.0 * 44100.0 * 4.0 / (p->value.env.val * tok_num));
+      cnr->length = (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
       staff->value.staff.numsamples += cnr->length;
       expecting = TOK_NOTE;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NOTE)
-	{
-	  UNEXPECTED (tok, d);
-	}
-      note_t *n = malloc(sizeof(note_t));
-      assert(n!=NULL);
+        {
+          UNEXPECTED (tok, d);
+        }
+      note_t *n = malloc (sizeof (note_t));
+      assert (n != NULL);
       n->frequency = tok_num;
       cnr->note = n;
     }
@@ -68,12 +81,10 @@ parse_notes_rests ()
       cnr->type = SYM_REST;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
-	{
-	  UNEXPECTED (tok, d);
-	}
-      symrec_t *p = getsym (d, "BPM");
-      cnr->length =
-	(uint32_t) (60.0 * 44100.0 * 4.0 / (p->value.env.val * tok_num));
+        {
+          UNEXPECTED (tok, d);
+        }
+      cnr->length = (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
       cnr->note = NULL;
       staff->value.staff.numsamples += cnr->length;
     }
@@ -89,7 +100,6 @@ parse_notes_rests ()
   if (tok != TOK_SEMICOLON)
     {
       EXPECTING (TOK_SEMICOLON, d);
-      return 1;
     }
   tok = read_next_tok_cur_dats_t (d);
   cnr->next = malloc (sizeof (list_n_r));
@@ -166,7 +176,7 @@ parse_cur_dats_t (dats_t * const t)
       return 1;
     }
   printf ("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s: parsing successful\n",
-	  __FILE__, __LINE__, __func__, d->fname);
+          __FILE__, __LINE__, __func__, d->fname);
 
   local_errors = 0;
   return 0;

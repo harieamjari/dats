@@ -8,6 +8,7 @@ enum token_t
 {
   TOK_STAFF,
   TOK_TRACK,
+  TOK_BPM,
   TOK_REPEAT,
   TOK_LCURLY_BRACE,
   TOK_RCURLY_BRACE,
@@ -15,7 +16,8 @@ enum token_t
   TOK_R,
   TOK_NOTE,
   TOK_IDENTIFIER,
-  TOK_ENV,			/* Environment variables */
+  TOK_EQUAL,
+  //TOK_ENV,			/* Environment variables 
   TOK_NUM,
   TOK_SEMICOLON,
   TOK_EOF,
