@@ -29,10 +29,8 @@ enum music_symbol {
   SYM_NOTE
 };
 
-typedef struct list_n_r list_n_r; /* list of notes and rests with properties */
-struct list_n_r {
-  music_symbol type;
-  uint32_t length; /* if it is a NOTE */
+typedef struct note_t note_t;
+struct note_t { 
   float frequency;
   int velocity;
   int volume;
@@ -40,6 +38,15 @@ struct list_n_r {
   int decay;
   int sustain;
   int release;
+  int16_t *response;
+  int response_length;
+};
+
+typedef struct list_n_r list_n_r; /* list of notes and rests with properties */
+struct list_n_r {
+  music_symbol type;
+  uint32_t length;
+  note_t   *note;  /* if type = NOTE */
   list_n_r *next;
 
 };

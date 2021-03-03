@@ -20,6 +20,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #define SCANNER_EXTERN
 #include "scanner.h"
@@ -57,7 +58,10 @@ parse_notes_rests ()
 	{
 	  UNEXPECTED (tok, d);
 	}
-      cnr->frequency = tok_num;
+      note_t *n = malloc(sizeof(note_t));
+      assert(n!=NULL);
+      n->frequency = tok_num;
+      cnr->note = n;
     }
   else if (tok == TOK_R)
     {
@@ -70,11 +74,13 @@ parse_notes_rests ()
       symrec_t *p = getsym (d, "BPM");
       cnr->length =
 	(uint32_t) (60.0 * 44100.0 * 4.0 / (p->value.env.val * tok_num));
+      cnr->note = NULL;
       staff->value.staff.numsamples += cnr->length;
     }
   else
     {
       cnr->next = NULL;
+      cnr->note = NULL;
       return 0;
     }
   expecting = TOK_NULL;
@@ -135,7 +141,7 @@ parse_staff ()
   return 0;
 }
 
-int
+static int
 start ()
 {
 
@@ -156,7 +162,6 @@ parse_cur_dats_t (dats_t * const t)
     {
       ERROR ("%d local errors generated\n", local_errors);
       global_errors += local_errors;
-      //clean_all_symrec_t_cur_dats_t(d);
       local_errors = 0;
       return 1;
     }

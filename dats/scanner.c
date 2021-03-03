@@ -35,7 +35,7 @@ print_all_list_n_r (list_n_r * nr)
       switch (p->type)
 	{
 	case SYM_NOTE:
-	  printf ("NOTE length: %u frequency: %f\n", p->length, p->frequency);
+	  printf ("NOTE length: %u frequency: %f\n", p->length, p->note->frequency);
 	  break;
 	case SYM_REST:
 	  printf ("REST length: %u\n", p->length);
@@ -126,6 +126,7 @@ clean_all_symrec_t_all_dats_t ()
 	      for (list_n_r * nr = p->value.staff.nr; nr != NULL;)
 		{
 		  tmp = nr->next;
+		  if (nr->type==SYM_NOTE) free(nr->note);
 		  free (nr);
 		  nr = tmp;
 		}
