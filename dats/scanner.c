@@ -130,7 +130,7 @@ clean_all_symrec_t_all_dats_t ()
               for (list_n_r * nr = p->value.staff.nr; nr != NULL;)
                 {
                   tmp = nr->next;
-                  if (nr->type == SYM_NOTE)
+                  if (nr->type == SYM_NOTE && nr != NULL)
                     free (nr->note);
                   free (nr);
                   nr = tmp;
@@ -277,7 +277,11 @@ w:
             t->sym_table = s;
             return TOK_STAFF;
           }
-        else if (expecting == TOK_NOTE)
+        else if ((buff[0] >= 'a' && buff[0] <= 'g') &&
+                 (((buff[1] == '#' || buff[1] == 'b')
+                   && (buff[2] >= '0' && buff[2] <= '9')) || (buff[1] >= '0'
+                                                              && buff[1] <=
+                                                              '9')))
           {
             switch (buff[0])
               {
@@ -310,7 +314,7 @@ w:
 
               }
             if ((buff[1] == '#' || buff[1] == 'b')
-                && (buff[2] >= '0' && buff[2] <= '9') && !buff[3])
+                && (buff[2] >= '0' && buff[2] <= '9'))
               {
                 switch (buff[1])
                   {
@@ -328,7 +332,7 @@ w:
                   ERROR ("Warning: non numeric character/s %s\n", end);
                 return TOK_NOTE;
               }
-            else if ((buff[1] >= '0' && buff[1] <= '9') && !buff[2])
+            else if ((buff[1] >= '0' && buff[1] <= '9'))
               {
                 char *end;
                 tok_num *= pow (2.0, strtof (buff + 1, &end));
@@ -476,8 +480,11 @@ token_t_to_str (const token_t t)
       return "'n'";
     case TOK_R:
       return "'r'";
+    case TOK_NOTE:
+      return "note";
     default:
       REPORT ("Unknown token\n");
+      printf ("%d\n", t);
       return __FILE__;
 
     }

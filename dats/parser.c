@@ -32,6 +32,7 @@ static symrec_t *staff;
 static list_n_r *cnr;
 int local_errors = 0;           /* count of errors generated single dats file */
 int global_errors = 0;          /* total count generated errors from all dats file */
+int rule_match = 0;
 dats_t *d;
 
 /* Returns 0 if success. Non-zero if failed. */
@@ -52,6 +53,7 @@ parse_notes_rests ()
           tok_num = 120.0;
         }
       tok_bpm = tok_num;
+      rule_match = 1;
     }
 
   else if (tok == TOK_N)
@@ -65,9 +67,9 @@ parse_notes_rests ()
 
       cnr->length = (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
       staff->value.staff.numsamples += cnr->length;
-      expecting = TOK_NOTE;
       tok = read_next_tok_cur_dats_t (d);
-      if (tok != TOK_NOTE)
+
+      if (tok != TOK_NOTE && tok != TOK_NUM)
         {
           UNEXPECTED (tok, d);
         }
@@ -75,7 +77,9 @@ parse_notes_rests ()
       assert (n != NULL);
       n->frequency = tok_num;
       cnr->note = n;
+      rule_match = 1;
     }
+
   else if (tok == TOK_R)
     {
       cnr->type = SYM_REST;
@@ -85,15 +89,12 @@ parse_notes_rests ()
           UNEXPECTED (tok, d);
         }
       cnr->length = (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
-      cnr->note = NULL;
       staff->value.staff.numsamples += cnr->length;
+      rule_match = 1;
     }
   else
-    {
-      cnr->next = NULL;
-      cnr->note = NULL;
-      return 0;
-    }
+    return 0;
+
   expecting = TOK_NULL;
 
   tok = read_next_tok_cur_dats_t (d);
@@ -104,12 +105,16 @@ parse_notes_rests ()
   tok = read_next_tok_cur_dats_t (d);
   cnr->next = malloc (sizeof (list_n_r));
   cnr = cnr->next;
-  return parse_notes_rests ();
+  cnr->next = NULL;
+  cnr->note = NULL;
+  return 0;
 }
 
 int
 parse_staff ()
 {
+  int ret;
+  tok_bpm = 120.0;              //default
   if (tok != TOK_STAFF)
     {
       UNEXPECTED (tok, d);
@@ -130,8 +135,14 @@ parse_staff ()
     }
 
   tok = read_next_tok_cur_dats_t (d);
-  if (parse_notes_rests ())
-    return 1;
+  do
+    {
+      rule_match = 0;
+      ret = parse_notes_rests ();
+      if (ret)
+        return ret;
+    }
+  while (rule_match);
 
   if (tok != TOK_RCURLY_BRACE)
     {

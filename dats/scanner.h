@@ -50,7 +50,7 @@ EXTERN dats_t *dats_files;
     return 1;\
    }
 #define WARNING(str) \
-       ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s:%d:%d \x1b[1;31mwarning\x1b[0m: %s\n",\
+       ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s:%d:%d \x1b[1;31mwarning\x1b[0m: %s",\
      __FILE__,__LINE__, __func__,d->fname, line_token_found,\
      column_token_found, str)
 
@@ -63,7 +63,7 @@ EXTERN dats_t *dats_files;
     return 1; \
    }
 #define REPORT(...) \
-   ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s\n",__FILE__, __LINE__,\
+   ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s",__FILE__, __LINE__,\
    __func__, __VA_ARGS__)
 
 

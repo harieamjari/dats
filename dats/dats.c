@@ -159,7 +159,6 @@ process_args (const int argc, char *const *argv)
           p->numsamples = 0;
           p->pcm_s16le = NULL;
 
-          tok_bpm = 120.0;
           /*
              symrec_t *t = malloc (sizeof (symrec_t));
              assert (t != NULL);
