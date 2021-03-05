@@ -8,6 +8,7 @@ enum token_t
 {
   TOK_STAFF,
   TOK_TRACK,
+  TOK_MASTER,
   TOK_BPM,
   TOK_REPEAT,
   TOK_LCURLY_BRACE,

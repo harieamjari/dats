@@ -5,7 +5,7 @@ OBJ := dats.o parser.o scanner.o
 all : dats
 
 dats : $(OBJ)
-	$(CC) $(CFLAGS) $^ -L../wav -lm -lwav -o $@
+	$(CC) $(CFLAGS) $^ -L../libwav -lm -lwav -o $@
 
 
 $(OBJ) :%.o:%.c $(wildcard *.h)

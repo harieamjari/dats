@@ -110,7 +110,7 @@ parse_notes_rests ()
   return 0;
 }
 
-int
+static int
 parse_staff ()
 {
   int ret;
@@ -138,9 +138,8 @@ parse_staff ()
   do
     {
       rule_match = 0;
-      ret = parse_notes_rests ();
-      if (ret)
-        return ret;
+      if (parse_notes_rests ())
+        return 1;
     }
   while (rule_match);
 
@@ -150,15 +149,16 @@ parse_staff ()
 
     }
   //cnr->next = NULL;
-  tok = read_next_tok_cur_dats_t (d);
-  if (tok != TOK_EOF)
-    {
-      ERROR ("num parser %d\n", staff->value.staff.numsamples);
-      print_all_list_n_r (staff->value.staff.nr);
-      return parse_staff ();
-    }
+  tok = read_next_tok_cur_dats_t (d);   /*
+                                           if (tok != TOK_EOF)
+                                           {
+                                           ERROR ("num parser %d\n", staff->value.staff.numsamples);
+                                           print_all_list_n_r (staff->value.staff.nr);
+                                           return parse_staff ();
+                                           } */
   ERROR ("num parser %d\n", staff->value.staff.numsamples);
   print_all_list_n_r (staff->value.staff.nr);
+  rule_match = 1;
   return 0;
 }
 
@@ -167,8 +167,24 @@ start ()
 {
 
   tok = read_next_tok_cur_dats_t (d);
-  if (parse_staff ())
-    return 1;
+  switch (tok)
+    {
+    case TOK_STAFF:
+      do
+        {
+          rule_match = 0;
+          if (parse_staff ())
+            return 1;
+        }
+      while (tok == TOK_STAFF);
+      return local_errors;
+    case TOK_MASTER:
+    case TOK_EOF:
+      return local_errors;
+    default:
+      UNEXPECTED (tok, d);
+    }
+
   return local_errors;
 }
 

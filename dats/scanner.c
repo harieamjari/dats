@@ -359,8 +359,12 @@ w:
           {
             return TOK_R;
           }
+        else if (!strcmp ("track", buff))
+          return TOK_TRACK;
         else if (!strcmp ("bpm", buff))
           return TOK_BPM;
+        else if (!strcmp ("master", buff))
+          return TOK_MASTER;
         else
           {
             symrec_t *s = getsym (t, buff);
@@ -482,6 +486,10 @@ token_t_to_str (const token_t t)
       return "'r'";
     case TOK_NOTE:
       return "note";
+    case TOK_MASTER:
+      return "master";
+    case TOK_TRACK:
+      return "track";
     default:
       REPORT ("Unknown token\n");
       printf ("%d\n", t);
