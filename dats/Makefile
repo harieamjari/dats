@@ -5,7 +5,7 @@ OBJ := dats.o parser.o scanner.o
 all : dats
 
 dats : $(OBJ)
-	$(CC) $(CFLAGS) $^ -lm -o $@
+	$(CC) $(CFLAGS) $^ -L../wav -lm -lwav -o $@
 
 
 $(OBJ) :%.o:%.c $(wildcard *.h)
@@ -18,5 +18,7 @@ clean:
 test : dats
 	./dats -i ../test/t.dats -o f
 	./dats -i ../test/terr.dats -i ../test/t.dats  -o f
+install:  dats
+	cp $^ $(PREFIX)/bin
 
 
