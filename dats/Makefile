@@ -1,7 +1,7 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -O0 -ggdb3 -fsanitize=address -fsanitize=undefined 
-OBJ := dats.o parser.o scanner.o
+CFLAGS = -Wall -Wextra -std=c99 -O0 -ggdb3 -fsanitize=address -fsanitize=undefined 
+OBJ := dats.o parser.o scanner.o semantic.o
 all : dats
 
 dats : $(OBJ)

@@ -23,6 +23,8 @@
 #include <assert.h>
 #include <string.h>
 #include <math.h>
+
+#define DEFINE_SCANNER_VARIABLES
 #include "scanner.h"
 
 dats_t *dats_files = NULL;
@@ -168,8 +170,6 @@ getsym (const dats_t * const t, char const *const id)
   for (symrec_t * p = t->sym_table->next; p != NULL; p = n)
     {
       n = p->next;
-      if (p->type == TOK_NUM)
-        continue;
       if (p->value.staff.identifier == NULL)
         continue;
       if (!strcmp (p->value.staff.identifier, id))
@@ -178,6 +178,27 @@ getsym (const dats_t * const t, char const *const id)
         return p;
     }
   return NULL;
+
+}
+
+void
+appendsym (symrec_t * l, symrec_t * a)
+{
+  symrec_t *cur = l;
+  while (cur != NULL)
+    cur = cur->next;
+  a->next = NULL;
+  cur->next = a;
+}
+
+symrec_t *
+symrec_tcpy (symrec_t * const s)
+{
+  symrec_t *copy = malloc (sizeof (symrec_t));
+  assert (copy != NULL);
+  *copy = *s;
+  copy->next = NULL;
+  return copy;
 
 }
 
@@ -309,7 +330,7 @@ w:
               default:
                 ERROR
                   ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
-                   t->fname, t->line, t->column, buff);
+                   t->fname, line_token_found, column_token_found, buff);
                 return TOK_ERR;
 
               }
@@ -343,7 +364,7 @@ w:
             else
               ERROR
                 ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
-                 t->fname, t->line, t->column, buff);
+                 t->fname, line_token_found, column_token_found, buff);
             return TOK_ERR;
 
           }
@@ -360,11 +381,32 @@ w:
             return TOK_R;
           }
         else if (!strcmp ("track", buff))
-          return TOK_TRACK;
+          {
+            master_t *m = malloc (sizeof (master_t));
+            assert (m != NULL);
+            m->track = NULL;
+            if (t->sym_table->type != TOK_MASTER)
+              {
+                ERROR ("%s:%d:%d \x1b[1;31merror\x1b[0m: illegal syntax\n",
+                       t->fname, line_token_found, column_token_found);
+                return TOK_ERR;
+              }
+            m->next = t->sym_table->value.master;
+            t->sym_table->value.master = m;
+
+            return TOK_TRACK;
+          }
         else if (!strcmp ("bpm", buff))
           return TOK_BPM;
         else if (!strcmp ("master", buff))
-          return TOK_MASTER;
+          {
+            /* put symbol */
+            symrec_t *s = malloc (sizeof (symrec_t));
+            s->value.master = NULL;
+            s->next = t->sym_table;
+            t->sym_table = s;
+            return TOK_MASTER;
+          }
         else
           {
             symrec_t *s = getsym (t, buff);
@@ -390,25 +432,26 @@ w:
                   }
               }
             else
-              {
-                int length = snprintf (NULL, 0,
-                                       "[%s:%d @ %p] %s:%d:%d: ",
-                                       __FILE__,
-                                       __LINE__,
-                                       read_next_tok_cur_dats_t,
-                                       t->fname,
-                                       t->line,
-                                       t->column);
-                ERROR
-                  ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d: \x1b[1;31merror\x1b[0m: redefinition of \"%s\"\n"
-                   "%*s previous definition at %d:%d\n",
-                   __FILE__, __LINE__,
-                   read_next_tok_cur_dats_t,
-                   t->fname, line_token_found,
-                   column_token_found, buff,
-                   length + 5, "note:", s->line, s->column);
+              {                 /*
+                                   int length = snprintf (NULL, 0,
+                                   "[%s:%d @ %p] %s:%d:%d: ",
+                                   __FILE__,
+                                   __LINE__,
+                                   read_next_tok_cur_dats_t,
+                                   t->fname,
+                                   t->line,
+                                   t->column);
+                                   ERROR
+                                   ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d: \x1b[1;31merror\x1b[0m: redefinition of \"%s\"\n"
+                                   "%*s previous definition at %d:%d\n",
+                                   __FILE__, __LINE__,
+                                   read_next_tok_cur_dats_t,
+                                   t->fname, line_token_found,
+                                   column_token_found, buff,
+                                   length + 5, "note:", s->line, s->column); */
+                tok_identifier = strdup (buff);
 
-                return TOK_ERR;
+                return TOK_IDENTIFIER;
               }
           }
       }

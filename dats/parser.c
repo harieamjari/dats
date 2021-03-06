@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#define SCANNER_EXTERN
 #include "scanner.h"
 
 extern void print_all_list_n_r (list_n_r * nr);
@@ -30,8 +29,6 @@ extern void print_all_list_n_r (list_n_r * nr);
 static token_t tok;
 static symrec_t *staff;
 static list_n_r *cnr;
-int local_errors = 0;           /* count of errors generated single dats file */
-int global_errors = 0;          /* total count generated errors from all dats file */
 int rule_match = 0;
 dats_t *d;
 
@@ -113,12 +110,7 @@ parse_notes_rests ()
 static int
 parse_staff ()
 {
-  int ret;
   tok_bpm = 120.0;              //default
-  if (tok != TOK_STAFF)
-    {
-      UNEXPECTED (tok, d);
-    }
   staff = d->sym_table;
   staff->value.staff.nr = malloc (sizeof (list_n_r));
   cnr = staff->value.staff.nr;
@@ -148,14 +140,7 @@ parse_staff ()
       UNEXPECTED (tok, d);
 
     }
-  //cnr->next = NULL;
-  tok = read_next_tok_cur_dats_t (d);   /*
-                                           if (tok != TOK_EOF)
-                                           {
-                                           ERROR ("num parser %d\n", staff->value.staff.numsamples);
-                                           print_all_list_n_r (staff->value.staff.nr);
-                                           return parse_staff ();
-                                           } */
+  tok = read_next_tok_cur_dats_t (d);
   ERROR ("num parser %d\n", staff->value.staff.numsamples);
   print_all_list_n_r (staff->value.staff.nr);
   rule_match = 1;
@@ -163,22 +148,97 @@ parse_staff ()
 }
 
 static int
-start ()
+parse_track ()
+{
+  if (tok == TOK_TRACK)
+    {
+
+      do
+        {
+          tok = read_next_tok_cur_dats_t (d);
+          if (tok != TOK_IDENTIFIER)
+            {
+              break;
+            }
+
+          symrec_t *istaff = getsym (d, tok_identifier);
+          if (staff == NULL)
+            {
+              C_ERROR ("undefined reference to \"%s\"", tok_identifier);
+              free (tok_identifier);
+              tok_identifier = NULL;
+              return 1;
+
+            }
+          free (tok_identifier);
+          tok_identifier = NULL;
+          if (staff->type != TOK_STAFF)
+            {
+              local_errors++;
+              C_ERROR ("Dats forbids the use of non staff in track\n");
+              return 1;
+            }
+
+          appendsym (d->sym_table->value.master->track, symrec_tcpy (istaff));
+        }
+      while (tok == TOK_IDENTIFIER);
+      rule_match = 1;
+    }
+
+  if (tok != TOK_SEMICOLON)
+    UNEXPECTED (tok, d);
+  tok = read_next_tok_cur_dats_t (d);
+
+  return 0;
+
+}
+
+static int
+parse_master ()
 {
 
   tok = read_next_tok_cur_dats_t (d);
+  if (tok != TOK_LCURLY_BRACE)
+    {
+      UNEXPECTED (tok, d);
+    }
+  tok = read_next_tok_cur_dats_t (d);
+  do
+    {
+      rule_match = 0;
+      if (parse_track ())
+        return 1;
+    }
+  while (rule_match);
+
+  if (tok != TOK_RCURLY_BRACE)
+    UNEXPECTED (tok, d);
+
+  return 0;
+}
+
+static int
+start ()
+{
+
   switch (tok)
     {
     case TOK_STAFF:
       do
         {
-          rule_match = 0;
           if (parse_staff ())
             return 1;
         }
       while (tok == TOK_STAFF);
       return local_errors;
     case TOK_MASTER:
+      do
+        {
+          if (parse_master ())
+            return 1;
+        }
+      while (tok == TOK_MASTER);
+      return local_errors;
     case TOK_EOF:
       return local_errors;
     default:
@@ -192,19 +252,24 @@ start ()
 int
 parse_cur_dats_t (dats_t * const t)
 {
+  local_errors = 0;
   d = t;
 
-  /* Pass 1: Syntax analysis */
-  if (start ())
+  tok = read_next_tok_cur_dats_t (d);
+  while (1)
     {
-      ERROR ("%d local errors generated\n", local_errors);
-      global_errors += local_errors;
-      local_errors = 0;
-      return 1;
+      if (start ())
+        {
+          ERROR ("%d local errors generated\n", local_errors);
+          global_errors += local_errors;
+          local_errors = 0;
+          return 1;
+        }
+      if (tok == TOK_EOF)
+        break;
     }
   printf ("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s: parsing successful\n",
           __FILE__, __LINE__, __func__, d->fname);
 
-  local_errors = 0;
-  return 0;
+  return local_errors;
 }

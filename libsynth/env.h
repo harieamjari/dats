@@ -55,6 +55,12 @@ struct list_n_r {
 };
 
 typedef struct symrec_t symrec_t;
+typedef struct master_t master_t;
+
+struct master_t {
+  symrec_t *track; /* track is composed of series of type TOK_STAFF linked together */
+  master_t *next; /* next track */
+};
 struct symrec_t
 {
   token_t type;
@@ -73,6 +79,7 @@ struct symrec_t
       char *identifier;
       float val;
     } env;			/* environment variables */
+    master_t *master; /* a chain of track */
   } value;
 
   symrec_t *next;

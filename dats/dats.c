@@ -28,11 +28,17 @@
 
 #include <sys/stat.h>
 
-#define SCANNER_EXTERN
 #include "scanner.h"
 
+#include "libwav/wav.h"
+
+/* Performs syntatic analysis */
 extern int parse_cur_dats_t (dats_t * const t);
-extern int global_errors;
+
+/* Performs semantic analysis */
+extern int semantic_cur_dats_t (dats_t * const t);
+
+
 FILE *wav_out;
 /* process_args returns the value 0 if sucesss and nonzero if
  * failed. */
@@ -197,10 +203,21 @@ main (int argc, char **argv)
     return 1;
   for (dats_t * p = dats_files; p != NULL; p = p->next)
     {
-      parse_cur_dats_t (p);
+      if (parse_cur_dats_t (p))
+        continue;
+      semantic_cur_dats_t (p);
     }
   if (global_errors)
     goto err;
+
+  if (tok_master == 0)
+    {
+      REPORT ("error: No definition of master\n");
+      goto err;
+    }
+  else if (tok_master > 1)
+    goto err;
+
   for (dats_t * p = dats_files; p != NULL; p = p->next)
     {
       for (symrec_t * s = p->sym_table; s != NULL; s = s->next)
@@ -212,7 +229,8 @@ main (int argc, char **argv)
     }
 err:
   if (global_errors)
-    ERROR ("%d global errors generated\n", global_errors);
+    ERROR ("%d global errors generated %d local\n", global_errors,
+           local_errors);
 
   fclose (wav_out);
   clean_all_symrec_t_all_dats_t ();

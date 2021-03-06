@@ -1,6 +1,6 @@
 # Dats
 
-Compose a music in a text editor.
+A digital audio text station.
 
 ```
 staff pol {
@@ -8,12 +8,27 @@ staff pol {
   n 4 d4;
   n 4 e4;
 }
+
+master {
+ track pol;
+}
 ```
 Compile dats file as `dats -i file.dats`
 
+# Building
+
+Building Dats requires no dependencies and should compile on Windows and \*nix operating
+systems, provided that the compiler is C99 compatible.
+
+## \*nix
+
+```
+make && make install && make test
+```
+
 ### TODO
 
-- libpsg - Programmed sound generator.
+- libsynth - Provides synthesizers.
 
-- libwavfilter - library for manipulating raw PCM s16le data.
+- libfilter - Provides filters for manipulating raw PCM s16le data.
 
