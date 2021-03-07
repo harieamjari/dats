@@ -163,7 +163,14 @@ static int
 parse_track ()
 {
   if (tok == TOK_TRACK)
-  {
+    {
+      symrec_t *a = getsym (d, "master");
+      {
+        master_t *m = malloc (sizeof (master_t));
+        m->next = a->value.master;
+        m->track = NULL;
+        a->value.master = m;
+      }
       do
         {
           tok = read_next_tok_cur_dats_t (d);
@@ -190,23 +197,27 @@ parse_track ()
               return 1;
             }
 
-	  /* append staff to track */
-	  symrec_t *m = getsym(d, "master");
-	  printf("[debug] getsym master %p\n", m);
-	  symrec_t *right = m->value.master->track;
+          /* append staff to track */
+          symrec_t *m = getsym (d, "master");
+          printf ("[debug] getsym master %p\n", m);
+          symrec_t *right = m->value.master->track;
 
-	  if (right == NULL) m->value.master->track = m;
-	  else{
+          if (right == NULL)
+            m->value.master->track = symrec_tcpy (s);
+          else
+            {
 
-          for (symrec_t *a = m->value.master->track; 1; a=a->next)
-               if (a->next == NULL) {
-		a->next = symrec_tcpy (s);
-		printf("[append staff] %s to head %p\n", a->value.staff.identifier,
-		m->value.master->track);
-		//->next = NULL;
-		break;
-	   }
-        }}
+              for (symrec_t * a = m->value.master->track; 1; a = a->next)
+                if (a->next == NULL)
+                  {
+                    a->next = symrec_tcpy (s);
+                    printf ("[append staff] %s to head %p\n",
+                            a->value.staff.identifier,
+                            m->value.master->track);
+                    break;
+                  }
+            }
+        }
       while (1);
       rule_match = 1;
     }
@@ -216,29 +227,20 @@ parse_track ()
   if (tok != TOK_SEMICOLON)
     UNEXPECTED (tok, d);
 
-  /* insert track to master */
-  symrec_t *a = getsym(d, "master");
-  printf("track add at %p\n", a->value.master->track);
-  master_t *m = malloc(sizeof(master_t));
-  m->next = a->value.master;
-  m->track = NULL;
-  a->value.master = m;
   tok = read_next_tok_cur_dats_t (d);
 
   return 0;
-
 }
 
 static int
 parse_master ()
 {
-  symrec_t *m= malloc(sizeof(symrec_t));
+  /* insert one master */
+  symrec_t *m = malloc (sizeof (symrec_t));
   m->type = TOK_MASTER;
   m->line = line_token_found;
   m->column = column_token_found;
-  m->value.master = malloc(sizeof(master_t));
-  m->value.master->track = NULL;
-  m->value.master->next = NULL;
+  m->value.master = NULL;
   m->next = d->sym_table;
   d->sym_table = m;
 

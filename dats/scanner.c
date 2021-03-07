@@ -561,8 +561,7 @@ print_master_cur_symrec_t (const symrec_t * const t)
       printf ("MASTER track %d: ", track++);
       for (symrec_t * s = m->track; s != NULL; s = s->next)
         {
-          printf ("a %s %s ", s->value.staff.identifier,
-                  s->next->value.staff.identifier);
+          printf ("%s ", s->value.staff.identifier);
         }
       putchar ('\n');
     }
@@ -579,6 +578,9 @@ print_all_symrec_t_cur_dats_t (const dats_t * const t)
       n = p->next;
       switch (p->type)
         {
+        case TOK_MASTER:
+          printf ("  %-20s    %-20s\n", "[none]", "master");
+          break;
         case TOK_STAFF:
           printf ("  %-20s    %-20s\n",
                   p->value.staff.identifier, token_t_to_str (TOK_STAFF));

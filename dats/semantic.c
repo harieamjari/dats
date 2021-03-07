@@ -47,7 +47,8 @@ semantic_cur_dats_t (dats_t * const t)
         {
           if (p->type != TOK_STAFF)
             continue;
-          if (!strcmp (p->value.staff.identifier, r->value.staff.identifier))
+          if (!strcmp (p->value.staff.identifier, r->value.staff.identifier)
+              && p != r)
             {
 
               int length = snprintf (NULL, 0,
@@ -62,9 +63,9 @@ semantic_cur_dats_t (dats_t * const t)
                  "%*s previous definition at %d:%d\n",
                  __FILE__, __LINE__,
                  semantic_cur_dats_t,
-                 t->fname, p->line,
-                 p->column, r->value.staff.identifier,
-                 length + 5, "note:", r->line, r->column);
+                 t->fname, r->line,
+                 r->column, r->value.staff.identifier,
+                 length + 5, "note:", p->line, p->column);
               global_errors++;
             }
         }

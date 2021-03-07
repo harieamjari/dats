@@ -205,7 +205,7 @@ main (int argc, char **argv)
     {
       if (parse_cur_dats_t (p))
         continue;
-      print_all_symrec_t_cur_dats_t(p);
+      print_all_symrec_t_cur_dats_t (p);
       semantic_cur_dats_t (p);
     }
   if (global_errors)
