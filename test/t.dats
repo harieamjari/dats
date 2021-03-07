@@ -1,4 +1,4 @@
-staff ks{
+staff apple{
 bpm = 2;
 
 n 82 cb9;
@@ -10,13 +10,14 @@ r 8;
 n 3 f7;
 }
 
-staff rest_24_measure{
+staff pizza{
 n 83 cb1;
 r 2;
 }
 
 master {
-  track ks;
+  track apple apple;
+  track pizza apple;
 
 }
 

@@ -57,7 +57,7 @@ struct list_n_r {
 typedef struct symrec_t symrec_t;
 typedef struct master_t master_t;
 
-struct master_t {
+struct master_t{
   symrec_t *track; /* track is composed of series of type TOK_STAFF linked together */
   master_t *next; /* next track */
 };

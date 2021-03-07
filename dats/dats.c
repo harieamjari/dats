@@ -205,6 +205,7 @@ main (int argc, char **argv)
     {
       if (parse_cur_dats_t (p))
         continue;
+      print_all_symrec_t_cur_dats_t(p);
       semantic_cur_dats_t (p);
     }
   if (global_errors)
@@ -222,9 +223,10 @@ main (int argc, char **argv)
     {
       for (symrec_t * s = p->sym_table; s != NULL; s = s->next)
         {
-          if (s->type != TOK_STAFF)
-            continue;
-          process_nr (s);
+          if (s->type == TOK_MASTER)
+            print_master_cur_symrec_t (s);
+          else if (s->type != TOK_STAFF)
+            process_nr (s);
         }
     }
 err:

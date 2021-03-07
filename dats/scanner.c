@@ -167,6 +167,10 @@ symrec_t *
 getsym (const dats_t * const t, char const *const id)
 {
   symrec_t *n;
+  if (!strcmp (id, "master"))
+    for (symrec_t * p = t->sym_table; p != NULL; p = p->next)
+      if (p->type == TOK_MASTER)
+        return p;
   for (symrec_t * p = t->sym_table->next; p != NULL; p = n)
     {
       n = p->next;
@@ -184,11 +188,10 @@ getsym (const dats_t * const t, char const *const id)
 void
 appendsym (symrec_t * l, symrec_t * a)
 {
-  symrec_t *cur = l;
-  while (cur != NULL)
-    cur = cur->next;
+  while (l != NULL)
+    l = l->next;
   a->next = NULL;
-  cur->next = a;
+  l = a;
 }
 
 symrec_t *
@@ -196,10 +199,11 @@ symrec_tcpy (symrec_t * const s)
 {
   symrec_t *copy = malloc (sizeof (symrec_t));
   assert (copy != NULL);
-  *copy = *s;
+  //*copy = *s;
+  copy->type = s->type;
+  copy->value.staff.identifier = s->value.staff.identifier;
   copy->next = NULL;
   return copy;
-
 }
 
 /*---------.
@@ -286,16 +290,16 @@ w:
         //puts (buff);
         if (!strcmp ("staff", buff))
           {
-            /* put symbol */
-            symrec_t *s = malloc (sizeof (symrec_t));
-            assert (s != NULL);
-            s->type = TOK_STAFF;        //0 = staff
-            s->value.staff.identifier = NULL;
-            s->value.staff.numsamples = 0;
-            s->value.staff.pcm_s16le = NULL;
-            s->value.staff.nr = NULL;
-            s->next = t->sym_table;
-            t->sym_table = s;
+            /* put symbol 
+               symrec_t *s = malloc (sizeof (symrec_t));
+               assert (s != NULL);
+               s->type = TOK_STAFF;        //0 = staff
+               s->value.staff.identifier = NULL;
+               s->value.staff.numsamples = 0;
+               s->value.staff.pcm_s16le = NULL;
+               s->value.staff.nr = NULL;
+               s->next = t->sym_table;
+               t->sym_table = s; */
             return TOK_STAFF;
           }
         else if ((buff[0] >= 'a' && buff[0] <= 'g') &&
@@ -381,18 +385,18 @@ w:
             return TOK_R;
           }
         else if (!strcmp ("track", buff))
-          {
-            master_t *m = malloc (sizeof (master_t));
-            assert (m != NULL);
-            m->track = NULL;
-            if (t->sym_table->type != TOK_MASTER)
-              {
-                ERROR ("%s:%d:%d \x1b[1;31merror\x1b[0m: illegal syntax\n",
-                       t->fname, line_token_found, column_token_found);
-                return TOK_ERR;
-              }
-            m->next = t->sym_table->value.master;
-            t->sym_table->value.master = m;
+          {                     /*
+                                   master_t *m = malloc (sizeof (master_t));
+                                   assert (m != NULL);
+                                   m->track = NULL;
+                                   if (t->sym_table->type != TOK_MASTER)
+                                   {
+                                   ERROR ("%s:%d:%d \x1b[1;31merror\x1b[0m: illegal syntax\n",
+                                   t->fname, line_token_found, column_token_found);
+                                   return TOK_ERR;
+                                   }
+                                   m->next = t->sym_table->value.master;
+                                   t->sym_table->value.master = m; */
 
             return TOK_TRACK;
           }
@@ -400,39 +404,42 @@ w:
           return TOK_BPM;
         else if (!strcmp ("master", buff))
           {
-            /* put symbol */
-            symrec_t *s = malloc (sizeof (symrec_t));
-            s->value.master = NULL;
-            s->next = t->sym_table;
-            t->sym_table = s;
+            /* put symbol 
+               symrec_t *s = malloc (sizeof (symrec_t));
+               s->type = TOK_MASTER;
+               s->value.master = NULL;
+               s->next = t->sym_table;
+               t->sym_table = s; */
             return TOK_MASTER;
           }
         else
-          {
-            symrec_t *s = getsym (t, buff);
-            if (s == NULL)
-              {
-                /* if the name at buff is new (it doesn't have a previous definition.)
-                 */
-                if (t->sym_table->type == TOK_STAFF)
-                  {
-                    t->sym_table->line = line_token_found;
-                    t->sym_table->column = column_token_found;
-                    t->sym_table->value.staff.identifier = strdup (buff);
-                    assert (t->sym_table->value.staff.identifier != NULL);
-                    return TOK_IDENTIFIER;
-                  }
-                else
-                  {
-                    ERROR
-                      ("At %s:%d %s: \x1b[1;31minternal error\x1b[0m\n"
-                       "Please report this error on github.com/harieamjari/dats\n",
-                       __FILE__, __LINE__, __func__);
-                    exit (1);
-                  }
-              }
-            else
-              {                 /*
+          {                     /*
+                                   symrec_t *s = getsym (t, buff);
+                                   if (s == NULL)
+                                   {
+                                   f the name at buff is new (it doesn't have a previous definition.)
+
+                                   if (t->sym_table->type == TOK_STAFF)
+                                   {
+                                   t->sym_table->line = line_token_found;
+                                   t->sym_table->column = column_token_found;
+                                   t->sym_table->value.staff.identifier = strdup (buff);
+                                   assert (t->sym_table->value.staff.identifier != NULL);
+                                   return TOK_IDENTIFIER;
+                                   }
+                                   else
+                                   {
+                                   tok_identifier = strdup(buff);
+                                   ERROR
+                                   ("At %s:%d %s: \x1b[1;31minternal error\x1b[0m\n"
+                                   "Please report this error on github.com/harieamjari/dats\n",
+                                   __FILE__, __LINE__, __func__);
+                                   exit (1);
+                                   return TOK_IDENTIFIER;
+                                   }
+                                   }
+                                   else
+                                   {            
                                    int length = snprintf (NULL, 0,
                                    "[%s:%d @ %p] %s:%d:%d: ",
                                    __FILE__,
@@ -449,10 +456,9 @@ w:
                                    t->fname, line_token_found,
                                    column_token_found, buff,
                                    length + 5, "note:", s->line, s->column); */
-                tok_identifier = strdup (buff);
+            tok_identifier = strdup (buff);
 
-                return TOK_IDENTIFIER;
-              }
+            return TOK_IDENTIFIER;
           }
       }
     case '0':
@@ -544,6 +550,24 @@ token_t_to_str (const token_t t)
 
 /* prints the symbol table of the current dats_t* t
  */
+void
+print_master_cur_symrec_t (const symrec_t * const t)
+{
+  if (t->type != TOK_MASTER)
+    return;
+  int track = 1;
+  for (master_t * m = t->value.master; m != NULL; m = m->next)
+    {
+      printf ("MASTER track %d: ", track++);
+      for (symrec_t * s = m->track; s != NULL; s = s->next)
+        {
+          printf ("a %s %s ", s->value.staff.identifier,
+                  s->next->value.staff.identifier);
+        }
+      putchar ('\n');
+    }
+}
+
 void
 print_all_symrec_t_cur_dats_t (const dats_t * const t)
 {

@@ -32,6 +32,8 @@ EXTERN token_t read_next_tok_cur_dats_t (dats_t * const t);
 
 EXTERN void print_all_symrec_t_cur_dats_t (const dats_t * const t);
 
+EXTERN void print_master_cur_symrec_t(const symrec_t *const t);
+
 EXTERN int process_nr (symrec_t * s);
 
 EXTERN int line_token_found;

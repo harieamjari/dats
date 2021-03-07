@@ -111,15 +111,28 @@ static int
 parse_staff ()
 {
   tok_bpm = 120.0;              //default
-  staff = d->sym_table;
-  staff->value.staff.nr = malloc (sizeof (list_n_r));
-  cnr = staff->value.staff.nr;
-  cnr->next = NULL;
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_IDENTIFIER)
     {
       EXPECTING (TOK_IDENTIFIER, d);
     }
+  /* insert symrec_t */
+  staff = malloc (sizeof (symrec_t));
+  assert (staff != NULL);
+  staff->type = TOK_STAFF;
+  staff->line = line_token_found;
+  staff->column = column_token_found;
+  staff->value.staff.identifier = strdup (tok_identifier);
+  staff->value.staff.numsamples = 0;
+  staff->value.staff.pcm_s16le = NULL;
+  staff->value.staff.nr = malloc (sizeof (list_n_r));
+  assert (staff->value.staff.nr != NULL);
+  staff->next = d->sym_table;
+  d->sym_table = staff;
+
+  cnr = staff->value.staff.nr;
+  cnr->next = NULL;
+
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_LCURLY_BRACE)
     {
@@ -140,7 +153,6 @@ parse_staff ()
       UNEXPECTED (tok, d);
 
     }
-  tok = read_next_tok_cur_dats_t (d);
   ERROR ("num parser %d\n", staff->value.staff.numsamples);
   print_all_list_n_r (staff->value.staff.nr);
   rule_match = 1;
@@ -151,8 +163,7 @@ static int
 parse_track ()
 {
   if (tok == TOK_TRACK)
-    {
-
+  {
       do
         {
           tok = read_next_tok_cur_dats_t (d);
@@ -161,32 +172,57 @@ parse_track ()
               break;
             }
 
-          symrec_t *istaff = getsym (d, tok_identifier);
-          if (staff == NULL)
+          symrec_t *s = getsym (d, tok_identifier);
+          if (s == NULL)
             {
-              C_ERROR ("undefined reference to \"%s\"", tok_identifier);
+              local_errors++;
+              C_ERROR ("undefined reference to \"%s\"\n", tok_identifier);
               free (tok_identifier);
               tok_identifier = NULL;
               return 1;
-
             }
           free (tok_identifier);
           tok_identifier = NULL;
-          if (staff->type != TOK_STAFF)
+          if (s->type != TOK_STAFF)
             {
               local_errors++;
               C_ERROR ("Dats forbids the use of non staff in track\n");
               return 1;
             }
 
-          appendsym (d->sym_table->value.master->track, symrec_tcpy (istaff));
-        }
-      while (tok == TOK_IDENTIFIER);
+	  /* append staff to track */
+	  symrec_t *m = getsym(d, "master");
+	  printf("[debug] getsym master %p\n", m);
+	  symrec_t *right = m->value.master->track;
+
+	  if (right == NULL) m->value.master->track = m;
+	  else{
+
+          for (symrec_t *a = m->value.master->track; 1; a=a->next)
+               if (a->next == NULL) {
+		a->next = symrec_tcpy (s);
+		printf("[append staff] %s to head %p\n", a->value.staff.identifier,
+		m->value.master->track);
+		//->next = NULL;
+		break;
+	   }
+        }}
+      while (1);
       rule_match = 1;
     }
+  else
+    return 0;
 
   if (tok != TOK_SEMICOLON)
     UNEXPECTED (tok, d);
+
+  /* insert track to master */
+  symrec_t *a = getsym(d, "master");
+  printf("track add at %p\n", a->value.master->track);
+  master_t *m = malloc(sizeof(master_t));
+  m->next = a->value.master;
+  m->track = NULL;
+  a->value.master = m;
   tok = read_next_tok_cur_dats_t (d);
 
   return 0;
@@ -196,6 +232,15 @@ parse_track ()
 static int
 parse_master ()
 {
+  symrec_t *m= malloc(sizeof(symrec_t));
+  m->type = TOK_MASTER;
+  m->line = line_token_found;
+  m->column = column_token_found;
+  m->value.master = malloc(sizeof(master_t));
+  m->value.master->track = NULL;
+  m->value.master->next = NULL;
+  m->next = d->sym_table;
+  d->sym_table = m;
 
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_LCURLY_BRACE)
@@ -255,9 +300,9 @@ parse_cur_dats_t (dats_t * const t)
   local_errors = 0;
   d = t;
 
-  tok = read_next_tok_cur_dats_t (d);
   while (1)
     {
+      tok = read_next_tok_cur_dats_t (d);
       if (start ())
         {
           ERROR ("%d local errors generated\n", local_errors);
