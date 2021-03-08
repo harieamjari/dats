@@ -24,12 +24,11 @@
 
 #include "scanner.h"
 
-extern void print_all_list_n_r (list_n_r * nr);
+extern void print_all_nr_t (nr_t * nr);
 
 static token_t tok;
 static symrec_t *staff;
-static list_n_r *cnr;
-int rule_match = 0;
+static int rule_match = 0;
 dats_t *d;
 
 /* Returns 0 if success. Non-zero if failed. */
@@ -52,10 +51,13 @@ parse_notes_rests ()
       tok_bpm = tok_num;
       rule_match = 1;
     }
-
   else if (tok == TOK_N)
     {
+      nr_t *cnr = malloc (sizeof (nr_t));
+      assert (cnr != NULL);
       cnr->type = SYM_NOTE;
+      cnr->next = NULL;
+
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
         {
@@ -70,16 +72,34 @@ parse_notes_rests ()
         {
           UNEXPECTED (tok, d);
         }
+
       note_t *n = malloc (sizeof (note_t));
       assert (n != NULL);
       n->frequency = tok_num;
       cnr->note = n;
+
+      if (staff->value.staff.nr != NULL)
+        {
+          for (nr_t * p = staff->value.staff.nr; 1; p = p->next)
+            {
+              if (p->next == NULL)
+                {
+                  p->next = cnr;
+                  printf ("[debug] add note %p\n", cnr);
+                  break;
+                }
+            }
+        }
+      else
+        staff->value.staff.nr = cnr;
       rule_match = 1;
     }
-
   else if (tok == TOK_R)
     {
+      nr_t *cnr = malloc (sizeof (nr_t));
+      assert (cnr != NULL);
       cnr->type = SYM_REST;
+      cnr->next = NULL;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_NUM)
         {
@@ -87,12 +107,25 @@ parse_notes_rests ()
         }
       cnr->length = (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
       staff->value.staff.numsamples += cnr->length;
+      if (staff->value.staff.nr != NULL)
+        {
+          for (nr_t * p = staff->value.staff.nr; 1; p = p->next)
+            {
+              if (p->next == NULL)
+                {
+                  p->next = cnr;
+                  printf ("[debug] add rest %p\n", cnr);
+                  break;
+                }
+            }
+        }
+      else
+        staff->value.staff.nr = cnr;
       rule_match = 1;
     }
   else
     return 0;
 
-  expecting = TOK_NULL;
 
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_SEMICOLON)
@@ -100,10 +133,6 @@ parse_notes_rests ()
       EXPECTING (TOK_SEMICOLON, d);
     }
   tok = read_next_tok_cur_dats_t (d);
-  cnr->next = malloc (sizeof (list_n_r));
-  cnr = cnr->next;
-  cnr->next = NULL;
-  cnr->note = NULL;
   return 0;
 }
 
@@ -116,6 +145,7 @@ parse_staff ()
     {
       EXPECTING (TOK_IDENTIFIER, d);
     }
+  printf ("=== BEGIN STAFF === %s\n", tok_identifier);
   /* insert symrec_t */
   staff = malloc (sizeof (symrec_t));
   assert (staff != NULL);
@@ -123,15 +153,13 @@ parse_staff ()
   staff->line = line_token_found;
   staff->column = column_token_found;
   staff->value.staff.identifier = strdup (tok_identifier);
+  free (tok_identifier);
+  tok_identifier = NULL;
   staff->value.staff.numsamples = 0;
   staff->value.staff.pcm_s16le = NULL;
-  staff->value.staff.nr = malloc (sizeof (list_n_r));
-  assert (staff->value.staff.nr != NULL);
+  staff->value.staff.nr = NULL;
   staff->next = d->sym_table;
   d->sym_table = staff;
-
-  cnr = staff->value.staff.nr;
-  cnr->next = NULL;
 
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_LCURLY_BRACE)
@@ -151,10 +179,11 @@ parse_staff ()
   if (tok != TOK_RCURLY_BRACE)
     {
       UNEXPECTED (tok, d);
-
     }
+  puts ("=== END STAFF ===");
+/*
   ERROR ("num parser %d\n", staff->value.staff.numsamples);
-  print_all_list_n_r (staff->value.staff.nr);
+  print_all_nr_t (staff->value.staff.nr);*/
   rule_match = 1;
   return 0;
 }
@@ -175,9 +204,7 @@ parse_track ()
         {
           tok = read_next_tok_cur_dats_t (d);
           if (tok != TOK_IDENTIFIER)
-            {
-              break;
-            }
+            break;
 
           symrec_t *s = getsym (d, tok_identifier);
           if (s == NULL)
@@ -202,11 +229,8 @@ parse_track ()
           printf ("[debug] getsym master %p\n", m);
           symrec_t *right = m->value.master->track;
 
-          if (right == NULL)
-            m->value.master->track = symrec_tcpy (s);
-          else
+          if (right != NULL)
             {
-
               for (symrec_t * a = m->value.master->track; 1; a = a->next)
                 if (a->next == NULL)
                   {
@@ -217,6 +241,8 @@ parse_track ()
                     break;
                   }
             }
+          else
+            m->value.master->track = symrec_tcpy (s);
         }
       while (1);
       rule_match = 1;

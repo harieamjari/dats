@@ -10,6 +10,9 @@ enum token_t
   TOK_TRACK,
   TOK_MASTER,
   TOK_BPM,
+  TOK_SYNTH,
+  TOK_LPAREN,
+  TOK_RPAREN,
   TOK_REPEAT,
   TOK_LCURLY_BRACE,
   TOK_RCURLY_BRACE,
@@ -45,12 +48,12 @@ struct note_t {
   int response_length;
 };
 
-typedef struct list_n_r list_n_r; /* list of notes and rests with properties */
-struct list_n_r {
+typedef struct nr_t nr_t; /* list of notes and rests with properties */
+struct nr_t {
   music_symbol type;
   uint32_t length;
   note_t   *note;  /* if type = NOTE */
-  list_n_r *next;
+  nr_t     *next;
 
 };
 
@@ -70,7 +73,7 @@ struct symrec_t
     struct
     {
       char *identifier;
-      list_n_r *nr; 
+      nr_t *nr; 
       uint32_t numsamples;
       int16_t *pcm_s16le;
     } staff;			/* staff variables */

@@ -1,0 +1,234 @@
+
+\documentclass{article}
+\usepackage[top=0.4in]{geometry}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{hyperref}
+
+\title{\textbf{The Dats\thanks{\url{github.com/harieamjari/dats/}} language v2.0.0}}
+\author{Al-buharie Amjari, STEM-A}
+
+\begin{document}
+\maketitle
+
+\abstract
+This is part of the Dats v2.0.0 documentation\footnote{\url{github.com/harieamjari/dats/blob/master/doc/dats-2.tex}} and is a draft. This document may be outdated in the future so readers are adviced instead to follow 1, although this draft should be able to provide the syntax and able the user to extrapolate from these to
+start writing a music composition in Dats language.
+
+Further revision of this draft may be publish by the author from time to time.
+
+
+\section{Introduction}
+
+\indent The Dats language is a text-based programming language use for music composition.  It intents to promote the readability of ASCII music sheets and the compilation of these into a soundfile.
+This language is fairly new and still in expiremental so other features such trills, tie,
+repeat, glissando, are not implemented but are considered to be.
+
+\section{Environment}
+
+
+The following keywords are defined in the language:
+\begin{Verbatim}[frame=single]
+      staff        master         NOTE 
+      n            BPM          use
+\end{Verbatim}
+
+\subsection{BEGIN and END}
+
+The \verb+BEGIN+ keyword signifies the beginning of a series of a note. It
+takes no parameter:
+\begin{Verbatim}[frame=single]
+      BEGIN
+      //Your notes
+      END
+\end{Verbatim}
+It must end with the \verb+END+ keyword to signify the end of a series
+of a note as seen as above. We may need to call this the "main" block.
+
+\subsection{NOTE}
+
+The \verb+NOTE+ keyword signifies the beginning of a note. It must be declared
+inside the main block.
+It takes 2 parameters; the length and the key of the note. It must end with
+a semicolon: 
+\begin{Verbatim}[frame=single]
+      NOTE <length> <key>;
+\end{Verbatim}
+
+To play a whole note ringing at C4:
+\begin{Verbatim}[frame=single]
+      BEGIN
+      NOTE 1 C4;
+      END
+\end{Verbatim}
+\newpage
+A half of a note ringing at D4:
+\begin{Verbatim}[frame=single]
+      BEGIN
+      NOTE 2 D4;
+      END
+\end{Verbatim}
+
+And a quarter of a note ringing at E4:
+\begin{Verbatim}[frame=single]
+      BEGIN
+      NOTE 4 E4;
+      END
+\end{Verbatim}
+
+One can derive the length of the note from the denominator of these notes:
+\verb+1/1 1/2 1/4+
+
+\subsubsection{Extensions: dyad}
+The parameter \verb+<key>+ may be entered for a number of times:
+\begin{Verbatim}[frame=single]
+      BEGIN
+      NOTE 1 C4 E4 G4;
+      END
+\end{Verbatim}
+
+The example above plays the C major chord at root position as whole note. (Integer overflow is not
+protected; you might hear undesirable sounds.)
+
+\subsubsection{Extensions: others}
+The paramater, \verb+length+, will take any real positive integer (as long as it's in the range of int),
+so a length of \verb+3+ will work (equivalent to 1/3 of a note), \verb+5+ will work (equivalent to 1/5
+of a note) and others. \newline
+
+To play a 1/8 note triplet, one may need to do some math:
+
+\begin{align}
+	\shortintertext{Multiply 1/8 with 2:}
+	\frac{1}{8}2 = \frac{2}{8} \Rightarrow \frac{1}{4} \\
+	\shortintertext{divide the answer with 3:}
+	\frac{1}{4(3)} = \frac{1}{12}
+\end{align}
+
+And use the denominator, \verb+12+, as the value of the length:
+\begin{Verbatim}[frame=single]
+      BEGIN
+      NOTE 12 C4;
+      NOTE 12 D4;
+      NOTE 12 E4;
+      END
+\end{Verbatim}
+
+Single and double dotted notes are implemented but three dots were not. To use dots, you may need to use a period. An example below is a 1/4 dotted note:
+\begin{Verbatim}[frame=single]
+      BEGIN
+      NOTE 4.  C4;
+      NOTE 4.. D4;
+      ENDD
+\end{Verbatim}
+
+The key from A-G is supported, and the octave it takes may be any positive integer, but
+it should not exceed the range of \verb+int+. \newline
+
+To use accidentals, use \verb+#+ to raise the note a semitone and use \verb+b+ to lower the
+note a semitone:
+\begin{Verbatim}[frame=single]
+      BEGIN
+      NOTE 1 C#4;
+      NOTE 2 Db4;
+      END
+\end{Verbatim}
+
+\subsection{REST}
+The \verb+REST+ keyword signifies the beginning of a rest. It must be declared inside
+the main block.
+The keyword takes 1 parameter; the length of the rest. It must end with a semicolon:
+\begin{Verbatim}[frame=single]
+      REST <length>;
+\end{Verbatim}
+
+\subsubsection{Extensions}
+
+The length of the rest is semantically similar to one of that length
+of the note. Refer to the \verb+NOTE+ keyword.
+
+\subsection{BPM}
+
+The \verb+BPM+ keyword sets the BPM of the music. It must be declared inside the main block.
+It takes 1 parameter; the BPM of the music in integer or decimal form. It must end
+with a semicolon:
+\begin{Verbatim}[frame=single]
+      BPM <BPM>;
+\end{Verbatim}
+
+\subsubsection{Extensions}
+
+The \verb+BPM+ keyword may be use to change the BPM of the music midway:
+\begin{Verbatim}[frame=single]
+      BEGIN
+      BPM 80;
+      NOTE 8 C4;
+      NOTE 8 D4;
+
+      BPM 130;
+      NOTE 8 E4;
+      NOTE 8 F4;
+      END
+\end{Verbatim}
+
+If \verb+BPM+ is not set, the default is set to be 120.
+
+Regex: \verb@[0-9]+(\.[0-9]+)?@
+\subsection{use}
+
+The \verb+use+ keyword sets the soundfont of the music. It must be declared before the main block begins.
+We may need to call this block the "prerequisite".
+It takes two parameter; the location of the library and the name of the soundfont
+or more technically, the name of the function:
+\begin{Verbatim}[frame=single]
+      use <library> <soundfont>
+\end{Verbatim}
+
+This opens the shared library with \verb+dlopen(3)+\footnote{\url{https://www.man7.org/linux/man-pages/man3/dlopen.3.html}}.
+
+If this is not set, it uses the default library, \verb+libpsg.so+ and uses the function \verb+guitar+\footnote{It employs \href{wikipedia.org/wiki/Karplus\%E2\%80\%93Strong_string_synthesis}{karplus-strong algorithm} to synthesize the guitar-like sound.}
+
+\subsubsection{Extensions}
+For creating your own soundfont, please refer to the file, "Plugin.md" (Which is unfinished yet).
+
+\section{Comments}
+Just like in the C programming language, you can use a double slash (solidus if you like), \verb+//+.
+It eats the letters/words in its front until it reaches a newline.
+\begin{Verbatim}[frame=single]
+      BEGIN
+      NOTE 1 C4; //EAT MEEE!!!
+      END
+\end{Verbatim}
+
+\section{Formatting}
+To preserve the readability of the text, it is a recommended practice to add a comment for every
+beginning measure, regardless of the time signature. Below is a 4/4 time signature:
+\begin{Verbatim}[frame=single]
+      BEGIN
+
+      // Measure 1
+      NOTE 1 C4;
+
+      // Measure 2
+      NOTE 4 D4;
+      NOTE 4 E4;
+      NOTE 4 F4;
+      NOTE 4 G4;
+
+      // Measure 3
+      NOTE 2 A4;
+      NOTE 2 B4;
+
+      END
+\end{Verbatim}
+
+\section*{Afterword}
+
+Currently, even myself is having hard time transcribing music into Dats. It can be time consuming to debug the music sheet whenever a note was place 
+incorrectly and a pain in the butt.
+
+\textbf{Composition created with Dats:}
+
+1. \url{facebook.com/groups/427631411331889/permalink/837013050393721}
+
+\end{document}

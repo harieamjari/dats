@@ -15,10 +15,6 @@ n 83 cb1;
 r 2;
 }
 
-staff pizza{
- n 9 c3;
-}
-
 staff d{
   n 3 c1;
 }

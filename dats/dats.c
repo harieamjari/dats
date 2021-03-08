@@ -164,16 +164,6 @@ process_args (const int argc, char *const *argv)
           p->column = 1;
           p->numsamples = 0;
           p->pcm_s16le = NULL;
-
-          /*
-             symrec_t *t = malloc (sizeof (symrec_t));
-             assert (t != NULL);
-             t->type = TOK_ENV;
-             t->value.env.identifier = strdup ("BPM");
-             assert (t->value.env.identifier != NULL);
-             t->value.env.val = 120.0;
-             t->next = NULL; */
-
           p->sym_table = NULL;
           p->next = dats_files;
           dats_files = p;

@@ -30,9 +30,9 @@
 dats_t *dats_files = NULL;
 
 void
-print_all_list_n_r (list_n_r * nr)
+print_all_nr_t (nr_t * nr)
 {
-  for (list_n_r * p = nr; p != NULL; p = p->next)
+  for (nr_t * p = nr; p != NULL; p = p->next)
     {
       switch (p->type)
         {
@@ -57,7 +57,7 @@ process_nr (symrec_t * s)
   printf ("%u numsamples\n", numsamples);
   s->value.staff.pcm_s16le = malloc (sizeof (int16_t) * numsamples);
 
-  list_n_r *a = s->value.staff.nr;
+  nr_t *a = s->value.staff.nr;
   for (uint32_t total_samples = 0; total_samples < numsamples; a = a->next)
     {
       if (a->type == SYM_NOTE || a->type == SYM_REST)
@@ -128,8 +128,8 @@ clean_all_symrec_t_all_dats_t ()
             {
               free (p->value.staff.identifier);
               free (p->value.staff.pcm_s16le);
-              list_n_r *tmp;
-              for (list_n_r * nr = p->value.staff.nr; nr != NULL;)
+              nr_t *tmp;
+              for (nr_t * nr = p->value.staff.nr; nr != NULL;)
                 {
                   tmp = nr->next;
                   if (nr->type == SYM_NOTE && nr != NULL)
@@ -185,26 +185,29 @@ getsym (const dats_t * const t, char const *const id)
 
 }
 
-void
-appendsym (symrec_t * l, symrec_t * a)
-{
-  while (l != NULL)
-    l = l->next;
-  a->next = NULL;
-  l = a;
-}
-
 symrec_t *
 symrec_tcpy (symrec_t * const s)
 {
   symrec_t *copy = malloc (sizeof (symrec_t));
   assert (copy != NULL);
   //*copy = *s;
-  copy->type = s->type;
-  copy->value.staff.identifier = s->value.staff.identifier;
-  copy->next = NULL;
+  switch (s->type)
+    {
+    case TOK_STAFF:
+      copy->type = s->type;
+      copy->value.staff.identifier = s->value.staff.identifier;
+      copy->value.staff.numsamples = s->value.staff.numsamples;
+      copy->value.staff.pcm_s16le = s->value.staff.pcm_s16le;
+      copy->value.staff.nr = s->value.staff.nr;
+      copy->next = NULL;
+      break;
+    default:
+      free (copy);
+      copy = NULL;
+    }
   return copy;
 }
+
 
 /*---------.
  | Scanner |
@@ -290,16 +293,6 @@ w:
         //puts (buff);
         if (!strcmp ("staff", buff))
           {
-            /* put symbol 
-               symrec_t *s = malloc (sizeof (symrec_t));
-               assert (s != NULL);
-               s->type = TOK_STAFF;        //0 = staff
-               s->value.staff.identifier = NULL;
-               s->value.staff.numsamples = 0;
-               s->value.staff.pcm_s16le = NULL;
-               s->value.staff.nr = NULL;
-               s->next = t->sym_table;
-               t->sym_table = s; */
             return TOK_STAFF;
           }
         else if ((buff[0] >= 'a' && buff[0] <= 'g') &&
@@ -413,49 +406,7 @@ w:
             return TOK_MASTER;
           }
         else
-          {                     /*
-                                   symrec_t *s = getsym (t, buff);
-                                   if (s == NULL)
-                                   {
-                                   f the name at buff is new (it doesn't have a previous definition.)
-
-                                   if (t->sym_table->type == TOK_STAFF)
-                                   {
-                                   t->sym_table->line = line_token_found;
-                                   t->sym_table->column = column_token_found;
-                                   t->sym_table->value.staff.identifier = strdup (buff);
-                                   assert (t->sym_table->value.staff.identifier != NULL);
-                                   return TOK_IDENTIFIER;
-                                   }
-                                   else
-                                   {
-                                   tok_identifier = strdup(buff);
-                                   ERROR
-                                   ("At %s:%d %s: \x1b[1;31minternal error\x1b[0m\n"
-                                   "Please report this error on github.com/harieamjari/dats\n",
-                                   __FILE__, __LINE__, __func__);
-                                   exit (1);
-                                   return TOK_IDENTIFIER;
-                                   }
-                                   }
-                                   else
-                                   {            
-                                   int length = snprintf (NULL, 0,
-                                   "[%s:%d @ %p] %s:%d:%d: ",
-                                   __FILE__,
-                                   __LINE__,
-                                   read_next_tok_cur_dats_t,
-                                   t->fname,
-                                   t->line,
-                                   t->column);
-                                   ERROR
-                                   ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d: \x1b[1;31merror\x1b[0m: redefinition of \"%s\"\n"
-                                   "%*s previous definition at %d:%d\n",
-                                   __FILE__, __LINE__,
-                                   read_next_tok_cur_dats_t,
-                                   t->fname, line_token_found,
-                                   column_token_found, buff,
-                                   length + 5, "note:", s->line, s->column); */
+          {
             tok_identifier = strdup (buff);
 
             return TOK_IDENTIFIER;

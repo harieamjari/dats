@@ -16,7 +16,6 @@ EXTERN void clean_all_symrec_t_cur_dats_t (const dats_t * const t);
 
 EXTERN void clean_all_symrec_t_all_dats_t (void);
 
-EXTERN void appendsym (symrec_t *l, symrec_t *a);
 
 EXTERN symrec_t * symrec_tcpy (symrec_t * const s);
 
