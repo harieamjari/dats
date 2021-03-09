@@ -54,8 +54,9 @@ int
 process_nr (symrec_t * s)
 {
   uint32_t numsamples = s->value.staff.numsamples;
-  printf ("%u numsamples\n", numsamples);
-  s->value.staff.pcm_s16le = malloc (sizeof (int16_t) * numsamples);
+  printf ("%u numsamples\n", numsamples);/*
+  s->value.staff.pcm_s16le = malloc (sizeof (int16_t) * numsamples);*/
+  /*
 
   nr_t *a = s->value.staff.nr;
   for (uint32_t total_samples = 0; total_samples < numsamples; a = a->next)
@@ -65,7 +66,7 @@ process_nr (symrec_t * s)
           total_samples += a->length;
           printf ("%d total %u\n", a->length, total_samples);
         }
-    }
+    }*/
 
   return 0;
 }
@@ -105,7 +106,6 @@ clean_all_symrec_t_cur_dats_t (const dats_t * const t)
       if (p->type == TOK_STAFF)
         {
           free (p->value.staff.identifier);
-          free (p->value.staff.pcm_s16le);
         }
       else if (p->type == TOK_IDENTIFIER)
         free (p->value.env.identifier);
@@ -127,7 +127,6 @@ clean_all_symrec_t_all_dats_t ()
           if (p->type == TOK_STAFF)
             {
               free (p->value.staff.identifier);
-              free (p->value.staff.pcm_s16le);
               nr_t *tmp;
               for (nr_t * nr = p->value.staff.nr; nr != NULL;)
                 {
@@ -197,7 +196,6 @@ symrec_tcpy (symrec_t * const s)
       copy->type = s->type;
       copy->value.staff.identifier = s->value.staff.identifier;
       copy->value.staff.numsamples = s->value.staff.numsamples;
-      copy->value.staff.pcm_s16le = s->value.staff.pcm_s16le;
       copy->value.staff.nr = s->value.staff.nr;
       copy->next = NULL;
       break;
@@ -378,18 +376,7 @@ w:
             return TOK_R;
           }
         else if (!strcmp ("track", buff))
-          {                     /*
-                                   master_t *m = malloc (sizeof (master_t));
-                                   assert (m != NULL);
-                                   m->track = NULL;
-                                   if (t->sym_table->type != TOK_MASTER)
-                                   {
-                                   ERROR ("%s:%d:%d \x1b[1;31merror\x1b[0m: illegal syntax\n",
-                                   t->fname, line_token_found, column_token_found);
-                                   return TOK_ERR;
-                                   }
-                                   m->next = t->sym_table->value.master;
-                                   t->sym_table->value.master = m; */
+          {                     
 
             return TOK_TRACK;
           }
@@ -397,18 +384,11 @@ w:
           return TOK_BPM;
         else if (!strcmp ("master", buff))
           {
-            /* put symbol 
-               symrec_t *s = malloc (sizeof (symrec_t));
-               s->type = TOK_MASTER;
-               s->value.master = NULL;
-               s->next = t->sym_table;
-               t->sym_table = s; */
             return TOK_MASTER;
           }
         else
           {
             tok_identifier = strdup (buff);
-
             return TOK_IDENTIFIER;
           }
       }
@@ -530,7 +510,7 @@ print_all_symrec_t_cur_dats_t (const dats_t * const t)
       switch (p->type)
         {
         case TOK_MASTER:
-          printf ("  %-20s    %-20s\n", "[none]", "master");
+          printf ("  %-20s    %-20s\n", "[none]", token_t_to_str(TOK_MASTER));
           break;
         case TOK_STAFF:
           printf ("  %-20s    %-20s\n",

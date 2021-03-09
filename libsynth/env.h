@@ -44,8 +44,8 @@ struct note_t {
   int decay;
   int sustain;
   int release;
-  int16_t *response;
-  int response_length;
+  int16_t *response; /*pcm s16le response */
+  uint32_t response_length;
 };
 
 typedef struct nr_t nr_t; /* list of notes and rests with properties */
@@ -54,7 +54,6 @@ struct nr_t {
   uint32_t length;
   note_t   *note;  /* if type = NOTE */
   nr_t     *next;
-
 };
 
 typedef struct symrec_t symrec_t;
@@ -64,6 +63,7 @@ struct master_t{
   symrec_t *track; /* track is composed of series of type TOK_STAFF linked together */
   master_t *next; /* next track */
 };
+
 struct symrec_t
 {
   token_t type;
@@ -75,7 +75,6 @@ struct symrec_t
       char *identifier;
       nr_t *nr; 
       uint32_t numsamples;
-      int16_t *pcm_s16le;
     } staff;			/* staff variables */
     struct
     {
@@ -86,9 +85,7 @@ struct symrec_t
   } value;
 
   symrec_t *next;
-
 };
-
 
 typedef struct dats_t dats_t;
 struct dats_t

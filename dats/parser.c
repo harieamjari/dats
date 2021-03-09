@@ -156,7 +156,6 @@ parse_staff ()
   free (tok_identifier);
   tok_identifier = NULL;
   staff->value.staff.numsamples = 0;
-  staff->value.staff.pcm_s16le = NULL;
   staff->value.staff.nr = NULL;
   staff->next = d->sym_table;
   d->sym_table = staff;
