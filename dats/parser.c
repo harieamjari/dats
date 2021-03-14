@@ -41,8 +41,8 @@ parse_notes_rests ()
       if (tok != TOK_EQUAL)
         UNEXPECTED (tok, d);
       tok = read_next_tok_cur_dats_t (d);
-      if (tok != TOK_NUM)
-        EXPECTING (TOK_NUM, d);
+      if (tok != TOK_FLOAT)
+        EXPECTING (TOK_FLOAT, d);
       if (tok_num == 0.0)
         {
           WARNING ("0 bpm is illegal. Now setting to 120\n");
@@ -59,16 +59,16 @@ parse_notes_rests ()
       cnr->next = NULL;
 
       tok = read_next_tok_cur_dats_t (d);
-      if (tok != TOK_NUM)
+      if (tok != TOK_FLOAT)
         {
-          EXPECTING (TOK_NUM, d);
+          EXPECTING (TOK_FLOAT, d);
         }
 
       cnr->length = (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
       staff->value.staff.numsamples += cnr->length;
       tok = read_next_tok_cur_dats_t (d);
 
-      if (tok != TOK_NOTE && tok != TOK_NUM)
+      if (tok != TOK_NOTE && tok != TOK_FLOAT)
         {
           UNEXPECTED (tok, d);
         }
@@ -101,7 +101,7 @@ parse_notes_rests ()
       cnr->type = SYM_REST;
       cnr->next = NULL;
       tok = read_next_tok_cur_dats_t (d);
-      if (tok != TOK_NUM)
+      if (tok != TOK_FLOAT)
         {
           UNEXPECTED (tok, d);
         }
@@ -216,7 +216,7 @@ parse_track ()
             }
           free (tok_identifier);
           tok_identifier = NULL;
-          if (s->type != TOK_STAFF)
+          if (s->type != TOK_SAMPLE)
             {
               local_errors++;
               C_ERROR ("Dats forbids the use of non staff in track\n");

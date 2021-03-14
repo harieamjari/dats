@@ -6,24 +6,38 @@
 typedef enum token_t token_t;
 enum token_t
 {
+  TOK_IDENTIFIER,
+
+  /* Data types */
   TOK_STAFF,
   TOK_TRACK,
-  TOK_MASTER,
-  TOK_BPM,
+  TOK_SAMPLE,
   TOK_SYNTH,
+  TOK_MASTER,
+  TOK_PCM16,
+
+  /* Macros */
+  TOK_NOTE,
+  TOK_BPM,
+  TOK_N,
+  TOK_R,
+
+  /* Symbols */
   TOK_LPAREN,
   TOK_RPAREN,
   TOK_REPEAT,
   TOK_LCURLY_BRACE,
   TOK_RCURLY_BRACE,
-  TOK_N,
-  TOK_R,
-  TOK_NOTE,
-  TOK_IDENTIFIER,
-  TOK_EQUAL,
-  //TOK_ENV,			/* Environment variables 
-  TOK_NUM,
   TOK_SEMICOLON,
+
+  TOK_EQUAL,
+  TOK_ADD,
+  TOK_SUB,
+  TOK_MUL,
+  TOK_DIV,
+
+  //TOK_ENV,			/* Environment variables 
+  TOK_FLOAT,
   TOK_EOF,
   TOK_ERR,
   TOK_NULL
@@ -82,6 +96,7 @@ struct symrec_t
       float val;
     } env;			/* environment variables */
     master_t *master; /* a chain of track */
+    int16_t *pcm16;
   } value;
 
   symrec_t *next;

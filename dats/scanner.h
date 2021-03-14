@@ -39,7 +39,7 @@ EXTERN int line_token_found;
 EXTERN int column_token_found;
 EXTERN int local_errors;
 EXTERN int global_errors;
-
+EXTERN int seek;
 EXTERN float tok_num;
 EXTERN float tok_bpm;
 EXTERN char *tok_identifier;

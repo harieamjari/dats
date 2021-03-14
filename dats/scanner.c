@@ -54,19 +54,19 @@ int
 process_nr (symrec_t * s)
 {
   uint32_t numsamples = s->value.staff.numsamples;
-  printf ("%u numsamples\n", numsamples);/*
-  s->value.staff.pcm_s16le = malloc (sizeof (int16_t) * numsamples);*/
+  printf ("%u numsamples\n", numsamples);       /*
+                                                   s->value.staff.pcm_s16le = malloc (sizeof (int16_t) * numsamples); */
   /*
 
-  nr_t *a = s->value.staff.nr;
-  for (uint32_t total_samples = 0; total_samples < numsamples; a = a->next)
-    {
-      if (a->type == SYM_NOTE || a->type == SYM_REST)
-        {
-          total_samples += a->length;
-          printf ("%d total %u\n", a->length, total_samples);
-        }
-    }*/
+     nr_t *a = s->value.staff.nr;
+     for (uint32_t total_samples = 0; total_samples < numsamples; a = a->next)
+     {
+     if (a->type == SYM_NOTE || a->type == SYM_REST)
+     {
+     total_samples += a->length;
+     printf ("%d total %u\n", a->length, total_samples);
+     }
+     } */
 
   return 0;
 }
@@ -122,24 +122,38 @@ clean_all_symrec_t_all_dats_t ()
   for (dats_t * d = dats_files; d != NULL; d = d->next)
     {
       symrec_t *n;
-      for (symrec_t * p = d->sym_table; p != NULL;)
+      for (symrec_t * p = d->sym_table; p != NULL; p = n)
         {
+          n = p->next;
           if (p->type == TOK_STAFF)
             {
               free (p->value.staff.identifier);
               nr_t *tmp;
-              for (nr_t * nr = p->value.staff.nr; nr != NULL;)
+              for (nr_t * nr = p->value.staff.nr; nr != NULL; nr = tmp)
                 {
                   tmp = nr->next;
                   if (nr->type == SYM_NOTE && nr != NULL)
                     free (nr->note);
                   free (nr);
-                  nr = tmp;
                 }
             }
-          n = p->next;
+          else if (p->type == TOK_MASTER)
+            {
+              master_t *mtmp;
+              for (master_t * track = p->value.master; track != NULL; track = mtmp)
+                {
+                  mtmp = track->next;
+                  symrec_t *stmp;
+                  for (symrec_t * staff = track->track; staff != NULL; staff = stmp)
+                    {
+                      stmp = staff->next;
+                      free (staff);
+
+                    }
+                  free (track);
+                }
+            }
           free (p);
-          p = n;
         }
     }
 }
@@ -218,11 +232,14 @@ read_next_tok_cur_dats_t (dats_t * const t)
   char buff[100] = { 0 };
   /* eat whitespace */
 w:
-  while ((c = fgetc (t->fp)) == (int) ' ')
+  while ((c = fgetc (t->fp)) == (int) ' '){
     t->column++;
+    seek++;
+  }
   if (c == (int) '\n')
     {
       ++t->line;
+      seek++;
       t->column = 1;
       goto w;
     }
@@ -288,6 +305,7 @@ w:
         ungetc (c, t->fp);
         (void) fscanf (t->fp, "%[a-zA-Z0-9_#]%n", buff, &nchar);
         t->column += nchar;
+        seek+=nchar;
         //puts (buff);
         if (!strcmp ("staff", buff))
           {
@@ -367,6 +385,8 @@ w:
           {
             return TOK_REPEAT;
           }
+        else if (!strcmp ("pcm16", buff))
+            return TOK_PCM16;
         else if (buff[0] == 'n' && !buff[1])
           {
             return TOK_N;
@@ -376,7 +396,7 @@ w:
             return TOK_R;
           }
         else if (!strcmp ("track", buff))
-          {                     
+          {
 
             return TOK_TRACK;
           }
@@ -411,22 +431,26 @@ w:
         if (*end)
           ERROR ("Warning: non numeric character/s %s\n", end);
         t->column += nchar;
-        return TOK_NUM;
+        seek++;
+        return TOK_FLOAT;
       }
     case '{':
       t->column += 1;
+      seek++;
       return TOK_LCURLY_BRACE;
     case '}':
       t->column += 1;
+      seek++;
       return TOK_RCURLY_BRACE;
     case ';':
       t->column += 1;
+      seek++;
       return TOK_SEMICOLON;
     case '=':
       t->column += 1;
+      seek++;
       return TOK_EQUAL;
     case EOF:
-      //fclose (t->fp);
       return TOK_EOF;
     default:
       ERROR
@@ -458,7 +482,7 @@ token_t_to_str (const token_t t)
       return "'}'";
     case TOK_SEMICOLON:
       return "';'";
-    case TOK_NUM:
+    case TOK_FLOAT:
       return "numeric";
     case TOK_N:
       return "'n'";
@@ -470,6 +494,10 @@ token_t_to_str (const token_t t)
       return "master";
     case TOK_TRACK:
       return "track";
+    case TOK_SAMPLE:
+      return "sample";
+    case TOK_PCM16:
+      return "pcm16";
     default:
       REPORT ("Unknown token\n");
       printf ("%d\n", t);
@@ -510,7 +538,8 @@ print_all_symrec_t_cur_dats_t (const dats_t * const t)
       switch (p->type)
         {
         case TOK_MASTER:
-          printf ("  %-20s    %-20s\n", "[none]", token_t_to_str(TOK_MASTER));
+          printf ("  %-20s    %-20s\n", "[none]",
+                  token_t_to_str (TOK_MASTER));
           break;
         case TOK_STAFF:
           printf ("  %-20s    %-20s\n",

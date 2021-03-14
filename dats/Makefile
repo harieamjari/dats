@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O0 -ggdb3 -fsanitize=address -fsanitize=undefined 
+CFLAGS = -Wall -Wextra -std=c99 -O3 -march=native -ggdb3 -fsanitize=address -fsanitize=undefined 
 OBJ := dats.o parser.o scanner.o semantic.o
 all : dats
 
@@ -13,11 +13,11 @@ $(OBJ) :%.o:%.c $(wildcard *.h)
 
 .PHONY : clean test indent
 clean: 
-	rm dats $(OBJ) f
+	rm dats $(OBJ)
 
 test : dats
-	./dats -i ../test/t.dats -o f
-	./dats -i ../test/terr.dats -i ../test/t.dats  -o f
+	./dats -i ../test/t.dats
+	./dats -i ../test/terr.dats -i ../test/t.dats
 install:  dats
 	cp $^ $(PREFIX)/bin
 

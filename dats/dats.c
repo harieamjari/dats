@@ -38,8 +38,6 @@ extern int parse_cur_dats_t (dats_t * const t);
 /* Performs semantic analysis */
 extern int semantic_cur_dats_t (dats_t * const t);
 
-
-FILE *wav_out;
 /* process_args returns the value 0 if sucesss and nonzero if
  * failed. */
 int
@@ -51,7 +49,7 @@ process_args (const int argc, char *const *argv)
       return 1;
     }
   FILE *fp;
-  int c, option_index, out_files = 0;
+  int c;//option_index, out_files = 0;
   const struct option long_options[] = {
     {"dats-file", required_argument, 0, 'i'},
     {0, 0, 0, 0}
@@ -67,8 +65,7 @@ process_args (const int argc, char *const *argv)
   int err = 0;
   while (1)
     {
-      option_index = 0;
-      c = getopt_long (argc, argv, "i:o:h", long_options, NULL);
+      c = getopt_long (argc, argv, "i:h", long_options, NULL);
       if (c == -1)
         break;
       switch (c)
@@ -93,29 +90,11 @@ process_args (const int argc, char *const *argv)
                 }
             }
           break;
-        case 'o':
-          if (out_files > 0)
-            {
-              ERROR ("Too many output file %s\n", optarg);
-              err++;
-              break;
-            }
-          out_files++;
-          fp = fopen (optarg, "wb");
-          if (fp == NULL)
-            {
-              perror (optarg);
-              err++;
-              break;
-            }
-          fclose (fp);
-          break;
         case 'h':
           puts ("Dats compiler 2.0.0\n"
                 "\n"
                 "options:\n"
-                "-i                   input dats files\n"
-                "-o                   output file\n");
+                "-i                   input dats files\n");
           return 1;
         default:
           return 1;
@@ -129,11 +108,6 @@ process_args (const int argc, char *const *argv)
           ("\x1b[1;31merror\x1b[0m: unknown option '%s'\n", argv[optind++]);
       return 1;
     }
-  if (!out_files)
-    {
-      ERROR ("No output file supplied!\n");
-      return 1;
-    }
   if (err)
     {
       return 1;
@@ -143,7 +117,7 @@ process_args (const int argc, char *const *argv)
   /* Pass 2 */
   while (1)
     {
-      c = getopt_long (argc, argv, "i:o:", long_options, NULL);
+      c = getopt_long (argc, argv, "i:", long_options, NULL);
       if (c == -1)
         break;
       switch (c)
@@ -167,16 +141,6 @@ process_args (const int argc, char *const *argv)
           p->sym_table = NULL;
           p->next = dats_files;
           dats_files = p;
-          break;
-        case 'o':
-          fp = fopen (optarg, "wb");
-          if (fp == NULL)
-            {
-              perror (optarg);
-              /* clean this */
-              return 1;
-            }
-          wav_out = fp;
           break;
         }
     }
@@ -224,7 +188,6 @@ err:
     ERROR ("%d global errors generated %d local\n", global_errors,
            local_errors);
 
-  fclose (wav_out);
   clean_all_symrec_t_all_dats_t ();
   clean_all_dats_t ();
   return 0;
