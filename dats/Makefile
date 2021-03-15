@@ -5,7 +5,8 @@ OBJ := dats.o parser.o scanner.o semantic.o
 all : dats
 
 dats : $(OBJ)
-	$(CC) $(CFLAGS) $^ -L../libwav -lm -lwav -o $@
+	$(CC) $(CFLAGS) $^ -L../libwav -L../libsynth \
+	-lm -lwav -lsynth -o $@
 
 
 $(OBJ) :%.o:%.c $(wildcard *.h)

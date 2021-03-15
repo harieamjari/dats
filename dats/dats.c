@@ -30,7 +30,7 @@
 
 #include "scanner.h"
 
-#include "libwav/wav.h"
+//#include "libwav/wav.h"
 
 /* Performs syntatic analysis */
 extern int parse_cur_dats_t (dats_t * const t);
@@ -49,7 +49,7 @@ process_args (const int argc, char *const *argv)
       return 1;
     }
   FILE *fp;
-  int c;//option_index, out_files = 0;
+  int c;                        //option_index, out_files = 0;
   const struct option long_options[] = {
     {"dats-file", required_argument, 0, 'i'},
     {0, 0, 0, 0}
@@ -92,9 +92,7 @@ process_args (const int argc, char *const *argv)
           break;
         case 'h':
           puts ("Dats compiler 2.0.0\n"
-                "\n"
-                "options:\n"
-                "-i                   input dats files\n");
+                "\n" "options:\n" "-i                   input dats files\n");
           return 1;
         default:
           return 1;
@@ -185,8 +183,7 @@ main (int argc, char **argv)
     }
 err:
   if (global_errors)
-    ERROR ("%d global errors generated %d local\n", global_errors,
-           local_errors);
+    ERROR ("\n%d global errors generated\n", global_errors);
 
   clean_all_symrec_t_all_dats_t ();
   clean_all_dats_t ();

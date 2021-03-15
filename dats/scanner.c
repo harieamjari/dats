@@ -125,33 +125,42 @@ clean_all_symrec_t_all_dats_t ()
       for (symrec_t * p = d->sym_table; p != NULL; p = n)
         {
           n = p->next;
-          if (p->type == TOK_STAFF)
+          switch (p->type)
             {
-              free (p->value.staff.identifier);
-              nr_t *tmp;
-              for (nr_t * nr = p->value.staff.nr; nr != NULL; nr = tmp)
-                {
-                  tmp = nr->next;
-                  if (nr->type == SYM_NOTE && nr != NULL)
-                    free (nr->note);
-                  free (nr);
-                }
-            }
-          else if (p->type == TOK_MASTER)
-            {
-              master_t *mtmp;
-              for (master_t * track = p->value.master; track != NULL; track = mtmp)
-                {
-                  mtmp = track->next;
-                  symrec_t *stmp;
-                  for (symrec_t * staff = track->track; staff != NULL; staff = stmp)
-                    {
-                      stmp = staff->next;
-                      free (staff);
+            case TOK_STAFF:
+              {
+                free (p->value.staff.identifier);
+                nr_t *tmp;
+                for (nr_t * nr = p->value.staff.nr; nr != NULL; nr = tmp)
+                  {
+                    tmp = nr->next;
+                    if (nr->type == SYM_NOTE && nr != NULL)
+                      free (nr->note);
+                    free (nr);
+                  }
+              }
+              break;
+            case TOK_MASTER:
+              {
+                master_t *mtmp;
+                for (master_t * track = p->value.master; track != NULL;
+                     track = mtmp)
+                  {
+                    mtmp = track->next;
+                    symrec_t *stmp;
+                    for (symrec_t * staff = track->track; staff != NULL;
+                         staff = stmp)
+                      {
+                        stmp = staff->next;
+                        free (staff);
 
-                    }
-                  free (track);
-                }
+                      }
+                    free (track);
+                  }
+              }
+              break;
+            default:
+              ERROR ("UNKNOWN TYPE %d\n", p->type);
             }
           free (p);
         }
@@ -232,10 +241,11 @@ read_next_tok_cur_dats_t (dats_t * const t)
   char buff[100] = { 0 };
   /* eat whitespace */
 w:
-  while ((c = fgetc (t->fp)) == (int) ' '){
-    t->column++;
-    seek++;
-  }
+  while ((c = fgetc (t->fp)) == (int) ' ')
+    {
+      t->column++;
+      seek++;
+    }
   if (c == (int) '\n')
     {
       ++t->line;
@@ -305,12 +315,9 @@ w:
         ungetc (c, t->fp);
         (void) fscanf (t->fp, "%[a-zA-Z0-9_#]%n", buff, &nchar);
         t->column += nchar;
-        seek+=nchar;
-        //puts (buff);
+        seek += nchar;
         if (!strcmp ("staff", buff))
-          {
-            return TOK_STAFF;
-          }
+          return TOK_STAFF;
         else if ((buff[0] >= 'a' && buff[0] <= 'g') &&
                  (((buff[1] == '#' || buff[1] == 'b')
                    && (buff[2] >= '0' && buff[2] <= '9')) || (buff[1] >= '0'
@@ -386,7 +393,7 @@ w:
             return TOK_REPEAT;
           }
         else if (!strcmp ("pcm16", buff))
-            return TOK_PCM16;
+          return TOK_PCM16;
         else if (buff[0] == 'n' && !buff[1])
           {
             return TOK_N;
@@ -406,6 +413,8 @@ w:
           {
             return TOK_MASTER;
           }
+        else if (!strcmp ("synth", buff))
+          return TOK_SYNTH;
         else
           {
             tok_identifier = strdup (buff);
@@ -446,6 +455,10 @@ w:
       t->column += 1;
       seek++;
       return TOK_SEMICOLON;
+    case '.':
+      t->column += 1;
+      seek++;
+      return TOK_DOT;
     case '=':
       t->column += 1;
       seek++;
@@ -482,6 +495,14 @@ token_t_to_str (const token_t t)
       return "'}'";
     case TOK_SEMICOLON:
       return "';'";
+    case TOK_DOT:
+      return "'.'";
+    case TOK_DIV:
+      return "'/'";
+    case TOK_MUL:
+      return "'*'";
+    case TOK_SUB:
+      return "'-'";
     case TOK_FLOAT:
       return "numeric";
     case TOK_N:
@@ -494,10 +515,10 @@ token_t_to_str (const token_t t)
       return "master";
     case TOK_TRACK:
       return "track";
-    case TOK_SAMPLE:
-      return "sample";
     case TOK_PCM16:
       return "pcm16";
+    case TOK_SYNTH:
+      return "synth";
     default:
       REPORT ("Unknown token\n");
       printf ("%d\n", t);
@@ -544,6 +565,10 @@ print_all_symrec_t_cur_dats_t (const dats_t * const t)
         case TOK_STAFF:
           printf ("  %-20s    %-20s\n",
                   p->value.staff.identifier, token_t_to_str (TOK_STAFF));
+          break;
+        case TOK_PCM16:
+          printf ("  %-20s    %-20s\n", p->value.pcm16.identifier,
+                  token_t_to_str (TOK_PCM16));
           break;
         default:
           REPORT ("Unknown token\n");

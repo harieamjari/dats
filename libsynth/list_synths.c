@@ -1,4 +1,4 @@
 static const DSynth *synth_list[] = {
-  &synth_s_sine,
+  &ss_psg,
   NULL
 };

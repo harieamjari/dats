@@ -20,8 +20,6 @@ staff d{
 }
 
 master {
-  track apple apple;
-  track pizza apple;
-
+   pcm16 pol = synth.psg;
 }
 

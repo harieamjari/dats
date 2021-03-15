@@ -11,12 +11,13 @@ enum token_t
   /* Data types */
   TOK_STAFF,
   TOK_TRACK,
-  TOK_SAMPLE,
+  //TOK_SAMPLE,
   TOK_SYNTH,
   TOK_MASTER,
   TOK_PCM16,
 
   /* Macros */
+  TOK_REPEAT,
   TOK_NOTE,
   TOK_BPM,
   TOK_N,
@@ -25,10 +26,10 @@ enum token_t
   /* Symbols */
   TOK_LPAREN,
   TOK_RPAREN,
-  TOK_REPEAT,
   TOK_LCURLY_BRACE,
   TOK_RCURLY_BRACE,
   TOK_SEMICOLON,
+  TOK_DOT,
 
   TOK_EQUAL,
   TOK_ADD,
@@ -36,7 +37,7 @@ enum token_t
   TOK_MUL,
   TOK_DIV,
 
-  //TOK_ENV,			/* Environment variables 
+  //TOK_ENV,                    /* Environment variables 
   TOK_FLOAT,
   TOK_EOF,
   TOK_ERR,
@@ -44,13 +45,15 @@ enum token_t
 };
 
 typedef enum music_symbol music_symbol;
-enum music_symbol {
+enum music_symbol
+{
   SYM_REST,
   SYM_NOTE
 };
 
 typedef struct note_t note_t;
-struct note_t { 
+struct note_t
+{
   float frequency;
   int velocity;
   int volume;
@@ -58,24 +61,24 @@ struct note_t {
   int decay;
   int sustain;
   int release;
-  int16_t *response; /*pcm s16le response */
-  uint32_t response_length;
 };
 
-typedef struct nr_t nr_t; /* list of notes and rests with properties */
-struct nr_t {
+typedef struct nr_t nr_t;       /* list of notes and rests with properties */
+struct nr_t
+{
   music_symbol type;
   uint32_t length;
-  note_t   *note;  /* if type = NOTE */
-  nr_t     *next;
+  note_t *note;                 /* if type = NOTE */
+  nr_t *next;
 };
 
 typedef struct symrec_t symrec_t;
 typedef struct master_t master_t;
 
-struct master_t{
-  symrec_t *track; /* track is composed of series of type TOK_STAFF linked together */
-  master_t *next; /* next track */
+struct master_t
+{
+  symrec_t *track;              /* track is composed of series of type TOK_STAFF linked together */
+  master_t *next;               /* next track */
 };
 
 struct symrec_t
@@ -87,16 +90,21 @@ struct symrec_t
     struct
     {
       char *identifier;
-      nr_t *nr; 
+      nr_t *nr;
       uint32_t numsamples;
-    } staff;			/* staff variables */
+    } staff;                    /* staff variables */
     struct
     {
       char *identifier;
       float val;
-    } env;			/* environment variables */
-    master_t *master; /* a chain of track */
-    int16_t *pcm16;
+    } env;                      /* environment variables */
+    master_t *master;           /* a chain of track */
+    struct
+    {
+      char *identifier;
+      int16_t *pcm;
+      uint32_t numsamples;
+    } pcm16;
   } value;
 
   symrec_t *next;
@@ -113,7 +121,7 @@ struct dats_t
 
   uint32_t numsamples;
   int16_t *pcm_s16le;
- symrec_t *sym_table;
+  symrec_t *sym_table;
 };
 
 #endif

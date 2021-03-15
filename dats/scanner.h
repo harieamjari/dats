@@ -2,7 +2,9 @@
 #define SCANNER_H
 #include <stdio.h>
 #include <stdint.h>
+
 #include "libsynth/env.h"
+#include "libsynth/synth.h"
 
 #ifdef DEFINE_SCANNER_VARIABLES
 #define EXTERN
@@ -63,10 +65,12 @@ EXTERN dats_t *dats_files;
      column_token_found, str)
 
 #define C_ERROR(...) {\
+        local_errors++; \
 	ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: ",\
      __FILE__,__LINE__, __func__,d->fname, line_token_found,\
      column_token_found); \
 	ERROR(__VA_ARGS__);\
+        return 1;\
 	}
 #define EXPECTING(x, d) { \
     local_errors++; \
@@ -77,6 +81,7 @@ EXTERN dats_t *dats_files;
     return 1; \
    }
 #define REPORT(...) \
+   local_errors++;\
    ERROR("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s",__FILE__, __LINE__,\
    __func__, __VA_ARGS__)
 

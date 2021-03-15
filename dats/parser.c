@@ -24,6 +24,8 @@
 
 #include "scanner.h"
 
+#include "libsynth/allsynth.h"
+
 extern void print_all_nr_t (nr_t * nr);
 
 static token_t tok;
@@ -190,62 +192,99 @@ parse_staff ()
 static int
 parse_track ()
 {
-  if (tok == TOK_TRACK)
+  if (tok == TOK_PCM16)
     {
-      symrec_t *a = getsym (d, "master");
-      {
-        master_t *m = malloc (sizeof (master_t));
-        m->next = a->value.master;
-        m->track = NULL;
-        a->value.master = m;
-      }
-      do
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_IDENTIFIER)
+        UNEXPECTED (tok, d);
+      symrec_t *pcm16 = malloc (sizeof (symrec_t));
+      pcm16->type = TOK_PCM16;
+      pcm16->value.pcm16.identifier = tok_identifier;
+      pcm16->value.pcm16.pcm = NULL;
+      tok_identifier = NULL;
+      pcm16->next = d->sym_table;
+      d->sym_table = pcm16;
+
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_EQUAL)
+        UNEXPECTED (tok, d);
+
+      tok = read_next_tok_cur_dats_t (d);
+      switch (tok)
         {
+        case TOK_SYNTH:
+          tok = read_next_tok_cur_dats_t (d);
+          if (tok != TOK_DOT)
+            UNEXPECTED (tok, d);
           tok = read_next_tok_cur_dats_t (d);
           if (tok != TOK_IDENTIFIER)
-            break;
+            UNEXPECTED (tok, d);
 
-          symrec_t *s = getsym (d, tok_identifier);
-          if (s == NULL)
-            {
-              local_errors++;
-              C_ERROR ("undefined reference to \"%s\"\n", tok_identifier);
-              free (tok_identifier);
-              tok_identifier = NULL;
-              return 1;
-            }
+          const DSynth *synth = get_dsynth_by_name (tok_identifier);
+          if (synth == NULL)
+            C_ERROR ("No synth %s\n", tok_identifier);
+          printf ("Synth %s found\n", tok_identifier);
           free (tok_identifier);
           tok_identifier = NULL;
-          if (s->type != TOK_SAMPLE)
-            {
-              local_errors++;
-              C_ERROR ("Dats forbids the use of non staff in track\n");
-              return 1;
-            }
+          break;
 
-          /* append staff to track */
-          symrec_t *m = getsym (d, "master");
-          printf ("[debug] getsym master %p\n", m);
-          symrec_t *right = m->value.master->track;
-
-          if (right != NULL)
-            {
-              for (symrec_t * a = m->value.master->track; 1; a = a->next)
-                if (a->next == NULL)
-                  {
-                    a->next = symrec_tcpy (s);
-                    printf ("[append staff] %s to head %p\n",
-                            a->value.staff.identifier,
-                            m->value.master->track);
-                    break;
-                  }
-            }
-          else
-            m->value.master->track = symrec_tcpy (s);
+        default:
+          C_ERROR ("Undefined reference to \"%s\"\n", tok_identifier);
         }
-      while (1);
-      rule_match = 1;
-    }
+      tok = read_next_tok_cur_dats_t (d);
+    }                           /* 
+                                   else if (tok == TOK_TRACK)
+                                   {
+                                   symrec_t *a = getsym (d, "master");
+                                   {
+                                   master_t *m = malloc (sizeof (master_t));
+                                   m->next = a->value.master;
+                                   m->track = NULL;
+                                   a->value.master = m;
+                                   }
+                                   do
+                                   {
+                                   tok = read_next_tok_cur_dats_t (d);
+                                   if (tok != TOK_IDENTIFIER)
+                                   break;
+
+                                   symrec_t *s = getsym (d, tok_identifier);
+                                   if (s == NULL)
+                                   {
+                                   local_errors++;
+                                   C_ERROR ("undefined reference to \"%s\"\n", tok_identifier);
+                                   }
+                                   free (tok_identifier);
+                                   tok_identifier = NULL;
+                                   if (s->type != TOK_SAMPLE)
+                                   {
+                                   local_errors++;
+                                   C_ERROR ("Dats forbids the use of non staff in track\n");
+                                   }
+
+                                   // append staff to track 
+                                   symrec_t *m = getsym (d, "master");
+                                   printf ("[debug] getsym master %p\n", m);
+                                   symrec_t *right = m->value.master->track;
+
+                                   if (right != NULL)
+                                   {
+                                   for (symrec_t * a = m->value.master->track; 1; a = a->next)
+                                   if (a->next == NULL)
+                                   {
+                                   a->next = symrec_tcpy (s);
+                                   printf ("[append staff] %s to head %p\n",
+                                   a->value.staff.identifier,
+                                   m->value.master->track);
+                                   break;
+                                   }
+                                   }
+                                   else
+                                   m->value.master->track = symrec_tcpy (s);
+                                   }
+                                   while (1);
+                                   rule_match = 1;
+                                   } */
   else
     return 0;
 
@@ -335,6 +374,8 @@ parse_cur_dats_t (dats_t * const t)
           ERROR ("%d local errors generated\n", local_errors);
           global_errors += local_errors;
           local_errors = 0;
+          free (tok_identifier);
+          tok_identifier = NULL;
           return 1;
         }
       if (tok == TOK_EOF)

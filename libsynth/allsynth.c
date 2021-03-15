@@ -2,13 +2,12 @@
 #include "synth.h"
 
 
-extern DSynth synth_s_sine;
+extern DSynth ss_psg;
 #include "list_synths.c"
 
 const DSynth *
 get_dsynth_by_name (const char *name)
 {
-  const DSynth *f = NULL;
 
   if (!name||name==NULL)
     return NULL;
