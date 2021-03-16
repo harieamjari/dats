@@ -159,6 +159,10 @@ clean_all_symrec_t_all_dats_t ()
                   }
               }
               break;
+            case TOK_PCM16:
+              free (p->value.pcm16.pcm);
+              free (p->value.pcm16.identifier);
+              break;
             default:
               ERROR ("UNKNOWN TYPE %d\n", p->type);
             }
@@ -193,7 +197,7 @@ getsym (const dats_t * const t, char const *const id)
     for (symrec_t * p = t->sym_table; p != NULL; p = p->next)
       if (p->type == TOK_MASTER)
         return p;
-  for (symrec_t * p = t->sym_table->next; p != NULL; p = n)
+  for (symrec_t * p = t->sym_table; p != NULL; p = n)
     {
       n = p->next;
       if (p->value.staff.identifier == NULL)
@@ -241,8 +245,11 @@ read_next_tok_cur_dats_t (dats_t * const t)
   char buff[100] = { 0 };
   /* eat whitespace */
 w:
-  while ((c = fgetc (t->fp)) == (int) ' ')
+  while (1)
     {
+      c = fgetc (t->fp);
+      if ((c != (int) ' ') && c != (int) 0x09)
+        break;
       t->column++;
       seek++;
     }
@@ -256,6 +263,28 @@ w:
   line_token_found = t->line;
   column_token_found = t->column;
 
+  if (expecting == TOK_STRING)
+    {
+      ungetc (c, t->fp);
+      for (int i = 0; i < 99; i++)
+        {
+          c = fgetc (t->fp);
+          if (c == '"')
+            {
+              ungetc (c, t->fp);
+              tok_identifier = strdup (buff);
+              if (tok_identifier == NULL)
+                return TOK_ERR;
+              return TOK_STRING;
+            }
+          buff[i] = c;
+        }
+    }
+  if (expecting == TOK_STRING)
+    {
+      ERROR ("ERROR: long names\n");
+      return TOK_ERR;
+    }
   switch (c)
     {
     case 'a':
@@ -415,6 +444,8 @@ w:
           }
         else if (!strcmp ("synth", buff))
           return TOK_SYNTH;
+        else if (!strcmp ("write", buff))
+          return TOK_WRITE;
         else
           {
             tok_identifier = strdup (buff);
@@ -451,10 +482,26 @@ w:
       t->column += 1;
       seek++;
       return TOK_RCURLY_BRACE;
+    case '(':
+      t->column += 1;
+      seek++;
+      return TOK_LPAREN;
+    case ')':
+      t->column += 1;
+      seek++;
+      return TOK_RPAREN;
     case ';':
       t->column += 1;
       seek++;
       return TOK_SEMICOLON;
+    case '"':
+      t->column += 1;
+      seek++;
+      return TOK_DQUOTE;
+    case '\'':
+      t->column += 1;
+      seek++;
+      return TOK_SQUOTE;
     case '.':
       t->column += 1;
       seek++;
@@ -463,6 +510,10 @@ w:
       t->column += 1;
       seek++;
       return TOK_EQUAL;
+    case ',':
+      t->column += 1;
+      seek++;
+      return TOK_COMMA;
     case EOF:
       return TOK_EOF;
     default:
@@ -471,7 +522,6 @@ w:
          __FILE__, __LINE__, read_next_tok_cur_dats_t,
          t->fname, t->line, t->column, c);
       return TOK_ERR;
-
     }
 
   fclose (t->fp);
@@ -503,6 +553,16 @@ token_t_to_str (const token_t t)
       return "'*'";
     case TOK_SUB:
       return "'-'";
+    case TOK_LPAREN:
+      return "'('";
+    case TOK_RPAREN:
+      return "')'";
+    case TOK_DQUOTE:
+      return "\"";
+    case TOK_SQUOTE:
+      return "'";
+    case TOK_COMMA:
+      return "'.'";
     case TOK_FLOAT:
       return "numeric";
     case TOK_N:
@@ -519,6 +579,8 @@ token_t_to_str (const token_t t)
       return "pcm16";
     case TOK_SYNTH:
       return "synth";
+    case TOK_WRITE:
+      return "write";
     default:
       REPORT ("Unknown token\n");
       printf ("%d\n", t);

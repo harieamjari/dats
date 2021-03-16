@@ -24,6 +24,7 @@
 
 #include "scanner.h"
 
+#include "libwav/wav.h"
 #include "libsynth/allsynth.h"
 
 extern void print_all_nr_t (nr_t * nr);
@@ -144,9 +145,7 @@ parse_staff ()
   tok_bpm = 120.0;              //default
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_IDENTIFIER)
-    {
-      EXPECTING (TOK_IDENTIFIER, d);
-    }
+    EXPECTING (TOK_IDENTIFIER, d);
   printf ("=== BEGIN STAFF === %s\n", tok_identifier);
   /* insert symrec_t */
   staff = malloc (sizeof (symrec_t));
@@ -192,6 +191,7 @@ parse_staff ()
 static int
 parse_track ()
 {
+  /* statements */
   if (tok == TOK_PCM16)
     {
       tok = read_next_tok_cur_dats_t (d);
@@ -226,12 +226,43 @@ parse_track ()
           printf ("Synth %s found\n", tok_identifier);
           free (tok_identifier);
           tok_identifier = NULL;
-          break;
 
+          int16_t *(*const synthesizer) (symrec_t * staff) = synth->synth;
+
+
+          tok = read_next_tok_cur_dats_t (d);
+          if (tok != TOK_LPAREN)
+            UNEXPECTED (tok, d);
+
+          tok = read_next_tok_cur_dats_t (d);
+          if (tok != TOK_IDENTIFIER)
+            UNEXPECTED (tok, d);
+
+          symrec_t *staff = getsym (d, tok_identifier);
+          if (staff == NULL)
+            C_ERROR ("Undefined reference to %s\n", tok_identifier);
+
+          free (tok_identifier);
+          tok_identifier = NULL;
+
+          tok = read_next_tok_cur_dats_t (d);
+          if (tok != TOK_RPAREN)
+            UNEXPECTED (tok, d);
+
+          printf ("numsamples %u\n", staff->value.staff.numsamples);
+          if (staff->type != TOK_STAFF)
+            C_ERROR ("Synths takes staff not %s\n",
+                     token_t_to_str (staff->type));
+          pcm16->value.pcm16.pcm = synthesizer (staff);
+          pcm16->value.pcm16.numsamples = staff->value.staff.numsamples;
+          tok = read_next_tok_cur_dats_t (d);
+          break;
         default:
-          C_ERROR ("Undefined reference to \"%s\"\n", tok_identifier);
+          UNEXPECTED (tok, d);
         }
-      tok = read_next_tok_cur_dats_t (d);
+
+      rule_match = 1;
+
     }                           /* 
                                    else if (tok == TOK_TRACK)
                                    {
@@ -285,6 +316,83 @@ parse_track ()
                                    while (1);
                                    rule_match = 1;
                                    } */
+  else if (tok == TOK_WRITE)
+    {
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_LPAREN)
+        EXPECTING (TOK_LPAREN, d);
+
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_DQUOTE)
+        C_ERROR
+          ("Macro, `write`, expects an identifier between double quote\n");
+      expecting = TOK_STRING;
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_STRING)
+        EXPECTING (TOK_STRING, d);
+      expecting = TOK_NULL;
+      FILE *fp = fopen (tok_identifier, "wb");
+      if (fp == NULL)
+        {
+          perror (tok_identifier);
+          C_ERROR ("ERROR!\n");
+        }
+      free (tok_identifier);
+      tok_identifier = NULL;
+/*
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok!=TOK_DOT)
+       EXPECTING(TOK_DOT, d);
+
+
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok!=TOK_IDENTIFIER)
+        C_ERROR("Expecting extention\n");
+
+      if (strcmp(tok_identifier, "wav"))
+        C_ERROR("Unrecognized file extension: %s\n", tok_identifier);
+*/
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_DQUOTE)
+        C_ERROR ("Identifier must end with a double quote\n");
+
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_COMMA)
+        EXPECTING (TOK_COMMA, d);
+      tok = read_next_tok_cur_dats_t (d);
+
+      if (tok != TOK_IDENTIFIER)
+        EXPECTING (TOK_IDENTIFIER, d);
+
+      symrec_t *pcm16 = getsym (d, tok_identifier);
+      if (pcm16 == NULL)
+        C_ERROR ("Undefined reference to %s\n", tok_identifier);
+      if (pcm16->type != TOK_PCM16)
+        C_ERROR ("Macro, `write`, needs pcm16 variable type\n");
+
+      struct WAV_info wav = {
+        .fp = fp,
+        .Subchunk1Size = 16,
+        .AudioFormat = 1,
+        .NumChannels = 1,
+        .SampleRate = 44100,
+        .NumSamples = pcm16->value.pcm16.numsamples,
+        .BitsPerSample = 16,
+        .Data = pcm16->value.pcm16.pcm
+      };
+      wav_write_wav (&wav);
+      fclose (fp);
+      free (tok_identifier);
+      tok_identifier = NULL;
+
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_RPAREN)
+        EXPECTING (TOK_RPAREN, d);
+
+      tok = read_next_tok_cur_dats_t (d);
+      rule_match = 1;
+
+    }
   else
     return 0;
 

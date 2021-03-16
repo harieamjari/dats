@@ -7,6 +7,7 @@ typedef enum token_t token_t;
 enum token_t
 {
   TOK_IDENTIFIER,
+  TOK_STRING,
 
   /* Data types */
   TOK_STAFF,
@@ -18,6 +19,7 @@ enum token_t
 
   /* Macros */
   TOK_REPEAT,
+  TOK_WRITE,
   TOK_NOTE,
   TOK_BPM,
   TOK_N,
@@ -29,7 +31,10 @@ enum token_t
   TOK_LCURLY_BRACE,
   TOK_RCURLY_BRACE,
   TOK_SEMICOLON,
+  TOK_COMMA,
   TOK_DOT,
+  TOK_DQUOTE, //  double quote
+  TOK_SQUOTE, // single qoute
 
   TOK_EQUAL,
   TOK_ADD,

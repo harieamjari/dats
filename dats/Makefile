@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O3 -march=native -ggdb3 -fsanitize=address -fsanitize=undefined 
+CFLAGS = -Wall -Wextra -std=c99 -O0 -ggdb3 -fsanitize=address -fsanitize=undefined 
 OBJ := dats.o parser.o scanner.o semantic.o
 all : dats
 

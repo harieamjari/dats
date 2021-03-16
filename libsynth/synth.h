@@ -7,7 +7,7 @@ typedef struct DSynth DSynth;
 struct DSynth
 {
   const char *name;
-  int (*synth) (symrec_t * staff);
+  int16_t *(*const synth) (symrec_t * staff);
 };
 
 #endif /* SYNTHS_H */

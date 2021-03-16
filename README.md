@@ -10,7 +10,8 @@ staff pol {
 }
 
 master {
- track pol;
+ pcm16 kol = synth.psg pol;
+ write("sample.wav", kol);
 }
 ```
 Compile dats file as `dats -i file.dats`

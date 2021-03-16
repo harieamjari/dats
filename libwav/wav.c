@@ -6,7 +6,7 @@
 #include "wav.h"
 
 int
-wav_write_wav (struct WAV_info *wav)
+wav_write_wav (const struct WAV_info * const wav)
 {
   assert (wav->fp != NULL);
   assert (wav->Data != NULL);
@@ -29,11 +29,13 @@ wav_write_wav (struct WAV_info *wav)
   fwrite (&(int)
           { wav->NumChannels * (wav->BitsPerSample / 8) }, sizeof (int16_t),
           1, wav->fp);
+  fwrite(&wav->BitsPerSample, sizeof(uint16_t), 1, wav->fp);
   fwrite ("data", sizeof (char), 4, wav->fp);
   fwrite (&Subchunk2Size, sizeof (uint32_t), 1, wav->fp);
 
-  fwrite (&wav->Data, sizeof (int16_t), wav->NumSamples * wav->NumChannels,
+  fwrite (wav->Data, sizeof (int16_t), wav->NumSamples * wav->NumChannels,
           wav->fp);
+  printf("wav numsamples %u\n", wav->NumSamples);
 
   return 0;
 }

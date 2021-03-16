@@ -18,8 +18,9 @@ r 2;
 staff d{
   n 3 c1;
 }
-
+	
 master {
-   pcm16 pol = synth.psg;
+   pcm16 pol = synth.psg(apple);
+   write("w.wav", pol);
 }
 
