@@ -153,8 +153,7 @@ parse_staff ()
   staff->type = TOK_STAFF;
   staff->line = line_token_found;
   staff->column = column_token_found;
-  staff->value.staff.identifier = strdup (tok_identifier);
-  free (tok_identifier);
+  staff->value.staff.identifier = tok_identifier;
   tok_identifier = NULL;
   staff->value.staff.numsamples = 0;
   staff->value.staff.nr = NULL;
@@ -200,8 +199,8 @@ parse_track ()
       symrec_t *pcm16 = malloc (sizeof (symrec_t));
       pcm16->type = TOK_PCM16;
       pcm16->value.pcm16.identifier = tok_identifier;
-      pcm16->value.pcm16.pcm = NULL;
       tok_identifier = NULL;
+      pcm16->value.pcm16.pcm = NULL;
       pcm16->next = d->sym_table;
       d->sym_table = pcm16;
 
@@ -220,16 +219,15 @@ parse_track ()
           if (tok != TOK_IDENTIFIER)
             UNEXPECTED (tok, d);
 
-          const DSynth *synth = get_dsynth_by_name (tok_identifier);
-          if (synth == NULL)
+          const DSynth *driver = get_dsynth_by_name (tok_identifier);
+          if (driver == NULL)
             C_ERROR ("No synth %s\n", tok_identifier);
           printf ("Synth %s found\n", tok_identifier);
           free (tok_identifier);
           tok_identifier = NULL;
 
-          int16_t *(*const synthesizer) (symrec_t * staff) = synth->synth;
-
-
+          symrec_t *(*const synth) (const symrec_t * const staff) =
+            driver->synth;
           tok = read_next_tok_cur_dats_t (d);
           if (tok != TOK_LPAREN)
             UNEXPECTED (tok, d);
@@ -249,20 +247,53 @@ parse_track ()
           if (tok != TOK_RPAREN)
             UNEXPECTED (tok, d);
 
-          printf ("numsamples %u\n", staff->value.staff.numsamples);
           if (staff->type != TOK_STAFF)
             C_ERROR ("Synths takes staff not %s\n",
                      token_t_to_str (staff->type));
-          pcm16->value.pcm16.pcm = synthesizer (staff);
-          pcm16->value.pcm16.numsamples = staff->value.staff.numsamples;
+
           tok = read_next_tok_cur_dats_t (d);
+          if (tok == TOK_LBRACKET)
+            {
+              do
+                {
+                  tok = read_next_tok_cur_dats_t (d);
+                  if (tok != TOK_IDENTIFIER)
+                    C_ERROR ("Expecting options\n");
+                  for (int i = 0; driver->options[i].name != NULL; i++)
+                    {
+                      if (!strcmp (driver->options[i].name, tok_identifier))
+                        {
+                          free (tok_identifier);
+                          tok_identifier = NULL;
+                          tok = read_next_tok_cur_dats_t (d);
+                          if (tok != TOK_EQUAL)
+                            EXPECTING (TOK_EQUAL, d);
+                          tok = read_next_tok_cur_dats_t (d);
+                          if (tok != TOK_FLOAT)
+                            EXPECTING (TOK_FLOAT, d);
+                          driver->options[i].num = tok_num;
+                          printf("Driver num %f\n", driver->options[i].num);
+                          tok = read_next_tok_cur_dats_t (d);
+                          break;
+                        }
+                      else if (driver->options[i + 1].name == NULL)
+                        C_ERROR ("No such option %s\n", tok_identifier);
+                    }
+                } while (tok == TOK_COMMA);
+              if (tok != TOK_RBRACKET)
+                EXPECTING (TOK_RBRACKET, d);
+                          tok = read_next_tok_cur_dats_t (d);
+            }
+          symrec_t *p = synth (staff);
+          pcm16->value.pcm16.pcm = p->value.pcm16.pcm;
+          pcm16->value.pcm16.numsamples = p->value.pcm16.numsamples;
+          free (p);
           break;
         default:
           UNEXPECTED (tok, d);
         }
 
       rule_match = 1;
-
     }                           /* 
                                    else if (tok == TOK_TRACK)
                                    {
@@ -339,19 +370,7 @@ parse_track ()
         }
       free (tok_identifier);
       tok_identifier = NULL;
-/*
-      tok = read_next_tok_cur_dats_t (d);
-      if (tok!=TOK_DOT)
-       EXPECTING(TOK_DOT, d);
 
-
-      tok = read_next_tok_cur_dats_t (d);
-      if (tok!=TOK_IDENTIFIER)
-        C_ERROR("Expecting extention\n");
-
-      if (strcmp(tok_identifier, "wav"))
-        C_ERROR("Unrecognized file extension: %s\n", tok_identifier);
-*/
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_DQUOTE)
         C_ERROR ("Identifier must end with a double quote\n");
@@ -391,7 +410,6 @@ parse_track ()
 
       tok = read_next_tok_cur_dats_t (d);
       rule_match = 1;
-
     }
   else
     return 0;

@@ -97,6 +97,7 @@ clean_all_dats_t (void)
 }
 
 /* clean all symrec_t* and its next, of the current dats_t* */
+/*
 void
 clean_all_symrec_t_cur_dats_t (const dats_t * const t)
 {
@@ -115,7 +116,7 @@ clean_all_symrec_t_cur_dats_t (const dats_t * const t)
     }
 
 }
-
+*/
 void
 clean_all_symrec_t_all_dats_t ()
 {
@@ -180,6 +181,7 @@ count_dats_t (void)
   return ret;
 }
 
+/*
 int
 count_symrec_t_cur_dats_t (dats_t * t)
 {
@@ -188,7 +190,7 @@ count_symrec_t_cur_dats_t (dats_t * t)
     ++ret;
   return ret;
 }
-
+*/
 symrec_t *
 getsym (const dats_t * const t, char const *const id)
 {
@@ -490,6 +492,14 @@ w:
       t->column += 1;
       seek++;
       return TOK_RPAREN;
+    case '[':
+      t->column += 1;
+      seek++;
+      return TOK_LBRACKET;
+    case ']':
+      t->column += 1;
+      seek++;
+      return TOK_RBRACKET;
     case ';':
       t->column += 1;
       seek++;
@@ -553,6 +563,10 @@ token_t_to_str (const token_t t)
       return "'*'";
     case TOK_SUB:
       return "'-'";
+    case TOK_LBRACKET:
+      return "'['";
+    case TOK_RBRACKET:
+     return "']'";
     case TOK_LPAREN:
       return "'('";
     case TOK_RPAREN:

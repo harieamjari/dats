@@ -1,13 +1,15 @@
 staff apple{
-bpm = 2;
+bpm = 120;
 
-n 82 cb9;
-
-bpm = 0;
-n 2 c19 ;
-r 93;
-r 8;
-n 3 f7;
+n 4 c3;
+n 4 d3;
+n 4 e3;
+n 4 f3;
+n 4 g3;
+n 4 a3;
+n 4 b3;
+n 4 c4;
+r 1;
 }
 
 staff pizza{

@@ -9,11 +9,12 @@ const DSynth *
 get_dsynth_by_name (const char *name)
 {
 
-  if (!name||name==NULL)
+  if (!name || name == NULL)
     return NULL;
 
-  for (int i = 0; synth_list[i]!=NULL; i++)
-    if (!strcmp(synth_list[i]->name, name)) return synth_list[i];
+  for (int i = 0; synth_list[i] != NULL; i++)
+    if (!strcmp (synth_list[i]->name, name))
+      return synth_list[i];
 
   return NULL;
 }

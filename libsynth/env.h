@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
+
 typedef enum token_t token_t;
 enum token_t
 {
@@ -30,6 +31,8 @@ enum token_t
   TOK_RPAREN,
   TOK_LCURLY_BRACE,
   TOK_RCURLY_BRACE,
+  TOK_LBRACKET,
+  TOK_RBRACKET,
   TOK_SEMICOLON,
   TOK_COMMA,
   TOK_DOT,
