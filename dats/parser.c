@@ -88,7 +88,7 @@ parse_notes_rests ()
               if (p->next == NULL)
                 {
                   p->next = cnr;
-                  printf ("[debug] add note %p\n", cnr);
+                  //printf ("[debug] add note %p\n", cnr);
                   break;
                 }
             }
@@ -117,7 +117,7 @@ parse_notes_rests ()
               if (p->next == NULL)
                 {
                   p->next = cnr;
-                  printf ("[debug] add rest %p\n", cnr);
+                  //printf ("[debug] add rest %p\n", cnr);
                   break;
                 }
             }

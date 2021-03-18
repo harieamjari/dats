@@ -31,7 +31,7 @@ synth (const symrec_t * staff)
       if (n->type == SYM_NOTE)
         {
           int16_t wavetable[(int) (44100.0 / n->note->frequency)];
-          printf("freq %f len %d\n", n->note->frequency, (int) (44100.0 / n->note->frequency));
+          //printf("freq %f len %d\n", n->note->frequency, (int) (44100.0 / n->note->frequency));
           for (int i = 0; i < (int) (44100.0 / n->note->frequency); i++)
             wavetable[i] = rand ();
           int16_t prev = 0;

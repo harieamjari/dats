@@ -386,7 +386,7 @@ w:
 
               }
             if ((buff[1] == '#' || buff[1] == 'b')
-                && (buff[2] >= '0' && buff[2] <= '9'))
+                && (buff[2] >= '0' && buff[2] <= '9')&&!buff[3])
               {
                 switch (buff[1])
                   {
@@ -404,7 +404,7 @@ w:
                   ERROR ("Warning: non numeric character/s %s\n", end);
                 return TOK_NOTE;
               }
-            else if ((buff[1] >= '0' && buff[1] <= '9'))
+            else if ((buff[1] >= '0' && buff[1] <= '9')&&!buff[2])
               {
                 char *end;
                 tok_num *= pow (2.0, strtof (buff + 1, &end));

@@ -1,3 +1,5 @@
+*This BNF may be outdated*
+
 BNF for Dats v2
 
 
