@@ -19,7 +19,7 @@ EXTERN void clean_all_symrec_t_cur_dats_t (const dats_t * const t);*/
 
 EXTERN void clean_all_symrec_t_all_dats_t (void);
 
-EXTERN symrec_t * symrec_tcpy (symrec_t * const s);
+EXTERN symrec_t *symrec_tcpy (symrec_t * const s);
 
 EXTERN int count_dats_t (void);
 
@@ -33,7 +33,7 @@ EXTERN token_t read_next_tok_cur_dats_t (dats_t * const t);
 
 EXTERN void print_all_symrec_t_cur_dats_t (const dats_t * const t);
 
-EXTERN void print_master_cur_symrec_t(const symrec_t *const t);
+EXTERN void print_master_cur_symrec_t (const symrec_t * const t);
 
 EXTERN int process_nr (symrec_t * s);
 

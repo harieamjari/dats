@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "synth.h"
-static symrec_t *synth (const symrec_t * const staff);
+static pcm16_t *synth (const symrec_t * const staff);
 DSynth ss_psg = {
   .name = "psg",
   .options = (struct _option[])
@@ -15,15 +15,14 @@ DSynth ss_psg = {
 };
 
 
-static symrec_t *
+static pcm16_t *
 synth (const symrec_t * staff)
 {
   int16_t *pcm =
     malloc ((size_t) staff->value.staff.numsamples * sizeof (int16_t));
   assert (pcm != NULL);
-  symrec_t *pcm16 = malloc (sizeof (symrec_t));
-  assert (pcm16 != NULL);
-  pcm16->type = TOK_PCM16;
+  pcm16_t *pcm_ctx = malloc (sizeof (pcm16_t));
+  assert (pcm_ctx != NULL);
 
   uint32_t total = 0;
   for (nr_t * n = staff->value.staff.nr; n != NULL; n = n->next)
@@ -52,8 +51,8 @@ synth (const symrec_t * staff)
       total += n->length;
     }
 
-  pcm16->value.pcm16.numsamples = staff->value.staff.numsamples;
-  pcm16->value.pcm16.pcm = pcm;
+  pcm_ctx->numsamples = staff->value.staff.numsamples;
+  pcm_ctx->pcm = pcm;
   //printf ("gain %f\n", ss_psg.options[0].num);
-  return pcm16;
+  return pcm_ctx;
 }

@@ -35,16 +35,16 @@ print_all_nr_t (nr_t * nr)
   for (nr_t * p = nr; p != NULL; p = p->next)
     {
       switch (p->type)
-        {
-        case SYM_NOTE:
-          printf ("NOTE length: %u frequency: %f\n", p->length,
-                  p->note->frequency);
-          break;
-        case SYM_REST:
-          printf ("REST length: %u\n", p->length);
-          break;
+	{
+	case SYM_NOTE:
+	  printf ("NOTE length: %u frequency: %f\n", p->length,
+		  p->note->frequency);
+	  break;
+	case SYM_REST:
+	  printf ("REST length: %u\n", p->length);
+	  break;
 
-        }
+	}
 
     }
 
@@ -54,8 +54,8 @@ int
 process_nr (symrec_t * s)
 {
   uint32_t numsamples = s->value.staff.numsamples;
-  printf ("%u numsamples\n", numsamples);       /*
-                                                   s->value.staff.pcm_s16le = malloc (sizeof (int16_t) * numsamples); */
+  printf ("%u numsamples\n", numsamples);	/*
+						   s->value.staff.pcm_s16le = malloc (sizeof (int16_t) * numsamples); */
   /*
 
      nr_t *a = s->value.staff.nr;
@@ -80,11 +80,11 @@ clean_all_dats_t (void)
     {
       p = n->next;
       if (n->fp != NULL)
-        if (EOF == fclose (n->fp))
-          {
-            ERROR ("warning: ");
-            perror (n->fname);
-          }
+	if (EOF == fclose (n->fp))
+	  {
+	    ERROR ("warning: ");
+	    perror (n->fname);
+	  }
       free (n->fname);
       free (n->pcm_s16le);
       free (n);
@@ -124,51 +124,58 @@ clean_all_symrec_t_all_dats_t ()
     {
       symrec_t *n;
       for (symrec_t * p = d->sym_table; p != NULL; p = n)
-        {
-          n = p->next;
-          switch (p->type)
-            {
-            case TOK_STAFF:
-              {
-                free (p->value.staff.identifier);
-                nr_t *tmp;
-                for (nr_t * nr = p->value.staff.nr; nr != NULL; nr = tmp)
-                  {
-                    tmp = nr->next;
-                    if (nr->type == SYM_NOTE && nr != NULL)
-                      free (nr->note);
-                    free (nr);
-                  }
-              }
-              break;
-            case TOK_MASTER:
-              {
-                master_t *mtmp;
-                for (master_t * track = p->value.master; track != NULL;
-                     track = mtmp)
-                  {
-                    mtmp = track->next;
-                    symrec_t *stmp;
-                    for (symrec_t * staff = track->track; staff != NULL;
-                         staff = stmp)
-                      {
-                        stmp = staff->next;
-                        free (staff);
+	{
+	  n = p->next;
+	  switch (p->type)
+	    {
+	    case TOK_STAFF:
+	      {
+		free (p->value.staff.identifier);
+		nr_t *tmp;
+		for (nr_t * nr = p->value.staff.nr; nr != NULL; nr = tmp)
+		  {
+		    tmp = nr->next;
+		    if (nr->type == SYM_NOTE && nr != NULL)
+		      free (nr->note);
+		    free (nr);
+		  }
+	      }
+	      break;
+	    case TOK_MASTER:
+	      {
+		master_t *mtmp;
+		for (master_t * track = p->value.master; track != NULL;
+		     track = mtmp)
+		  {
+		    mtmp = track->next;
+		    symrec_t *stmp;
+		    for (symrec_t * staff = track->track; staff != NULL;
+			 staff = stmp)
+		      {
+			stmp = staff->next;
+			free (staff);
 
-                      }
-                    free (track);
-                  }
-              }
-              break;
-            case TOK_PCM16:
-              free (p->value.pcm16.pcm);
-              free (p->value.pcm16.identifier);
-              break;
-            default:
-              ERROR ("UNKNOWN TYPE %d\n", p->type);
-            }
-          free (p);
-        }
+		      }
+		    free (track);
+		  }
+	      }
+	      break;
+	    case TOK_PCM16:
+	      {
+		pcm16_t *ptmp;
+		for (pcm16_t * pcm = p->value.pcm16.pcm; pcm != NULL;
+		     pcm = ptmp)
+		  {
+		    ptmp = pcm->next;
+		    free (pcm->pcm);
+		  }
+		break;
+	      }
+	    default:
+	      ERROR ("UNKNOWN TYPE %d\n", p->type);
+	    }
+	  free (p);
+	}
     }
 }
 
@@ -198,16 +205,16 @@ getsym (const dats_t * const t, char const *const id)
   if (!strcmp (id, "master"))
     for (symrec_t * p = t->sym_table; p != NULL; p = p->next)
       if (p->type == TOK_MASTER)
-        return p;
+	return p;
   for (symrec_t * p = t->sym_table; p != NULL; p = n)
     {
       n = p->next;
       if (p->value.staff.identifier == NULL)
-        continue;
+	continue;
       if (!strcmp (p->value.staff.identifier, id))
-        return p;
+	return p;
       else if (!strcmp (p->value.env.identifier, id))
-        return p;
+	return p;
     }
   return NULL;
 
@@ -251,7 +258,7 @@ w:
     {
       c = fgetc (t->fp);
       if ((c != (int) ' ') && c != (int) 0x09)
-        break;
+	break;
       t->column++;
       seek++;
     }
@@ -269,18 +276,18 @@ w:
     {
       ungetc (c, t->fp);
       for (int i = 0; i < 99; i++)
-        {
-          c = fgetc (t->fp);
-          if (c == '"')
-            {
-              ungetc (c, t->fp);
-              tok_identifier = strdup (buff);
-              if (tok_identifier == NULL)
-                return TOK_ERR;
-              return TOK_STRING;
-            }
-          buff[i] = c;
-        }
+	{
+	  c = fgetc (t->fp);
+	  if (c == '"')
+	    {
+	      ungetc (c, t->fp);
+	      tok_identifier = strdup (buff);
+	      if (tok_identifier == NULL)
+		return TOK_ERR;
+	      return TOK_STRING;
+	    }
+	  buff[i] = c;
+	}
     }
   if (expecting == TOK_STRING)
     {
@@ -342,117 +349,119 @@ w:
     case 'z':
     case 'Z':
       {
-        int nchar;
-        ungetc (c, t->fp);
-        (void) fscanf (t->fp, "%[a-zA-Z0-9_#]%n", buff, &nchar);
-        t->column += nchar;
-        seek += nchar;
-        if (!strcmp ("staff", buff))
-          return TOK_STAFF;
-        else if ((buff[0] >= 'a' && buff[0] <= 'g') &&
-                 (((buff[1] == '#' || buff[1] == 'b')
-                   && (buff[2] >= '0' && buff[2] <= '9')) || (buff[1] >= '0'
-                                                              && buff[1] <=
-                                                              '9')))
-          {
-            switch (buff[0])
-              {
-              case 'a':
-                tok_num = 27.50;
-                break;
-              case 'b':
-                tok_num = 30.86;
-                break;
-              case 'c':
-                tok_num = 16.35;
-                break;
-              case 'd':
-                tok_num = 18.35;
-                break;
-              case 'e':
-                tok_num = 20.50;
-                break;
-              case 'f':
-                tok_num = 21.82;
-                break;
-              case 'g':
-                tok_num = 24.49;
-                break;
-              default:
-                ERROR
-                  ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
-                   t->fname, line_token_found, column_token_found, buff);
-                return TOK_ERR;
+	int nchar;
+	ungetc (c, t->fp);
+	(void) fscanf (t->fp, "%[a-zA-Z0-9_#]%n", buff, &nchar);
+	t->column += nchar;
+	seek += nchar;
+	if (!strcmp ("staff", buff))
+	  return TOK_STAFF;
+	else if ((buff[0] >= 'a' && buff[0] <= 'g') &&
+		 (((buff[1] == '#' || buff[1] == 'b')
+		   && (buff[2] >= '0' && buff[2] <= '9')) || (buff[1] >= '0'
+							      && buff[1] <=
+							      '9')))
+	  {
+	    switch (buff[0])
+	      {
+	      case 'a':
+		tok_num = 27.50;
+		break;
+	      case 'b':
+		tok_num = 30.86;
+		break;
+	      case 'c':
+		tok_num = 16.35;
+		break;
+	      case 'd':
+		tok_num = 18.35;
+		break;
+	      case 'e':
+		tok_num = 20.50;
+		break;
+	      case 'f':
+		tok_num = 21.82;
+		break;
+	      case 'g':
+		tok_num = 24.49;
+		break;
+	      default:
+		ERROR
+		  ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
+		   t->fname, line_token_found, column_token_found, buff);
+		return TOK_ERR;
 
-              }
-            if ((buff[1] == '#' || buff[1] == 'b')
-                && (buff[2] >= '0' && buff[2] <= '9')&&!buff[3])
-              {
-                switch (buff[1])
-                  {
-                  case '#':
-                    tok_num *= pow (2.0, 1.0 / 12.0);
-                    break;
-                  case 'b':
-                    tok_num /= pow (2.0, 1.0 / 12.0);
-                    break;
+	      }
+	    if ((buff[1] == '#' || buff[1] == 'b')
+		&& (buff[2] >= '0' && buff[2] <= '9') && !buff[3])
+	      {
+		switch (buff[1])
+		  {
+		  case '#':
+		    tok_num *= pow (2.0, 1.0 / 12.0);
+		    break;
+		  case 'b':
+		    tok_num /= pow (2.0, 1.0 / 12.0);
+		    break;
 
-                  }
-                char *end;
-                tok_num *= pow (2.0, strtof (buff + 2, &end));
-                if (*end)
-                  ERROR ("Warning: non numeric character/s %s\n", end);
-                return TOK_NOTE;
-              }
-            else if ((buff[1] >= '0' && buff[1] <= '9')&&!buff[2])
-              {
-                char *end;
-                tok_num *= pow (2.0, strtof (buff + 1, &end));
-                if (*end)
-                  ERROR ("Warning: non numeric character/s %s\n", end);
-                return TOK_NOTE;
-              }
-            else
-              ERROR
-                ("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
-                 t->fname, line_token_found, column_token_found, buff);
-            return TOK_ERR;
+		  }
+		char *end;
+		tok_num *= pow (2.0, strtof (buff + 2, &end));
+		if (*end)
+		  ERROR ("Warning: non numeric character/s %s\n", end);
+		return TOK_NOTE;
+	      }
+	    else if ((buff[1] >= '0' && buff[1] <= '9') && !buff[2])
+	      {
+		char *end;
+		tok_num *= pow (2.0, strtof (buff + 1, &end));
+		if (*end)
+		  ERROR ("Warning: non numeric character/s %s\n", end);
+		return TOK_NOTE;
+	      }
+	    else
+	      ERROR
+		("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
+		 t->fname, line_token_found, column_token_found, buff);
+	    return TOK_ERR;
 
-          }
-        else if (!strcmp ("repeat", buff))
-          {
-            return TOK_REPEAT;
-          }
-        else if (!strcmp ("pcm16", buff))
-          return TOK_PCM16;
-        else if (buff[0] == 'n' && !buff[1])
-          {
-            return TOK_N;
-          }
-        else if (buff[0] == 'r' && !buff[1])
-          {
-            return TOK_R;
-          }
-        else if (!strcmp ("track", buff))
-          {
+	  }
+	else if (!strcmp ("repeat", buff))
+	  {
+	    return TOK_REPEAT;
+	  }
+	else if (!strcmp ("pcm16", buff))
+	  return TOK_PCM16;
+	else if (buff[0] == 'n' && !buff[1])
+	  {
+	    return TOK_N;
+	  }
+	else if (buff[0] == 'r' && !buff[1])
+	  {
+	    return TOK_R;
+	  }
+	else if (!strcmp ("track", buff))
+	  {
 
-            return TOK_TRACK;
-          }
-        else if (!strcmp ("bpm", buff))
-          return TOK_BPM;
-        else if (!strcmp ("master", buff))
-          {
-            return TOK_MASTER;
-          }
-        else if (!strcmp ("synth", buff))
-          return TOK_SYNTH;
-        else if (!strcmp ("write", buff))
-          return TOK_WRITE;
-        else
-          {
-            tok_identifier = strdup (buff);
-            return TOK_IDENTIFIER;
-          }
+	    return TOK_TRACK;
+	  }
+	else if (!strcmp ("bpm", buff))
+	  return TOK_BPM;
+	else if (!strcmp ("master", buff))
+	  {
+	    return TOK_MASTER;
+	  }
+	else if (!strcmp ("synth", buff))
+	  return TOK_SYNTH;
+	else if (!strcmp ("read", buff))
+	  return TOK_READ;
+	else if (!strcmp ("write", buff))
+	  return TOK_WRITE;
+	else
+	  {
+	    tok_identifier = strdup (buff);
+	    return TOK_IDENTIFIER;
+	  }
       }
     case '0':
     case '1':
@@ -465,16 +474,16 @@ w:
     case '8':
     case '9':
       {
-        int nchar;
-        ungetc (c, t->fp);
-        (void) fscanf (t->fp, "%99[0-9]%n", buff, &nchar);
-        char *end;
-        tok_num = strtof (buff, &end);
-        if (*end)
-          ERROR ("Warning: non numeric character/s %s\n", end);
-        t->column += nchar;
-        seek++;
-        return TOK_FLOAT;
+	int nchar;
+	ungetc (c, t->fp);
+	(void) fscanf (t->fp, "%99[0-9]%n", buff, &nchar);
+	char *end;
+	tok_num = strtof (buff, &end);
+	if (*end)
+	  ERROR ("Warning: non numeric character/s %s\n", end);
+	t->column += nchar;
+	seek++;
+	return TOK_FLOAT;
       }
     case '{':
       t->column += 1;
@@ -528,9 +537,9 @@ w:
       return TOK_EOF;
     default:
       ERROR
-        ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected '%c'\n",
-         __FILE__, __LINE__, read_next_tok_cur_dats_t,
-         t->fname, t->line, t->column, c);
+	("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected '%c'\n",
+	 __FILE__, __LINE__, read_next_tok_cur_dats_t,
+	 t->fname, t->line, t->column, c);
       return TOK_ERR;
     }
 
@@ -566,7 +575,7 @@ token_t_to_str (const token_t t)
     case TOK_LBRACKET:
       return "'['";
     case TOK_RBRACKET:
-     return "']'";
+      return "']'";
     case TOK_LPAREN:
       return "'('";
     case TOK_RPAREN:
@@ -616,9 +625,9 @@ print_master_cur_symrec_t (const symrec_t * const t)
     {
       printf ("MASTER track %d: ", track++);
       for (symrec_t * s = m->track; s != NULL; s = s->next)
-        {
-          printf ("%s ", s->value.staff.identifier);
-        }
+	{
+	  printf ("%s ", s->value.staff.identifier);
+	}
       putchar ('\n');
     }
 }
@@ -627,29 +636,29 @@ void
 print_all_symrec_t_cur_dats_t (const dats_t * const t)
 {
   printf ("Symbol table of %s\n%-20s    %-20s\n\n", t->fname,
-          "  IDENTIFIER", "  TYPE");
+	  "  IDENTIFIER", "  TYPE");
   symrec_t *n;
   for (symrec_t * p = t->sym_table; p != NULL; p = n)
     {
       n = p->next;
       switch (p->type)
-        {
-        case TOK_MASTER:
-          printf ("  %-20s    %-20s\n", "[none]",
-                  token_t_to_str (TOK_MASTER));
-          break;
-        case TOK_STAFF:
-          printf ("  %-20s    %-20s\n",
-                  p->value.staff.identifier, token_t_to_str (TOK_STAFF));
-          break;
-        case TOK_PCM16:
-          printf ("  %-20s    %-20s\n", p->value.pcm16.identifier,
-                  token_t_to_str (TOK_PCM16));
-          break;
-        default:
-          REPORT ("Unknown token\n");
+	{
+	case TOK_MASTER:
+	  printf ("  %-20s    %-20s\n", "[none]",
+		  token_t_to_str (TOK_MASTER));
+	  break;
+	case TOK_STAFF:
+	  printf ("  %-20s    %-20s\n",
+		  p->value.staff.identifier, token_t_to_str (TOK_STAFF));
+	  break;
+	case TOK_PCM16:
+	  printf ("  %-20s    %-20s\n", p->value.pcm16.identifier,
+		  token_t_to_str (TOK_PCM16));
+	  break;
+	default:
+	  REPORT ("Unknown token\n");
 
-        }
+	}
     }
 
 }

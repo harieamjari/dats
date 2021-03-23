@@ -17,7 +17,7 @@ struct DSynth
     const char *name;
     float num;
   }*options;
-  symrec_t *(*const synth) (const symrec_t * const staff);
+  pcm16_t *(*const synth) (const symrec_t * const staff);
 };
 
 #endif /* SYNTHS_H */
