@@ -37,8 +37,8 @@ enum token_t
   TOK_SEMICOLON,
   TOK_COMMA,
   TOK_DOT,
-  TOK_DQUOTE, //  double quote
-  TOK_SQUOTE, // single qoute
+  TOK_DQUOTE,                   //  double quote
+  TOK_SQUOTE,                   // single qoute
 
   TOK_EQUAL,
   TOK_ADD,
@@ -90,12 +90,12 @@ struct master_t
   master_t *next;               /* next track */
 };
 typedef struct pcm16_t pcm16_t;
-    struct pcm16_t
-    {
-      int16_t *pcm;
-      uint32_t numsamples;
-      pcm16_t *next;
-    };
+struct pcm16_t
+{
+  int16_t *pcm;
+  uint32_t numsamples;
+  pcm16_t *next;
+};
 struct symrec_t
 {
   token_t type;
@@ -114,11 +114,12 @@ struct symrec_t
       float val;
     } env;                      /* environment variables */
     master_t *master;           /* a chain of track */
-    struct {
-    char *identifier;
-    uint32_t total_numsamples;
-    pcm16_t *pcm;
-    }pcm16;
+    struct
+    {
+      char *identifier;
+      uint32_t total_numsamples;
+      pcm16_t *pcm;
+    } pcm16;
   } value;
 
   symrec_t *next;

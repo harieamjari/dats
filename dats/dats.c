@@ -49,7 +49,7 @@ process_args (const int argc, char *const *argv)
       return 1;
     }
   FILE *fp;
-  int c;			//option_index, out_files = 0;
+  int c;                        //option_index, out_files = 0;
   const struct option long_options[] = {
     {"dats-file", required_argument, 0, 'i'},
     {0, 0, 0, 0}
@@ -67,43 +67,43 @@ process_args (const int argc, char *const *argv)
     {
       c = getopt_long (argc, argv, "i:h", long_options, NULL);
       if (c == -1)
-	break;
+        break;
       switch (c)
-	{
-	case 'i':
-	  fp = fopen (optarg, "r");
-	  if (fp == NULL)
-	    {
-	      perror (optarg);
-	      err++;
-	      break;
-	    }
-	  else
-	    {
-	      fclose (fp);
-	      struct stat path_stat;
-	      stat (optarg, &path_stat);
-	      if (!S_ISREG (path_stat.st_mode))
-		{
-		  ERROR ("%s: %s: not a regular file\n", argv[0], optarg);
-		  err++;
-		}
-	    }
-	  break;
-	case 'h':
-	  puts ("Dats compiler 2.0.0\n"
-		"\n" "options:\n" "-i                   input dats files\n");
-	  return 1;
-	default:
-	  return 1;
+        {
+        case 'i':
+          fp = fopen (optarg, "r");
+          if (fp == NULL)
+            {
+              perror (optarg);
+              err++;
+              break;
+            }
+          else
+            {
+              fclose (fp);
+              struct stat path_stat;
+              stat (optarg, &path_stat);
+              if (!S_ISREG (path_stat.st_mode))
+                {
+                  ERROR ("%s: %s: not a regular file\n", argv[0], optarg);
+                  err++;
+                }
+            }
+          break;
+        case 'h':
+          puts ("Dats compiler 2.0.0\n"
+                "\n" "options:\n" "-i                   input dats files\n");
+          return 1;
+        default:
+          return 1;
 
-	}
+        }
     }
   if (optind < argc)
     {
       while (optind < argc)
-	ERROR
-	  ("\x1b[1;31merror\x1b[0m: unknown option '%s'\n", argv[optind++]);
+        ERROR
+          ("\x1b[1;31merror\x1b[0m: unknown option '%s'\n", argv[optind++]);
       return 1;
     }
   if (err)
@@ -117,30 +117,30 @@ process_args (const int argc, char *const *argv)
     {
       c = getopt_long (argc, argv, "i:", long_options, NULL);
       if (c == -1)
-	break;
+        break;
       switch (c)
-	{
-	case 'i':
-	  fp = fopen (optarg, "r");
-	  if (fp == NULL)
-	    {
-	      perror (optarg);
-	      return 1;
-	    }
-	  dats_t *p = malloc (sizeof (dats_t));
-	  assert (p != NULL);
-	  p->fp = fp;
-	  p->fname = strdup (optarg);
-	  assert (p->fname != NULL);
-	  p->line = 1;
-	  p->column = 1;
-	  p->numsamples = 0;
-	  p->pcm_s16le = NULL;
-	  p->sym_table = NULL;
-	  p->next = dats_files;
-	  dats_files = p;
-	  break;
-	}
+        {
+        case 'i':
+          fp = fopen (optarg, "r");
+          if (fp == NULL)
+            {
+              perror (optarg);
+              return 1;
+            }
+          dats_t *p = malloc (sizeof (dats_t));
+          assert (p != NULL);
+          p->fp = fp;
+          p->fname = strdup (optarg);
+          assert (p->fname != NULL);
+          p->line = 1;
+          p->column = 1;
+          p->numsamples = 0;
+          p->pcm_s16le = NULL;
+          p->sym_table = NULL;
+          p->next = dats_files;
+          dats_files = p;
+          break;
+        }
     }
 
   return 0;
@@ -156,7 +156,7 @@ main (int argc, char **argv)
   for (dats_t * p = dats_files; p != NULL; p = p->next)
     {
       if (parse_cur_dats_t (p))
-	continue;
+        continue;
       print_all_symrec_t_cur_dats_t (p);
       semantic_cur_dats_t (p);
     }
@@ -174,12 +174,12 @@ main (int argc, char **argv)
   for (dats_t * p = dats_files; p != NULL; p = p->next)
     {
       for (symrec_t * s = p->sym_table; s != NULL; s = s->next)
-	{
-	  if (s->type == TOK_MASTER)
-	    print_master_cur_symrec_t (s);
-	  else if (s->type != TOK_STAFF)
-	    process_nr (s);
-	}
+        {
+          if (s->type == TOK_MASTER)
+            print_master_cur_symrec_t (s);
+          else if (s->type != TOK_STAFF)
+            process_nr (s);
+        }
     }
 err:
   if (global_errors)

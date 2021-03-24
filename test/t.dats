@@ -148,7 +148,7 @@ r 2;
 }
 	
 master {
-   pcm16 pol = synth.psg(apple);
+   pcm16 pol = synth.psg(apple), synth.psg(pizza), synth.psg(apple);
    write("w.wav", pol);
 }
 

@@ -12,9 +12,8 @@ struct WAV_info
   uint32_t SampleRate;
   uint32_t NumSamples;
   uint16_t  BitsPerSample;
-  int16_t *Data;
 };
 
-extern int wav_write_wav(const struct WAV_info *const wav);
+extern int wav_write_header(const struct WAV_info *const wav);
 
 #endif /* WAV_H */

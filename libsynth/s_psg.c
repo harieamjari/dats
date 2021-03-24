@@ -53,6 +53,7 @@ synth (const symrec_t * staff)
 
   pcm_ctx->numsamples = staff->value.staff.numsamples;
   pcm_ctx->pcm = pcm;
+  pcm_ctx->next = NULL;
   //printf ("gain %f\n", ss_psg.options[0].num);
   return pcm_ctx;
 }

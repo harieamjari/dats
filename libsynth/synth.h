@@ -13,10 +13,11 @@ typedef struct DSynth DSynth;
 struct DSynth
 {
   const char *name;
-  struct _option{
+  struct _option
+  {
     const char *name;
     float num;
-  }*options;
+  } *options;
   pcm16_t *(*const synth) (const symrec_t * const staff);
 };
 
