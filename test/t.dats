@@ -1,3 +1,5 @@
+// Composed by Al-buharie Amjari
+
 staff apple{
 bpm = 169;
 
@@ -140,6 +142,44 @@ n 16 d#3;
 
 n 4 f4;
 n 4 c4;
+
+
+n 8 a#3;
+r 16;
+n 16 g#3;
+
+n 8 a#3;
+r 16;
+n 16 c4;
+
+n 8 a#3;
+r 16;
+n 16 g#3;
+
+n 8 g3;
+r 16;
+n 16 f3;
+
+n 8 d#3;
+r 16;
+n 16 d#3;
+
+n 4 d#4;
+n 4 a#3;
+
+n 8 g#3;
+r 16;
+n 16 g3;
+
+n 8 g#3;
+r 16;
+n 16 a#3;
+
+n 8 c4;
+r 16;
+n 16  a#3;
+
+n 4 g#3;
 }
 
 staff pizza{
@@ -148,7 +188,11 @@ r 2;
 }
 	
 master {
-   pcm16 pol = synth.psg(apple), synth.psg(pizza), synth.psg(apple);
-   write("w.wav", pol);
+/* multi line **
+   ***
+   hh */
+   pcm16 track1 = synth.psg(apple);
+   write("w.wav", track1);
+   ref;
 }
 

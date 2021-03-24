@@ -39,7 +39,8 @@ extern int parse_cur_dats_t (dats_t * const t);
 extern int semantic_cur_dats_t (dats_t * const t);
 
 /* process_args returns the value 0 if sucesss and nonzero if
- * failed. */
+ * failed. 
+ */
 int
 process_args (const int argc, char *const *argv)
 {
@@ -93,7 +94,7 @@ process_args (const int argc, char *const *argv)
         case 'h':
           puts ("Dats compiler 2.0.0\n"
                 "\n" "options:\n" "-i                   input dats files\n");
-          return 1;
+          exit (0);
         default:
           return 1;
 
@@ -110,9 +111,8 @@ process_args (const int argc, char *const *argv)
     {
       return 1;
     }
-
+  /* retry parsing arguments */
   optind = 1;
-  /* Pass 2 */
   while (1)
     {
       c = getopt_long (argc, argv, "i:", long_options, NULL);
@@ -153,16 +153,21 @@ main (int argc, char **argv)
   ret = process_args (argc, argv);
   if (ret)
     return 1;
+
+  /* Individually parse each dats_t* */
   for (dats_t * p = dats_files; p != NULL; p = p->next)
     {
+      /* if parse current dats_t returns non zero, then it
+       * must be skipped
+       */
       if (parse_cur_dats_t (p))
         continue;
       print_all_symrec_t_cur_dats_t (p);
-      semantic_cur_dats_t (p);
+      //semantic_cur_dats_t (p);
     }
   if (global_errors)
     goto err;
-
+/*
   if (tok_master == 0)
     {
       REPORT ("error: No definition of master\n");
@@ -170,17 +175,16 @@ main (int argc, char **argv)
     }
   else if (tok_master > 1)
     goto err;
-
+*/
+/*
   for (dats_t * p = dats_files; p != NULL; p = p->next)
     {
       for (symrec_t * s = p->sym_table; s != NULL; s = s->next)
         {
           if (s->type == TOK_MASTER)
-            print_master_cur_symrec_t (s);
-          else if (s->type != TOK_STAFF)
-            process_nr (s);
+            //print_master_cur_symrec_t (s);
         }
-    }
+    }*/
 err:
   if (global_errors)
     ERROR ("\n%d global errors generated\n", global_errors);

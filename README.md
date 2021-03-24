@@ -16,6 +16,7 @@ staff pol {
 }
 
 master {
+  // This uses the synthesizer named "psg"
   pcm16 kol = synth.psg(pol);
   write("sample.wav", kol);
 }
@@ -38,4 +39,6 @@ make && make install && make test
 - libsynth - Provides synthesizers.
 
 - libfilter - Provides filters for manipulating raw PCM s16le data.
+
+- Branching and conditional statements.
 

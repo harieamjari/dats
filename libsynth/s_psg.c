@@ -49,7 +49,11 @@ synth (const symrec_t * staff)
           cur = 0;
         }
       total += n->length;
+       if ((total%44100)<1000){printf("\r[synth psg] %d/%d", total, staff->value.staff.numsamples);
+      fflush(stdout);
+     }
     }
+    putchar('\n');
 
   pcm_ctx->numsamples = staff->value.staff.numsamples;
   pcm_ctx->pcm = pcm;

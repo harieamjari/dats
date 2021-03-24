@@ -50,27 +50,14 @@ print_all_nr_t (nr_t * nr)
 
 }
 
-int
+/*
+void
 process_nr (symrec_t * s)
 {
   uint32_t numsamples = s->value.staff.numsamples;
-  printf ("%u numsamples\n", numsamples);       /*
-                                                   s->value.staff.pcm_s16le = malloc (sizeof (int16_t) * numsamples); */
-  /*
-
-     nr_t *a = s->value.staff.nr;
-     for (uint32_t total_samples = 0; total_samples < numsamples; a = a->next)
-     {
-     if (a->type == SYM_NOTE || a->type == SYM_REST)
-     {
-     total_samples += a->length;
-     printf ("%d total %u\n", a->length, total_samples);
-     }
-     } */
-
-  return 0;
+  printf ("%u numsamples\n", numsamples);
 }
-
+*/
 void
 clean_all_dats_t (void)
 {
@@ -275,10 +262,13 @@ w:
   if (expecting == TOK_STRING)
     {
       ungetc (c, t->fp);
-      for (int i = 0; i < 99; i++)
+      int i;
+      for (i = 0; i < 99; i++)
         {
           c = fgetc (t->fp);
-          if (c == '"')
+          if (c == '\\')
+            continue;
+          else if (c == '"')
             {
               ungetc (c, t->fp);
               tok_identifier = strdup (buff);
@@ -287,67 +277,73 @@ w:
               return TOK_STRING;
             }
           buff[i] = c;
+          t->column += 1;
         }
     }
   if (expecting == TOK_STRING)
     {
-      ERROR ("ERROR: long names\n");
+      ERROR ("ERROR: long name\n");
       return TOK_ERR;
+    }
+  if (c == (int) '/')
+    {
+      c = fgetc (t->fp);
+      if (c == (int) '/')
+        {
+          while ((c = fgetc (t->fp)) != EOF)
+            if (c == '\n')
+              {
+                t->line++;
+                t->column = 0;
+                goto w;
+              }
+        }
+      else if (c == (int) '*')
+        {
+          while ((c = fgetc (t->fp)) != EOF)
+            {
+              switch (c)
+                {
+                case '*':
+                  if ((c = fgetc (t->fp)) == '/')
+                    goto w;
+                  else if (c == '\n')
+                    {
+                      t->line++;
+                      t->column = 0;
+                    }
+                  break;
+                case '\n':
+                  t->line++;
+                  t->column = 0;
+                }
+            }
+          ERROR
+            ("%s:%d:%d: \x1b[1;31merror\x1b[0m: unterminated multi line comment\n",
+             t->fname, line_token_found, column_token_found);
+          return TOK_ERR;
+        }
+      ungetc (c, t->fp);
+      c = '/';
     }
   switch (c)
     {
-    case 'a':
-    case 'A':
-    case 'b':
-    case 'B':
-    case 'c':
-    case 'C':
-    case 'd':
-    case 'D':
-    case 'e':
-    case 'E':
-    case 'f':
-    case 'F':
-    case 'g':
-    case 'G':
-    case 'h':
-    case 'H':
-    case 'i':
-    case 'I':
-    case 'j':
-    case 'J':
-    case 'k':
-    case 'K':
-    case 'l':
-    case 'L':
-    case 'm':
-    case 'M':
-    case 'n':
-    case 'N':
-    case 'o':
-    case 'O':
-    case 'p':
-    case 'P':
-    case 'q':
-    case 'Q':
-    case 'r':
-    case 'R':
-    case 's':
-    case 'S':
-    case 't':
-    case 'T':
-    case 'u':
-    case 'U':
-    case 'v':
-    case 'V':
-    case 'w':
-    case 'W':
-    case 'x':
-    case 'X':
-    case 'y':
-    case 'Y':
+// clang-format off
+/* *INDENT-OFF* */
+    case 'a': case 'b': case 'c': case 'd': case 'e':
+    case 'f': case 'g': case 'h': case 'i': case 'j':
+    case 'k': case 'l': case 'm': case 'n': case 'o':
+    case 'p': case 'q': case 'r': case 's': case 't':
+    case 'u': case 'v': case 'w': case 'x': case 'y':
     case 'z':
+    case 'A': case 'B': case 'C': case 'D': case 'E':
+    case 'F': case 'G': case 'H': case 'I': case 'J':
+    case 'K': case 'L': case 'M': case 'N': case 'O':
+    case 'P': case 'Q': case 'R': case 'S': case 'T':
+    case 'U': case 'V': case 'W': case 'X': case 'Y':
     case 'Z':
+/* *INDENT-ON* */
+// clang-format on
       {
         int nchar;
         ungetc (c, t->fp);
@@ -403,7 +399,6 @@ w:
                   case 'b':
                     tok_num /= pow (2.0, 1.0 / 12.0);
                     break;
-
                   }
                 char *end;
                 tok_num *= pow (2.0, strtof (buff + 2, &end));
@@ -441,16 +436,11 @@ w:
             return TOK_R;
           }
         else if (!strcmp ("track", buff))
-          {
-
-            return TOK_TRACK;
-          }
+          return TOK_TRACK;
         else if (!strcmp ("bpm", buff))
           return TOK_BPM;
         else if (!strcmp ("master", buff))
-          {
-            return TOK_MASTER;
-          }
+          return TOK_MASTER;
         else if (!strcmp ("synth", buff))
           return TOK_SYNTH;
         else if (!strcmp ("read", buff))
@@ -463,16 +453,13 @@ w:
             return TOK_IDENTIFIER;
           }
       }
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
+// clang-format off
+/* *INDENT-OFF* */
+    case '0': case '1': case '2': case '3':
+    case '4': case '5': case '6': case '7':
+    case '8': case '9':
+// clang-format on
+/* *INDENT-ON* */
       {
         int nchar;
         ungetc (c, t->fp);
@@ -585,7 +572,7 @@ token_t_to_str (const token_t t)
     case TOK_SQUOTE:
       return "'";
     case TOK_COMMA:
-      return "'.'";
+      return "','";
     case TOK_FLOAT:
       return "numeric";
     case TOK_N:
@@ -604,6 +591,8 @@ token_t_to_str (const token_t t)
       return "synth";
     case TOK_WRITE:
       return "write";
+    case TOK_READ:
+      return "read";
     default:
       REPORT ("Unknown token\n");
       printf ("%d\n", t);
@@ -613,8 +602,7 @@ token_t_to_str (const token_t t)
 
 }
 
-/* prints the symbol table of the current dats_t* t
- */
+/*
 void
 print_master_cur_symrec_t (const symrec_t * const t)
 {
@@ -630,8 +618,9 @@ print_master_cur_symrec_t (const symrec_t * const t)
         }
       putchar ('\n');
     }
-}
+}*/
 
+/* prints the symbol table of the current dats_t* t*/
 void
 print_all_symrec_t_cur_dats_t (const dats_t * const t)
 {

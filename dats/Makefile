@@ -21,5 +21,6 @@ test : dats
 	./dats -i ../test/terr.dats -i ../test/t.dats
 install:  dats
 	cp $^ $(PREFIX)/bin
-
+indent :
+	indent *.[ch] -nut
 
