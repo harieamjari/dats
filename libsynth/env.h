@@ -37,8 +37,8 @@ enum token_t
   TOK_SEMICOLON,
   TOK_COMMA,
   TOK_DOT,
-  TOK_DQUOTE,                   //  double quote
-  TOK_SQUOTE,                   // single qoute
+  TOK_DQUOTE,			//  double quote
+  TOK_SQUOTE,			// single qoute
 
   TOK_EQUAL,
   TOK_ADD,
@@ -72,12 +72,12 @@ struct note_t
   int release;
 };
 
-typedef struct nr_t nr_t;       /* list of notes and rests with properties */
+typedef struct nr_t nr_t;	/* list of notes and rests with properties */
 struct nr_t
 {
   music_symbol type;
   uint32_t length;
-  note_t *note;                 /* if type = NOTE */
+  note_t *note;			/* if type = NOTE */
   nr_t *next;
 };
 
@@ -86,8 +86,8 @@ typedef struct master_t master_t;
 
 struct master_t
 {
-  symrec_t *track;              /* track is composed of series of type TOK_STAFF linked together */
-  master_t *next;               /* next track */
+  symrec_t *track;		/* track is composed of series of type TOK_STAFF linked together */
+  master_t *next;		/* next track */
 };
 typedef struct pcm16_t pcm16_t;
 struct pcm16_t
@@ -107,13 +107,13 @@ struct symrec_t
       char *identifier;
       nr_t *nr;
       uint32_t numsamples;
-    } staff;                    /* staff variables */
+    } staff;			/* staff variables */
     struct
     {
       char *identifier;
       float val;
-    } env;                      /* environment variables */
-    master_t *master;           /* a chain of track */
+    } env;			/* environment variables */
+    master_t *master;		/* a chain of track */
     struct
     {
       char *identifier;

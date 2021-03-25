@@ -21,15 +21,49 @@ Further revision of this draft may be publish by the author from time to time.
 
 \section{Introduction}
 
-\indent The Dats language is a text-based programming language use for music composition.  It intents to promote the readability of ASCII music sheets and the compilation of these into a soundfile.
+\indent The Dats language is a text-based programming language use for music composition.  
+It intents to promote the readability of ASCII music sheets and the compilation of these into
+ a soundfile.
 This language is fairly new and still in expiremental so other features such trills, tie,
 repeat, glissando, are not implemented but are considered to be.
 
-\section{Environment}
-\paragraph{1} Hellow test jdjd jdjjd jsjdj jsjs jsjsj ieiej iejeje jsjsj diiskd siksj kekek siksks kejejjxkdjjdkk kdjsjdj jejdj dikd ksj kejej.
 
-\paragraph{2} Lop
- 
+
+\section{Environment}
+ \paragraph{} A Dats interpreter executes each statements from a Dats file sequentially. These
+statements are always terminated by a semicolon.
+
+\section{Language}
+\subsection{Types}
+\subsubsection{staff}
+\paragraph{} The \verb+staff+ keyword signifies the beginning of a staff. It is then followed by an identifier and \verb+{+. A staff consist of
+notes, which is declared by using \verb+n+, and or rest, which is declared by using \verb+r+, inside the \textit{staff block}. The staff, is terminated by \verb+}+. The, \verb+n+, or, \verb+r+, which is declared inside the \textit{staff block} both takes an argument.
+
+\paragraph{} \verb+n+, takes two arguments; the length and the frequency the note will be playing:
+\begin{Verbatim}[frame=single]
+      n <length>, <frequency>;
+\end{Verbatim}
+
+\paragraph{} For argument, length, it may be in the form of integer or floating point number:
+\begin{Verbatim}[frame=single]
+      n 4.0, <frequency>;
+      n 4, <frequency>;
+\end{Verbatim}
+\paragraph{} For argument, frequency, it may be in the form of \verb+[a-g](#|b)?[0-9]+, a floating
+point number, or an integer:
+\begin{Verbatim}[frame=single]
+      n 4, 440;
+      n 4, 440.0;
+      n 4, a4;
+\end{Verbatim}
+
+\paragraph{} Add operation may be performed in argument, length, to simulate a tie:
+\begin{Verbatim}[frame=single]
+      n 4+4, 440; /* is equivalent to: */
+      n 2, 440; 
+\end{Verbatim}
+\textbf{NOTE} Other arithmetic operations are prohibited.
+
 \subsection{NOTE}
 
 The \verb+NOTE+ keyword signifies the beginning of a note. It must be declared

@@ -6,3 +6,7 @@ clean: libwav.so
 	rm $^
 install: libwav.so
 	cp $^ $(PREFIX)/lib
+
+.PHONY: indent
+indent:
+	indent *.[ch]

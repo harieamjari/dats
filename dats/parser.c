@@ -54,28 +54,44 @@ parse_notes_rests ()
         }
       tok_bpm = tok_num;
       rule_match = 1;
+      tok = read_next_tok_cur_dats_t (d);
     }
   else if (tok == TOK_N)
     {
       nr_t *cnr = malloc (sizeof (nr_t));
       assert (cnr != NULL);
       cnr->type = SYM_NOTE;
+      cnr->length = 0;
       cnr->next = NULL;
-
+    add_length:
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_FLOAT)
-        {
-          EXPECTING (TOK_FLOAT, d);
-        }
+        EXPECTING (TOK_FLOAT, d);
 
-      cnr->length = (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
+      cnr->length += (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
+      uint32_t dotted_len =
+        (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
+    check:
+      tok = read_next_tok_cur_dats_t (d);
+      switch (tok)
+        {
+        case TOK_DOT:
+          dotted_len /= 2;
+          cnr->length += dotted_len;
+          goto check;
+        case TOK_ADD:
+          goto add_length;
+        case TOK_COMMA:
+          break;
+        default:
+          UNEXPECTED (tok, d);
+
+        }
       staff->value.staff.numsamples += cnr->length;
       tok = read_next_tok_cur_dats_t (d);
 
       if (tok != TOK_NOTE && tok != TOK_FLOAT)
-        {
-          UNEXPECTED (tok, d);
-        }
+        UNEXPECTED (tok, d);
 
       note_t *n = malloc (sizeof (note_t));
       assert (n != NULL);
@@ -97,6 +113,7 @@ parse_notes_rests ()
       else
         staff->value.staff.nr = cnr;
       rule_match = 1;
+      tok = read_next_tok_cur_dats_t (d);
     }
   else if (tok == TOK_R)
     {
@@ -124,16 +141,14 @@ parse_notes_rests ()
       else
         staff->value.staff.nr = cnr;
       rule_match = 1;
+      tok = read_next_tok_cur_dats_t (d);
     }
   else
     return 0;
 
 
-  tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_SEMICOLON)
-    {
-      EXPECTING (TOK_SEMICOLON, d);
-    }
+    UNEXPECTED (tok, d);
   tok = read_next_tok_cur_dats_t (d);
   return 0;
 }
@@ -145,7 +160,7 @@ parse_staff ()
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_IDENTIFIER)
     EXPECTING (TOK_IDENTIFIER, d);
-  printf ("=== BEGIN STAFF === %s\n", tok_identifier);
+  //printf ("=== BEGIN STAFF === %s\n", tok_identifier);
   /* insert symrec_t */
   staff = malloc (sizeof (symrec_t));
   assert (staff != NULL);
@@ -175,14 +190,7 @@ parse_staff ()
   while (rule_match);
 
   if (tok != TOK_RCURLY_BRACE)
-    {
-      UNEXPECTED (tok, d);
-    }
-  puts ("=== END STAFF ===");
-/*
-  ERROR ("num parser %d\n", staff->value.staff.numsamples);
-  print_all_nr_t (staff->value.staff.nr);*/
-  rule_match = 1;
+    UNEXPECTED (tok, d);
   return 0;
 }
 

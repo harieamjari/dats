@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <ctype.h>
 #include <math.h>
 
 #define DEFINE_SCANNER_VARIABLES
@@ -282,7 +283,7 @@ w:
     }
   if (expecting == TOK_STRING)
     {
-      ERROR ("ERROR: long name\n");
+      ERROR ("ERROR: Too long name\n");
       return TOK_ERR;
     }
   if (c == (int) '/')
@@ -294,7 +295,7 @@ w:
             if (c == '\n')
               {
                 t->line++;
-                t->column = 0;
+                t->column = 1;
                 goto w;
               }
         }
@@ -310,12 +311,12 @@ w:
                   else if (c == '\n')
                     {
                       t->line++;
-                      t->column = 0;
+                      t->column = 1;
                     }
                   break;
                 case '\n':
                   t->line++;
-                  t->column = 0;
+                  t->column = 1;
                 }
             }
           ERROR
@@ -353,10 +354,10 @@ w:
         if (!strcmp ("staff", buff))
           return TOK_STAFF;
         else if ((buff[0] >= 'a' && buff[0] <= 'g') &&
-                 (((buff[1] == '#' || buff[1] == 'b')
-                   && (buff[2] >= '0' && buff[2] <= '9')) || (buff[1] >= '0'
-                                                              && buff[1] <=
-                                                              '9')))
+                 (((buff[1] == '#' || buff[1] == 'b') && isdigit (buff[2]))
+                  /*(buff[2] >= '0' && buff[2] <= '9') */  || (buff[1] >= '0'
+                                                               && buff[1] <=
+                                                               '9')))
           {
             switch (buff[0])
               {
@@ -389,7 +390,7 @@ w:
 
               }
             if ((buff[1] == '#' || buff[1] == 'b')
-                && (buff[2] >= '0' && buff[2] <= '9') && !buff[3])
+                && isdigit (buff[2]) && !buff[3])
               {
                 switch (buff[1])
                   {
@@ -406,7 +407,7 @@ w:
                   ERROR ("Warning: non numeric character/s %s\n", end);
                 return TOK_NOTE;
               }
-            else if ((buff[1] >= '0' && buff[1] <= '9') && !buff[2])
+            else if (isdigit (buff[1]) && !buff[2])
               {
                 char *end;
                 tok_num *= pow (2.0, strtof (buff + 1, &end));
@@ -422,19 +423,13 @@ w:
 
           }
         else if (!strcmp ("repeat", buff))
-          {
-            return TOK_REPEAT;
-          }
+          return TOK_REPEAT;
         else if (!strcmp ("pcm16", buff))
           return TOK_PCM16;
         else if (buff[0] == 'n' && !buff[1])
-          {
-            return TOK_N;
-          }
+          return TOK_N;
         else if (buff[0] == 'r' && !buff[1])
-          {
-            return TOK_R;
-          }
+          return TOK_R;
         else if (!strcmp ("track", buff))
           return TOK_TRACK;
         else if (!strcmp ("bpm", buff))
@@ -463,9 +458,36 @@ w:
       {
         int nchar;
         ungetc (c, t->fp);
-        (void) fscanf (t->fp, "%99[0-9]%n", buff, &nchar);
+        (void) fscanf (t->fp, "%99[0-9.]%n", buff, &nchar);
         char *end;
         tok_num = strtof (buff, &end);
+        {
+          int i = 0;
+          while (isdigit (buff[i]))
+            i++;
+          if (buff[i] == (int) '.')
+            {
+              i++;
+              if (isdigit (buff[i]))
+                {
+                  while (isdigit (buff[++i]));
+                  printf ("%d %d log\n", i, nchar);
+                  if (i != nchar)
+                    for (int a = nchar; a - 1 != i - 1; a--)
+                      {
+                        ungetc (buff[a], t->fp);
+                        t->column--;
+                      }
+                }
+              else
+                {
+                  ungetc ('.', t->fp);
+                  t->column--;
+                }
+
+            }
+
+        }
         if (*end)
           ERROR ("Warning: non numeric character/s %s\n", end);
         t->column += nchar;
@@ -520,18 +542,35 @@ w:
       t->column += 1;
       seek++;
       return TOK_COMMA;
+    case '+':
+      t->column += 1;
+      seek++;
+      return TOK_ADD;
+    case '-':
+      t->column += 1;
+      seek++;
+      return TOK_SUB;
+    case '/':
+      t->column += 1;
+      seek++;
+      return TOK_DIV;
+    case '*':
+      t->column += 1;
+      seek++;
+      return TOK_MUL;
     case EOF:
       return TOK_EOF;
     default:
       ERROR
-        ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: unexpected '%c'\n",
+        ("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: illegal symbol '%c'\n",
          __FILE__, __LINE__, read_next_tok_cur_dats_t,
          t->fname, t->line, t->column, c);
       return TOK_ERR;
     }
 
   fclose (t->fp);
-  return TOK_EOF;
+  ERROR ("SYSTEM ERROR!!!\n");
+  return TOK_ERR;
 }
 
 const char *
