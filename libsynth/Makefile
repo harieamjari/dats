@@ -6,10 +6,10 @@ S_SYNTHS +=  s_psg.c
 OBJ := $(patsubst %.c, %.o, $(S_SYNTHS) allsynth.c)
 
 libsynth.so : $(OBJ)
-	$(CC) $(CFLAGS) -fPIC -shared -O0 $^ -o $@
+	$(CC) $(CFLAGS) ../memory-leak-detector/leak_detector.o -fPIC -shared -O0 $^ -o $@
 
 $(OBJ): %.o: %.c
-	$(CC) -c $(CFLAGS) $<
+	$(CC) -c $(CFLAGS) $< -I../memory-leak-detector
 
 .PHONY: indent
 clean: libsynth.so $(OBJ)

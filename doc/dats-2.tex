@@ -33,6 +33,8 @@ repeat, glissando, are not implemented but are considered to be.
  \paragraph{} A Dats interpreter executes each statements from a Dats file sequentially. These
 statements are always terminated by a semicolon.
 
+\paragraph The interpreter 
+
 \section{Language}
 \subsection{Types}
 \subsubsection{staff}
@@ -49,8 +51,9 @@ notes, which is declared by using \verb+n+, and or rest, which is declared by us
       n 4.0, <frequency>;
       n 4, <frequency>;
 \end{Verbatim}
-\paragraph{} For argument, frequency, it may be in the form of \verb+[a-g](#|b)?[0-9]+, a floating
+\paragraph{} For argument, \verb+frequency+, it may be in the form of \verb+[a-g](#|b)?[0-9]+, a floating
 point number, or an integer:
+
 \begin{Verbatim}[frame=single]
       n 4, 440;
       n 4, 440.0;
@@ -58,12 +61,28 @@ point number, or an integer:
 \end{Verbatim}
 
 \paragraph{} Add operation may be performed in argument, length, to simulate a tie:
+
 \begin{Verbatim}[frame=single]
       n 4+4, 440; /* is equivalent to: */
       n 2, 440; 
 \end{Verbatim}
 \textbf{NOTE} Other arithmetic operations are prohibited.
 
+\subsubsection{pcm16}
+\paragraph{} This is is a signed 16-bit PCM. A declaration of variable of type,
+\verb+pcm16+, must be immdediately followed by its identifier, followed by
+an assignment to one of synthesizers taking a variable of type, \verb+staff+. 
+\begin{Verbatim}[frame=single]
+      pcm16 foo = synth.psg(pol);
+\end{Verbatim}
+
+\paragraph{} Or other variable of type ,\verb+pcm16+.
+\begin{Verbatim}[frame=single]
+     pcm16 foo = synth.psg(pol);
+     pcm16 bar = foo;
+\end{Verbatim}
+
+\paragraph{} Append operation 
 \subsection{NOTE}
 
 The \verb+NOTE+ keyword signifies the beginning of a note. It must be declared

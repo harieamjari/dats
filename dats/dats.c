@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 
 #include "scanner.h"
-
+#include "memory-leak-detector/leak_detector.h"
 //#include "libwav/wav.h"
 
 /* Performs syntatic analysis */
@@ -149,6 +149,7 @@ process_args (const int argc, char *const *argv)
 int
 main (int argc, char **argv)
 {
+  atexit (report_mem_leak);
   int ret;
   ret = process_args (argc, argv);
   if (ret)

@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "memory-leak-detector/leak_detector.h"
 #include "scanner.h"
 
 #include "libwav/wav.h"

@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
+
+#include "leak_detector.h"
 #include "synth.h"
 static pcm16_t *synth (const symrec_t * const staff);
 DSynth ss_psg = {

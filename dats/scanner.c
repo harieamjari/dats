@@ -25,6 +25,8 @@
 #include <ctype.h>
 #include <math.h>
 
+#include "memory-leak-detector/leak_detector.h"
+
 #define DEFINE_SCANNER_VARIABLES
 #include "scanner.h"
 
@@ -157,6 +159,8 @@ clean_all_symrec_t_all_dats_t ()
                     ptmp = pcm->next;
                     free (pcm->pcm);
                   }
+                free (p->value.pcm16.pcm);
+                free (p->value.pcm16.identifier);
                 break;
               }
             default:
@@ -471,11 +475,12 @@ w:
               if (isdigit (buff[i]))
                 {
                   while (isdigit (buff[++i]));
-                  printf ("%d %d log\n", i, nchar);
                   if (i != nchar)
-                    for (int a = nchar; a - 1 != i - 1; a--)
+                    for (int a = nchar - 1; a != i - 1; a--)
                       {
                         ungetc (buff[a], t->fp);
+                        printf ("i %d a %d nchar %d unget '%c' %x\n", i, a,
+                                nchar, buff[a], buff[a]);
                         t->column--;
                       }
                 }

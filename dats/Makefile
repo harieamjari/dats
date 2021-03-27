@@ -1,16 +1,22 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -O0 -ggdb3 -fsanitize=address -fsanitize=undefined 
+CFLAGS = -Wall -Wextra -O3
+DEBUG_FLAGS = -ggdb3 -fsanitize=address -fsanitize=undefined 
 OBJ := dats.o parser.o scanner.o semantic.o
 all : dats
 
+ENABLE_DEBUG = no
+
+ifeq ($(ENABLE_DEBUG), no)
+	DEBUG_FLAGS =
+endif
 dats : $(OBJ)
-	$(CC) $(CFLAGS) $^ -L../libwav -L../libsynth \
-	-lm -lwav -lsynth -o $@
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $^ ../memory-leak-detector/leak_detector.o \
+	 -L../libwav -L../libsynth -lm -lwav -lsynth -o $@
 
 
 $(OBJ) :%.o:%.c $(wildcard *.h)
-	gcc -c -I.. $(CFLAGS) $< -o $@
+	gcc -c -I.. $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
 
 .PHONY : clean test indent
 clean: 
