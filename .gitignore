@@ -1,0 +1,28 @@
+# Object files
+*.o
+*.ko
+
+# Libraries
+*.lib
+*.a
+
+# Sound files
+test/*.wav
+dats/*.wav
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Latex outputs
+*.log
+*.pdf
+*.aux
+*.oit

@@ -1,17 +1,18 @@
 
 CC = gcc
 CFLAGS = -Wall -Wextra -O3
-DEBUG_FLAGS = -ggdb3 -fsanitize=address -fsanitize=undefined 
 OBJ := dats.o parser.o scanner.o semantic.o
 all : dats
 
 ENABLE_DEBUG = no
 
-ifeq ($(ENABLE_DEBUG), no)
-	DEBUG_FLAGS =
+ifeq ($(ENABLE_DEBUG), yes)
+	DEBUG_FLAGS = -ggdb3 -fsanitize=address -fsanitize=undefined 
+	OBJ += ../memory-leak-detector/leak_detector.o
+        CFLAGS += -DDATS_DETECT_MEM_LEAK
 endif
 dats : $(OBJ)
-	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $^ ../memory-leak-detector/leak_detector.o \
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $^  \
 	 -L../libwav -L../libsynth -lm -lwav -lsynth -o $@
 
 

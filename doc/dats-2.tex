@@ -28,13 +28,11 @@ This language is fairly new and still in expiremental so other features such tri
 repeat, glissando, are not implemented but are considered to be.
 
 
-
 \section{Environment}
  \paragraph{} A Dats interpreter executes each statements from a Dats file sequentially. These
 statements are always terminated by a semicolon.
 
-\paragraph The interpreter 
-
+\paragraph{} The start of a Dats file is called, \verb+master+. 
 \section{Language}
 \subsection{Types}
 \subsubsection{staff}
@@ -82,7 +80,10 @@ an assignment to one of synthesizers taking a variable of type, \verb+staff+.
      pcm16 bar = foo;
 \end{Verbatim}
 
-\paragraph{} Append operation 
+\paragraph{} To append these supported types, a comma must be declared, followed by a rvalue:
+\begin{Verbatim}[frame=single]
+      pcm16 foo = synth.psg(bar), synth.psg(bar);
+\end{Verbatim}
 \subsection{NOTE}
 
 The \verb+NOTE+ keyword signifies the beginning of a note. It must be declared

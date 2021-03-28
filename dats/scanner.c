@@ -25,7 +25,9 @@
 #include <ctype.h>
 #include <math.h>
 
+#ifdef DATS_DETECT_MEM_LEAK
 #include "memory-leak-detector/leak_detector.h"
+#endif
 
 #define DEFINE_SCANNER_VARIABLES
 #include "scanner.h"

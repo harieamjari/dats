@@ -23,7 +23,10 @@
 #include <assert.h>
 #include <string.h>
 
+#ifdef DATS_DETECT_MEM_LEAK
 #include "memory-leak-detector/leak_detector.h"
+#endif
+
 #include "scanner.h"
 
 #include "libwav/wav.h"
@@ -67,7 +70,10 @@ parse_notes_rests ()
     add_length:
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_FLOAT)
-        EXPECTING (TOK_FLOAT, d);
+        {
+          free (cnr);
+          EXPECTING (TOK_FLOAT, d);
+        }
 
       cnr->length += (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
       uint32_t dotted_len =
@@ -85,6 +91,7 @@ parse_notes_rests ()
         case TOK_COMMA:
           break;
         default:
+          free (cnr);
           UNEXPECTED (tok, d);
 
         }
@@ -92,7 +99,10 @@ parse_notes_rests ()
       tok = read_next_tok_cur_dats_t (d);
 
       if (tok != TOK_NOTE && tok != TOK_FLOAT)
-        UNEXPECTED (tok, d);
+        {
+          free (cnr);
+          UNEXPECTED (tok, d);
+        }
 
       note_t *n = malloc (sizeof (note_t));
       assert (n != NULL);
@@ -106,7 +116,6 @@ parse_notes_rests ()
               if (p->next == NULL)
                 {
                   p->next = cnr;
-                  //printf ("[debug] add note %p\n", cnr);
                   break;
                 }
             }
@@ -316,10 +325,66 @@ parse_track ()
           if (tok == TOK_COMMA)
             goto append;
           break;
+        case TOK_IDENTIFIER:
+          {
+            symrec_t *pcm = getsym (d, tok_identifier);
+            if (pcm == NULL)
+              C_ERROR ("Undefined reference to %s\n", tok_identifier);
+            free (tok_identifier);
+            if (pcm->type != TOK_PCM16)
+              C_ERROR ("Assignment of type %s to pcm16 is illegal",
+                       token_t_to_str (pcm->type));
+            pcm16_t *copy = malloc (sizeof (pcm16_t));
+            assert (copy != NULL);
+            copy->pcm =
+              malloc (pcm->value.pcm16.pcm->numsamples * sizeof (int16_t));
+            assert (copy != NULL);
+            memcpy (copy->pcm, pcm->value.pcm16.pcm->pcm,
+                    pcm->value.pcm16.pcm->numsamples * sizeof (int16_t));
+            copy->numsamples = pcm->value.pcm16.pcm->numsamples;
+            copy->next = NULL;
+            pcm16->value.pcm16.total_numsamples += copy->numsamples;
+
+            if (pcm16->value.pcm16.pcm != NULL)
+              for (pcm16_t * pcma = pcm16->value.pcm16.pcm; 1;
+                   pcma = pcma->next)
+                {
+                  if (pcma->next == NULL)
+                    {
+                      pcma->next = copy;
+                      break;
+                    }
+                }
+            else
+              pcm16->value.pcm16.pcm = copy;
+
+            tok = read_next_tok_cur_dats_t (d);
+            if (tok == TOK_COMMA)
+              goto append;
+          }
+          break;
         default:
           UNEXPECTED (tok, d);
         }
+      pcm16_t *p = malloc (sizeof (pcm16_t));
+      int16_t *pcm =
+        malloc (pcm16->value.pcm16.total_numsamples * sizeof (int16_t));
+      assert (pcm != NULL && p != NULL);
+      pcm16_t *pptmp;
+      uint32_t cur = 0;
+      for (pcm16_t * pp = pcm16->value.pcm16.pcm; pp != NULL; pp = pptmp)
+        {
+          pptmp = pp->next;
+          memcpy (pcm + cur, pp->pcm, pp->numsamples * sizeof (int16_t));
+          cur += pp->numsamples;
+          free (pp->pcm);
+          free (pp);
+        }
+      p->pcm = pcm;
+      p->numsamples = cur;
+      p->next = NULL;
 
+      pcm16->value.pcm16.pcm = p;
       rule_match = 1;
     }
   else if (tok == TOK_WRITE)
