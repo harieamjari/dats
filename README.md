@@ -34,6 +34,10 @@ systems, provided that the compiler provides GNU extensions.
 make && make install && make test
 ```
 
+# Documentation
+
+Tutorial is found at doc directory.
+
 ### TODO
 
 - libsynth - Provides synthesizers.

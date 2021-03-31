@@ -2,13 +2,22 @@
 #define SYNTHS_H
 #include <stdint.h>
 #include "env.h"
-/*
-typedef struct SOptions SOptions;
-struct SOptions {
-   const char *name;
-   const float *num;
-}
-*/
+
+typedef struct DOptions DOptions;
+typedef enum DOptionType DOptionType;
+enum DOptionType {
+   DOPTION_FLOAT,
+   DOPTION_STRING
+};
+struct DOption {
+   DOptionType type;
+   const char *option_name; 
+   union {
+   char *name;
+   float num;
+   } value;
+};
+
 typedef struct DSynth DSynth;
 struct DSynth
 {

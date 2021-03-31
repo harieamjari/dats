@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -O3
 OBJ := dats.o parser.o scanner.o semantic.o
 all : dats
 
-ENABLE_DEBUG = no
+ENABLE_DEBUG = yes
 
 ifeq ($(ENABLE_DEBUG), yes)
 	DEBUG_FLAGS = -ggdb3 -fsanitize=address -fsanitize=undefined 
@@ -29,5 +29,4 @@ test : dats
 install:  dats
 	cp $^ $(PREFIX)/bin
 indent :
-	indent *.[ch] -nut
-
+	indent *.[ch] -nut || clang-format *.[ch]

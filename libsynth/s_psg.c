@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "leak_detector.h"
+#ifdef DATS_DETECT_MEM_LEAK
+#include "memory-leak-detecttor/leak_detector.h"
+#endif
 #include "synth.h"
 static pcm16_t *synth (const symrec_t * const staff);
 DSynth ss_psg = {

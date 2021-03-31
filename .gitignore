@@ -6,6 +6,9 @@
 *.lib
 *.a
 
+# Vim backups
+*.swp
+
 # Sound files
 test/*.wav
 dats/*.wav
@@ -25,4 +28,4 @@ dats/*.wav
 *.log
 *.pdf
 *.aux
-*.oit
+*.out
