@@ -46,3 +46,21 @@ Tutorial is found at doc directory.
 
 - Branching and conditional statements.
 
+### DIR
+
+- libsynth - Provides synthesizers.
+
+- libfilter - Provides filters for manipulating raw PCM s16le data.
+
+- libwav - Provides functions for writing wav files.
+
+- dats - Source code of dats.
+
+- memory-leak-detector - Memory leak detector
+
+- test - Contain dats file for testing dats interpreter
+
+- doc - Documentation for dats
+
+
+

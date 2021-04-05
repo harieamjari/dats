@@ -354,7 +354,7 @@ w:
       {
         int nchar;
         ungetc (c, t->fp);
-        (void) fscanf (t->fp, "%[a-zA-Z0-9_#]%n", buff, &nchar);
+        (void) fscanf (t->fp, "%99[a-zA-Z0-9_#]%n", buff, &nchar);
         t->column += nchar;
         seek += nchar;
         if (!strcmp ("staff", buff))

@@ -1,6 +1,5 @@
 .PHONY : dats test
 dats :
-	#cd memory-leak-detector && make
 	cd memory-leak-detector && make
 	cd libwav && make
 	cd libsynth && make
