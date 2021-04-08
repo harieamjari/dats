@@ -67,7 +67,7 @@ parse_notes_rests ()
       cnr->type = SYM_NOTE;
       cnr->length = 0;
       cnr->next = NULL;
-    add_length:
+    add_lengthn:
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_FLOAT)
         {
@@ -78,22 +78,21 @@ parse_notes_rests ()
       cnr->length += (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
       uint32_t dotted_len =
         (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
-    check:
+    checkn:
       tok = read_next_tok_cur_dats_t (d);
       switch (tok)
         {
         case TOK_DOT:
           dotted_len /= 2;
           cnr->length += dotted_len;
-          goto check;
+          goto checkn;
         case TOK_ADD:
-          goto add_length;
+          goto add_lengthn;
         case TOK_COMMA:
           break;
         default:
           free (cnr);
           UNEXPECTED (tok, d);
-
         }
       staff->value.staff.numsamples += cnr->length;
       tok = read_next_tok_cur_dats_t (d);
@@ -130,28 +129,43 @@ parse_notes_rests ()
       nr_t *cnr = malloc (sizeof (nr_t));
       assert (cnr != NULL);
       cnr->type = SYM_REST;
+      cnr->length = 0;
       cnr->next = NULL;
+add_lengthr:
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_FLOAT)
         {
           UNEXPECTED (tok, d);
         }
-      cnr->length = (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
+      cnr->length += (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
+      uint32_t dotted_len =
+        (uint32_t) (60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
+    checkr:
+      tok = read_next_tok_cur_dats_t (d);
+      switch (tok)
+        {
+        case TOK_DOT:
+          dotted_len /= 2;
+          cnr->length += dotted_len;
+          goto checkr;
+        case TOK_ADD:
+          goto add_lengthr;
+        default: ;
+        }
       staff->value.staff.numsamples += cnr->length;
+
       if (staff->value.staff.nr != NULL)
         for (nr_t * p = staff->value.staff.nr; 1; p = p->next)
           {
             if (p->next == NULL)
               {
                 p->next = cnr;
-                //printf ("[debug] add rest %p\n", cnr);
                 break;
               }
           }
       else
         staff->value.staff.nr = cnr;
       rule_match = 1;
-      tok = read_next_tok_cur_dats_t (d);
     }
   else
     return 0;
@@ -205,7 +219,7 @@ parse_staff ()
 }
 
 static int
-parse_track ()
+parse_stmt ()
 {
   /* statements */
   if (tok == TOK_PCM16)
@@ -466,25 +480,24 @@ parse_track ()
 static int
 parse_master ()
 {
-  /* insert one master */
-  symrec_t *m = malloc (sizeof (symrec_t));
-  m->type = TOK_MASTER;
-  m->line = line_token_found;
-  m->column = column_token_found;
-  m->value.master = NULL;
-  m->next = d->sym_table;
-  d->sym_table = m;
+  /* insert one master *//*
+     symrec_t *m = malloc (sizeof (symrec_t));
+     m->type = TOK_MASTER;
+     m->line = line_token_found;
+     m->column = column_token_found;
+     m->value.master = NULL;
+     m->next = d->sym_table;
+     d->sym_table = m; */
 
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_LCURLY_BRACE)
-    {
-      UNEXPECTED (tok, d);
-    }
+    UNEXPECTED (tok, d);
+
   tok = read_next_tok_cur_dats_t (d);
   do
     {
       rule_match = 0;
-      if (parse_track ())
+      if (parse_stmt ())
         return 1;
     }
   while (rule_match);

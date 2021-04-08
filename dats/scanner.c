@@ -295,6 +295,7 @@ w:
   if (c == (int) '/')
     {
       c = fgetc (t->fp);
+      t->column++;
       if (c == (int) '/')
         {
           while ((c = fgetc (t->fp)) != EOF)
@@ -330,6 +331,7 @@ w:
              t->fname, line_token_found, column_token_found);
           return TOK_ERR;
         }
+      t->column--;
       ungetc (c, t->fp);
       c = '/';
     }
@@ -435,9 +437,9 @@ w:
         else if (buff[0] == 'n' && !buff[1])
           return TOK_N;
         else if (buff[0] == 'r' && !buff[1])
-          return TOK_R;
-        else if (!strcmp ("track", buff))
-          return TOK_TRACK;
+          return TOK_R;         /*
+                                   else if (!strcmp ("track", buff))
+                                   return TOK_TRACK; */
         else if (!strcmp ("bpm", buff))
           return TOK_BPM;
         else if (!strcmp ("master", buff))
@@ -628,9 +630,9 @@ token_t_to_str (const token_t t)
     case TOK_NOTE:
       return "note";
     case TOK_MASTER:
-      return "master";
-    case TOK_TRACK:
-      return "track";
+      return "master";          /*
+                                   case TOK_TRACK:
+                                   return "track"; */
     case TOK_PCM16:
       return "pcm16";
     case TOK_SYNTH:
