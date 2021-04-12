@@ -49,8 +49,9 @@ static void add (MEM_INFO alloc_info);
 static void erase (unsigned pos);
 static void clear (void);
 static void add_mem_info (void *mem_ref, unsigned int size, const char *file,
-                   unsigned int line, const char *func);
-static void remove_mem_info (void *mem_ref);
+                          unsigned int line, const char *func);
+static void remove_mem_info (void *mem_ref, const char *file,
+                             unsigned int line, const char *func);
 
 typedef struct _MEM_LEAK_ctx
 {
@@ -170,14 +171,15 @@ clear ()
 }
 
 void *
-xrealloc (void *str, int size, const char *file, unsigned int line, const char *func)
+xrealloc (void *str, int size, const char *file, unsigned int line,
+          const char *func)
 {
   void *ptr = realloc (str, size);
   if (ptr != NULL)
     {
       if ((str != NULL) && (ptr != str))
         {
-          remove_mem_info (str);
+          remove_mem_info (str, file, line, func);
         }
       if (str == NULL || (ptr != str))
         {
@@ -193,7 +195,8 @@ xrealloc (void *str, int size, const char *file, unsigned int line, const char *
 }
 
 char *
-xstrdup (const char *str, const char *file, unsigned int line, const char *func)
+xstrdup (const char *str, const char *file, unsigned int line,
+         const char *func)
 {
   char *ptr = strdup (str);
   if (ptr != NULL)
@@ -207,7 +210,8 @@ xstrdup (const char *str, const char *file, unsigned int line, const char *func)
  * replacement of malloc
  */
 void *
-xmalloc (unsigned int size, const char *file, unsigned int line, const char *func)
+xmalloc (unsigned int size, const char *file, unsigned int line,
+         const char *func)
 {
   void *ptr = malloc (size);
   if (ptr != NULL)
@@ -239,9 +243,10 @@ xcalloc (unsigned int elements, unsigned int size, const char *file,
  * replacement of free
  */
 void
-xfree (void *mem_ref)
+xfree (void *mem_ref, const char *file, unsigned int line, const char *func)
 {
-  remove_mem_info (mem_ref);
+  if (mem_ref==NULL) return;
+  remove_mem_info (mem_ref, file, line, func);
   free (mem_ref);
 }
 
@@ -279,9 +284,9 @@ add_mem_info (void *mem_ref, unsigned int size, const char *file,
  *
  */
 static void
-remove_mem_info (void *mem_ref)
+remove_mem_info (void *mem_ref, const char *file, unsigned int line,
+                 const char *func)
 {
-  if (mem_ref==NULL) return;
   unsigned short index;
   MEM_LEAK *leak_info;
   int flag = 0;
@@ -301,9 +306,10 @@ remove_mem_info (void *mem_ref)
   MUTEX_UNLOCK (leak_ctx.g_cs);
   if (flag == 0)
     {
-      fprintf(stderr, "undefined %p\n",  mem_ref);
-      assert (0);
-      printf ("remove memory error!");
+      fprintf (stderr,
+               " %p in %s %s:%d attempting to free an unknown address %p\n",
+               mem_ref, func, file, line, mem_ref);
+      //free(mem_ref);
     }
 }
 
@@ -378,11 +384,11 @@ report_mem_leak (void)
   //FILE *fp_write = stdout;
   char info[1024];
   int print_size;
-  if (ptr_start!=NULL)
+  if (ptr_start != NULL)
     {
-      puts("Memory Leak Summary");
-      puts("-----------------------------------");
-      puts("REPORT THIS LEAK TO https://github.com/harieamjari/dats");
+      puts ("Memory Leak Summary");
+      puts ("-----------------------------------");
+      puts ("REPORT THIS LEAK TO https://github.com/harieamjari/dats");
 
       fprintf (stdout, "leak total:%d,max used size:%d,once max:%d\n\n",
                leak_ctx.total, leak_ctx.used_max, leak_ctx.once_max);
@@ -391,8 +397,8 @@ report_mem_leak (void)
       for (leak_info = ptr_start; leak_info != NULL;
            leak_info = leak_info->next)
         {
-          fprintf (stdout, "#%d %p in %s %s:%d\n",i++, leak_info->mem_info.address,
-  leak_info->mem_info.func_name,
+          fprintf (stdout, "#%d %p in %s %s:%d\n", i++,
+                   leak_info->mem_info.address, leak_info->mem_info.func_name,
                    leak_info->mem_info.file_name, leak_info->mem_info.line);
           fprintf (stdout, "address : 0x%8x    size    : %d bytes\n",
                    (int) leak_info->mem_info.address,
@@ -404,7 +410,7 @@ report_mem_leak (void)
                            print_size, 16);
           fwrite (info, (strlen (info)), 1, stdout);
 
-        putchar('\n');
+          putchar ('\n');
         }
       fflush (stdout);
       fprintf (stdout, "-----------------------------------\n");

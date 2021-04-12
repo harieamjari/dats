@@ -3,14 +3,14 @@
 #include <stdint.h>
 #include "env.h"
 
-typedef struct DOptions DOptions;
-typedef enum DOptionType DOptionType;
-enum DOptionType {
-   DOPTION_FLOAT,
-   DOPTION_STRING
+typedef struct DSOption DSOption;
+typedef enum DSOptionType DSOptionType;
+enum DSOptionType {
+   DSOPTION_FLOAT,
+   DSOPTION_STRING
 };
-struct DOption {
-   DOptionType type;
+struct DSOption {
+   DSOptionType type;
    const char *option_name; 
    union {
    char *name;
@@ -18,10 +18,11 @@ struct DOption {
    } value;
 };
 
-typedef struct DSynth DSynth;
-struct DSynth
+typedef struct DSSynth DSSynth;
+struct DSSynth
 {
   const char *name;
+  const DSOption *option;
   struct _option
   {
     const char *name;

@@ -2,7 +2,7 @@
 
 A digital audio text station.
 
-This plays a diatonic scale:
+The "Hello World" of dats:
 ```
 staff pol {
   n 4 c4;

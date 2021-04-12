@@ -1,4 +1,4 @@
-static const DSynth *synth_list[] = {
+static const DSSynth *synth_list[] = {
   &ss_psg,
   NULL
 };

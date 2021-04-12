@@ -55,14 +55,6 @@ print_all_nr_t (nr_t * nr)
 
 }
 
-/*
-void
-process_nr (symrec_t * s)
-{
-  uint32_t numsamples = s->value.staff.numsamples;
-  printf ("%u numsamples\n", numsamples);
-}
-*/
 void
 clean_all_dats_t (void)
 {
@@ -88,27 +80,6 @@ clean_all_dats_t (void)
 
 }
 
-/* clean all symrec_t* and its next, of the current dats_t* */
-/*
-void
-clean_all_symrec_t_cur_dats_t (const dats_t * const t)
-{
-  symrec_t *n;
-  for (symrec_t * p = t->sym_table; p != NULL;)
-    {
-      if (p->type == TOK_STAFF)
-        {
-          free (p->value.staff.identifier);
-        }
-      else if (p->type == TOK_IDENTIFIER)
-        free (p->value.env.identifier);
-      n = p->next;
-      free (p);
-      p = n;
-    }
-
-}
-*/
 void
 clean_all_symrec_t_all_dats_t ()
 {
@@ -182,16 +153,6 @@ count_dats_t (void)
   return ret;
 }
 
-/*
-int
-count_symrec_t_cur_dats_t (dats_t * t)
-{
-  int ret = 0;
-  for (dats_t * p = t; p != NULL; p = p->next)
-    ++ret;
-  return ret;
-}
-*/
 symrec_t *
 getsym (const dats_t * const t, char const *const id)
 {
@@ -269,6 +230,7 @@ w:
   if (expecting == TOK_STRING)
     {
       ungetc (c, t->fp);
+      seek--;
       int i;
       for (i = 0; i < 99; i++)
         {
@@ -285,6 +247,7 @@ w:
             }
           buff[i] = c;
           t->column += 1;
+          seek++;
         }
     }
   if (expecting == TOK_STRING)
@@ -296,6 +259,7 @@ w:
     {
       c = fgetc (t->fp);
       t->column++;
+      seek++;
       if (c == (int) '/')
         {
           while ((c = fgetc (t->fp)) != EOF)
@@ -303,6 +267,7 @@ w:
               {
                 t->line++;
                 t->column = 1;
+                seek++;
                 goto w;
               }
         }
@@ -313,17 +278,21 @@ w:
               switch (c)
                 {
                 case '*':
-                  if ((c = fgetc (t->fp)) == '/')
+                  if ((c = fgetc (t->fp)) == '/'){
+                    seek++;
                     goto w;
+                  }
                   else if (c == '\n')
                     {
                       t->line++;
                       t->column = 1;
+                      seek++;
                     }
                   break;
                 case '\n':
                   t->line++;
                   t->column = 1;
+                  seek++;
                 }
             }
           ERROR
@@ -333,6 +302,7 @@ w:
         }
       t->column--;
       ungetc (c, t->fp);
+      seek--;
       c = '/';
     }
   switch (c)
@@ -473,7 +443,7 @@ w:
           int i = 0;
           while (isdigit (buff[i]))
             i++;
-          if (buff[i] == (int) '.')
+          if (buff[i] == (char) '.')
             {
               i++;
               if (isdigit (buff[i]))
@@ -630,9 +600,7 @@ token_t_to_str (const token_t t)
     case TOK_NOTE:
       return "note";
     case TOK_MASTER:
-      return "master";          /*
-                                   case TOK_TRACK:
-                                   return "track"; */
+      return "master";
     case TOK_PCM16:
       return "pcm16";
     case TOK_SYNTH:
@@ -641,32 +609,14 @@ token_t_to_str (const token_t t)
       return "write";
     case TOK_READ:
       return "read";
+    case TOK_REPEAT:
+      return "repeat";
     default:
       REPORT ("Unknown token\n");
       printf ("%d\n", t);
       return __FILE__;
-
     }
-
 }
-
-/*
-void
-print_master_cur_symrec_t (const symrec_t * const t)
-{
-  if (t->type != TOK_MASTER)
-    return;
-  int track = 1;
-  for (master_t * m = t->value.master; m != NULL; m = m->next)
-    {
-      printf ("MASTER track %d: ", track++);
-      for (symrec_t * s = m->track; s != NULL; s = s->next)
-        {
-          printf ("%s ", s->value.staff.identifier);
-        }
-      putchar ('\n');
-    }
-}*/
 
 /* prints the symbol table of the current dats_t* t*/
 void
@@ -694,8 +644,6 @@ print_all_symrec_t_cur_dats_t (const dats_t * const t)
           break;
         default:
           REPORT ("Unknown token\n");
-
         }
     }
-
 }

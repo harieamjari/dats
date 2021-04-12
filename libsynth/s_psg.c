@@ -3,12 +3,13 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#define DATS_DETECT_MEM_LEAK
 #ifdef DATS_DETECT_MEM_LEAK
-#include "memory-leak-detecttor/leak_detector.h"
+#include "memory-leak-detector/leak_detector.h"
 #endif
 #include "synth.h"
 static pcm16_t *synth (const symrec_t * const staff);
-DSynth ss_psg = {
+DSSynth ss_psg = {
   .name = "psg",
   .options = (struct _option[])
   {
@@ -34,7 +35,6 @@ synth (const symrec_t * staff)
       if (n->type == SYM_NOTE)
 	{
 	  int16_t wavetable[(int) (44100.0 / n->note->frequency)];
-	  //printf("freq %f len %d\n", n->note->frequency, (int) (44100.0 / n->note->frequency));
 	  for (int i = 0; i < (int) (44100.0 / n->note->frequency); i++)
 	    wavetable[i] = rand ();
 	  int16_t prev = 0;
@@ -65,6 +65,6 @@ synth (const symrec_t * staff)
   pcm_ctx->numsamples = staff->value.staff.numsamples;
   pcm_ctx->pcm = pcm;
   pcm_ctx->next = NULL;
-  //printf ("gain %f\n", ss_psg.options[0].num);
+
   return pcm_ctx;
 }

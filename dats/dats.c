@@ -39,7 +39,7 @@
 extern int parse_cur_dats_t (dats_t * const t);
 
 /* Performs semantic analysis */
-extern int semantic_cur_dats_t (dats_t * const t);
+__attribute__((deprecated)) extern int semantic_cur_dats_t (dats_t * const t);
 
 /* process_args returns the value 0 if sucesss and nonzero if
  * failed. 
@@ -95,7 +95,7 @@ process_args (const int argc, char *const *argv)
             }
           break;
         case 'h':
-          puts ("Dats compiler 2.0.0\n"
+          puts ("Dats interpreter Draft-2.0.0\n"
                 "\n" "options:\n" "-i                   input dats files\n");
           exit (0);
         default:
@@ -169,28 +169,9 @@ main (int argc, char **argv)
       if (parse_cur_dats_t (p))
         continue;
       print_all_symrec_t_cur_dats_t (p);
-      //semantic_cur_dats_t (p);
     }
   if (global_errors)
     goto err;
-/*
-  if (tok_master == 0)
-    {
-      REPORT ("error: No definition of master\n");
-      goto err;
-    }
-  else if (tok_master > 1)
-    goto err;
-*/
-/*
-  for (dats_t * p = dats_files; p != NULL; p = p->next)
-    {
-      for (symrec_t * s = p->sym_table; s != NULL; s = s->next)
-        {
-          if (s->type == TOK_MASTER)
-            //print_master_cur_symrec_t (s);
-        }
-    }*/
 err:
   if (global_errors)
     ERROR ("\n%d global errors generated\n", global_errors);

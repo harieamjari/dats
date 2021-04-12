@@ -2,10 +2,10 @@
 #include "synth.h"
 
 
-extern DSynth ss_psg;
+extern DSSynth ss_psg;
 #include "list_synths.c"
 
-const DSynth *
+const DSSynth *
 get_dsynth_by_name (const char *name)
 {
 

@@ -1,14 +1,15 @@
 /* This is composed by Al-buharie Amjari
  * and is a draft. Further revision may
- * be needed
+ * be needed.
  */
 
 staff apple{
 bpm = 169;
-
+/*
+repeat 2 {
 n 4, a#3;
 n 4, c4;
-
+}*/
 n 8.0., c#4;
 n 16, c4;
 n 8., c#4;

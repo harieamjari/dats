@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -fsanitize=address -ggdb3
 
 #LIBS = -l pthread -l dl
 LIBS = 

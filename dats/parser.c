@@ -131,7 +131,7 @@ parse_notes_rests ()
       cnr->type = SYM_REST;
       cnr->length = 0;
       cnr->next = NULL;
-add_lengthr:
+    add_lengthr:
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_FLOAT)
         {
@@ -150,7 +150,7 @@ add_lengthr:
           goto checkr;
         case TOK_ADD:
           goto add_lengthr;
-        default: ;
+        default:;
         }
       staff->value.staff.numsamples += cnr->length;
 
@@ -166,7 +166,36 @@ add_lengthr:
       else
         staff->value.staff.nr = cnr;
       rule_match = 1;
-    }
+    }/*
+  else if (tok == TOK_REPEAT)
+    {
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_FLOAT)
+        EXPECTING (TOK_FLOAT, d);
+      int it = (int) tok_num;
+      int to_seek = seek;
+      tok = read_next_tok_cur_dats_t (d);
+      if (tok != TOK_LCURLY_BRACE)
+        EXPECTING (TOK_LCURLY_BRACE, d);
+      for (int i = 0; i < it; i++)
+        {
+          do
+            {
+              rule_match = 0;
+              if (parse_notes_rests ())
+                return 1;
+            }
+          while (rule_match);
+          tok = read_next_tok_cur_dats_t (d);
+          if (tok != TOK_RCURLY_BRACE)
+            UNEXPECTED (tok, d);
+
+          fseek (d->fp, to_seek, SEEK_SET);
+
+        }
+      rule_match = 1;
+      return 0;
+    }*/
   else
     return 0;
 
@@ -253,7 +282,7 @@ parse_stmt ()
           if (tok != TOK_IDENTIFIER)
             UNEXPECTED (tok, d);
 
-          const DSynth *driver = get_dsynth_by_name (tok_identifier);
+          const DSSynth *driver = get_dsynth_by_name (tok_identifier);
           if (driver == NULL)
             C_ERROR ("No synth %s\n", tok_identifier);
           printf ("Synth %s found\n", tok_identifier);
@@ -409,8 +438,7 @@ parse_stmt ()
 
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_DQUOTE)
-        C_ERROR
-          ("Macro, `write`, expects an identifier between double quote\n");
+        C_ERROR ("`write`, expects an identifier between double quote\n");
       expecting = TOK_STRING;
       tok = read_next_tok_cur_dats_t (d);
       if (tok != TOK_STRING)
@@ -480,14 +508,6 @@ parse_stmt ()
 static int
 parse_master ()
 {
-  /* insert one master *//*
-     symrec_t *m = malloc (sizeof (symrec_t));
-     m->type = TOK_MASTER;
-     m->line = line_token_found;
-     m->column = column_token_found;
-     m->value.master = NULL;
-     m->next = d->sym_table;
-     d->sym_table = m; */
 
   tok = read_next_tok_cur_dats_t (d);
   if (tok != TOK_LCURLY_BRACE)

@@ -29,3 +29,7 @@ dats/*.wav
 *.pdf
 *.aux
 *.out
+
+# Indent backups
+*.c~
+*.h~
