@@ -9,6 +9,7 @@ enum DSOptionType {
    DSOPTION_FLOAT,
    DSOPTION_STRING
 };
+
 struct DSOption {
    DSOptionType type;
    const char *option_name; 
