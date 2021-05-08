@@ -21,9 +21,13 @@ enum token_t
   /* Macros */
   TOK_REPEAT,
   TOK_WRITE,
+  TOK_BPM,
+  TOK_ATTACK,
+  TOK_DECAY,
+  TOK_SUSTAIN,
+  TOK_RELEASE,
   TOK_READ,
   TOK_NOTE,
-  TOK_BPM,
   TOK_N,
   TOK_R,
 
@@ -113,7 +117,8 @@ struct symrec_t
       char *identifier;
       float val;
     } env;			/* environment variables */
-    master_t *master;		/* a chain of track */
+   
+// master_t *master;		/* a chain of track */
     struct
     {
       char *identifier;

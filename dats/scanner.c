@@ -103,7 +103,7 @@ clean_all_symrec_t_all_dats_t ()
                     free (nr);
                   }
               }
-              break;
+              break;/*
             case TOK_MASTER:
               {
                 master_t *mtmp;
@@ -122,7 +122,7 @@ clean_all_symrec_t_all_dats_t ()
                     free (track);
                   }
               }
-              break;
+              break;*/
             case TOK_PCM16:
               {
                 pcm16_t *ptmp;
@@ -212,7 +212,7 @@ w:
   while (1)
     {
       c = fgetc (t->fp);
-      if ((c != (int) ' ') && c != (int) 0x09)
+      if (((c != (int) ' ') && c != (int) 0x09) && c != (int) '\r')
         break;
       t->column++;
       seek++;
@@ -399,19 +399,25 @@ w:
                  t->fname, line_token_found, column_token_found, buff);
             return TOK_ERR;
 
-          }
+          }/*
         else if (!strcmp ("repeat", buff))
-          return TOK_REPEAT;
+          return TOK_REPEAT;*/
         else if (!strcmp ("pcm16", buff))
           return TOK_PCM16;
         else if (buff[0] == 'n' && !buff[1])
           return TOK_N;
         else if (buff[0] == 'r' && !buff[1])
-          return TOK_R;         /*
-                                   else if (!strcmp ("track", buff))
-                                   return TOK_TRACK; */
+          return TOK_R;
         else if (!strcmp ("bpm", buff))
           return TOK_BPM;
+        else if (!strcmp ("attack", buff))
+          return TOK_ATTACK;
+        else if (!strcmp ("decay", buff))
+          return TOK_DECAY;
+        else if (!strcmp ("sustain", buff))
+          return TOK_SUSTAIN;
+        else if (!strcmp ("release", buff))
+          return TOK_RELEASE;
         else if (!strcmp ("master", buff))
           return TOK_MASTER;
         else if (!strcmp ("synth", buff))
@@ -561,8 +567,16 @@ token_t_to_str (const token_t t)
       return "staff";
     case TOK_IDENTIFIER:
       return "identifier";
-    case TOK_EOF:
-      return "end of file";
+    case TOK_BPM:
+      return "bpm";
+    case TOK_ATTACK:
+      return "attack";
+    case TOK_DECAY:
+      return "decay";
+    case TOK_SUSTAIN:
+      return "sustain";
+    case TOK_RELEASE:
+      return "release";
     case TOK_LCURLY_BRACE:
       return "'{'";
     case TOK_RCURLY_BRACE:
@@ -611,6 +625,8 @@ token_t_to_str (const token_t t)
       return "read";
     case TOK_REPEAT:
       return "repeat";
+    case TOK_EOF:
+      return "end of file";
     default:
       REPORT ("Unknown token\n");
       printf ("%d\n", t);

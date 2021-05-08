@@ -1,4 +1,4 @@
-/* This is expected to error */
+/* This is expected to throw an error */
 
 / 
 

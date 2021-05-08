@@ -1,5 +1,6 @@
 #ifndef WAV_H
 #define WAV_H
+#include <stdint.h>
 
 typedef struct WAV_info WAV_info;
 

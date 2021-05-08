@@ -8,9 +8,17 @@
 #include "memory-leak-detector/leak_detector.h"
 #endif
 #include "synth.h"
+
+static const DSOption options[] = {
+  {DSOPTION_FLOAT, "volume", {.floatv = 0.0}},
+  {0,NULL}
+
+};
+
 static pcm16_t *synth (const symrec_t * const staff);
 DSSynth ss_psg = {
   .name = "psg",
+  .option = options,
   .options = (struct _option[])
   {
    {.name = "gain",.num = 10.0},

@@ -5,14 +5,14 @@ A digital audio text station.
 The "Hello World" of dats:
 ```
 staff pol {
-  n 4 c4;
-  n 4 d4;
-  n 4 e4;
-  n 4 f4;
-  n 4 g4;
-  n 4 a4;
-  n 4 b4;
-  n 4 c5;
+  n 4, c4;
+  n 4, d4;
+  n 4, e4;
+  n 4, f4;
+  n 4, g4;
+  n 4, a4;
+  n 4, b4;
+  n 4, c5;
 }
 
 master {

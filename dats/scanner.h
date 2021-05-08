@@ -20,32 +20,29 @@ EXTERN void clean_all_symrec_t_cur_dats_t (const dats_t * const t);*/
 EXTERN void clean_all_symrec_t_all_dats_t (void);
 
 EXTERN symrec_t *symrec_tcpy (symrec_t * const s);
-
-EXTERN int count_dats_t (void);
-
+EXTERN int         count_dats_t (void);
 EXTERN const char *token_t_to_str (const token_t t);
-/*
-EXTERN int count_symrec_t_cur_dats_t (dats_t * t);
-*/
-EXTERN symrec_t *getsym (const dats_t * const t, char const *const id);
+EXTERN symrec_t   *getsym (const dats_t * const t, char const *const id);
+EXTERN token_t     read_next_tok_cur_dats_t (dats_t * const t);
+EXTERN void        print_all_symrec_t_cur_dats_t (const dats_t * const t);
 
-EXTERN token_t read_next_tok_cur_dats_t (dats_t * const t);
 
-EXTERN void print_all_symrec_t_cur_dats_t (const dats_t * const t);
+EXTERN int  line_token_found;
+EXTERN int  column_token_found;
 
-//EXTERN void print_master_cur_symrec_t (const symrec_t * const t);
+EXTERN int  local_errors;
+EXTERN int  global_errors;
 
-//EXTERN int process_nr (symrec_t * s);
-
-EXTERN int line_token_found;
-EXTERN int column_token_found;
-EXTERN int local_errors;
-EXTERN int global_errors;
-EXTERN int seek;
+EXTERN int    seek;
 EXTERN float tok_num;
 EXTERN float tok_bpm;
+EXTERN float tok_attack;
+EXTERN float tok_decay;
+EXTERN float tok_sustain;
+EXTERN float tok_releaae;
+
 EXTERN char *tok_identifier;
-EXTERN int tok_master;
+EXTERN int   tok_master;
 EXTERN token_t expecting;
 
 EXTERN dats_t *dats_files;
