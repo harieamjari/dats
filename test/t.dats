@@ -5,6 +5,7 @@
 
 staff apple{
 bpm = 169;
+attack = 2;
 
 n 4, a#3;
 n 4, c4;
@@ -188,8 +189,8 @@ master {
 /* multi line **
    ***
    hh */
-   pcm16 tmp1 = synth.psg(apple)[volume=2.13];
-   pcm16 track1 = tmp1, synth.psg(apple);
+  /* pcm16 tmp1 = synth.kpa(apple);*/
+   pcm16 track1 = synth.kpa(apple)[test="Al-buharie test"], track1;
    write("w.wav", track1);
 }
 

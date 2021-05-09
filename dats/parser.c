@@ -146,6 +146,8 @@ static int parse_notes_rests() {
     n->decay = tok_decay;
     n->sustain = tok_sustain;
     n->release = tok_release;
+    n->next = malloc(sizeof(note_t));
+    n->next->next = NULL;
     cnr->note = n;
 
     if (staff->value.staff.nr != NULL) {
@@ -196,37 +198,7 @@ static int parse_notes_rests() {
     else
       staff->value.staff.nr = cnr;
     rule_match = 1;
-  } /*
- else if (tok == TOK_REPEAT)
-   {
-     tok = read_next_tok_cur_dats_t (d);
-     if (tok != TOK_FLOAT)
-       EXPECTING (TOK_FLOAT, d);
-     int it = (int) tok_num;
-     int to_seek = seek;
-     tok = read_next_tok_cur_dats_t (d);
-     if (tok != TOK_LCURLY_BRACE)
-       EXPECTING (TOK_LCURLY_BRACE, d);
-     for (int i = 0; i < it; i++)
-       {
-         do
-           {
-             rule_match = 0;
-             if (parse_notes_rests ())
-               return 1;
-           }
-         while (rule_match);
-         tok = read_next_tok_cur_dats_t (d);
-         if (tok != TOK_RCURLY_BRACE)
-           UNEXPECTED (tok, d);
-
-         fseek (d->fp, to_seek, SEEK_SET);
-
-       }
-     rule_match = 1;
-     return 0;
-   }*/
-  else
+  } else
     return 0;
 
   if (tok != TOK_SEMICOLON)
@@ -245,7 +217,6 @@ static int parse_staff() {
   tok = read_next_tok_cur_dats_t(d);
   if (tok != TOK_IDENTIFIER)
     EXPECTING(TOK_IDENTIFIER, d);
-  // printf ("=== BEGIN STAFF === %s\n", tok_identifier);
   /* insert symrec_t */
   staff = malloc(sizeof(symrec_t));
   assert(staff != NULL);
@@ -357,6 +328,32 @@ static int parse_stmt() {
                   EXPECTING(TOK_FLOAT, d);
                 driver->options[i].value.floatv = tok_num;
                 printf("Driver num %f\n", driver->options[i].value.floatv);
+                tok = read_next_tok_cur_dats_t(d);
+                break;
+              case DSOPTION_INT:
+                tok = read_next_tok_cur_dats_t(d);
+                if (tok != TOK_FLOAT)
+                  EXPECTING(TOK_FLOAT, d);
+                driver->options[i].value.intv = (int)tok_num;
+                printf("Driver num %d\n", driver->options[i].value.intv);
+                tok = read_next_tok_cur_dats_t(d);
+                break;
+              case DSOPTION_STRING:
+                tok = read_next_tok_cur_dats_t(d);
+                if (tok != TOK_DQUOTE)
+                  C_ERROR(
+                      "`write`, expects an identifier between double quote\n");
+                expecting = TOK_STRING;
+                tok = read_next_tok_cur_dats_t(d);
+                if (tok != TOK_STRING)
+                  EXPECTING(TOK_STRING, d);
+                expecting = TOK_NULL;
+                driver->options[i].value.strv = tok_identifier;
+                printf("Driver num %s\n", driver->options[i].value.strv);
+                tok_identifier = NULL;
+                tok = read_next_tok_cur_dats_t(d);
+                if (tok != TOK_DQUOTE)
+                  C_ERROR("Identifier must end with a double quote\n");
                 tok = read_next_tok_cur_dats_t(d);
                 break;
               }

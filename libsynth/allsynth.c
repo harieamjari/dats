@@ -2,7 +2,7 @@
 #include "synth.h"
 
 
-extern DSSynth ss_psg;
+extern DSSynth ss_kpa;
 #include "list_synths.c"
 
 const DSSynth *
@@ -18,8 +18,8 @@ get_dsynth_by_name (const char *name)
 
   return NULL;
 }
+
 /*
 void print_all_synths(void){
-
-
+}
 }*/

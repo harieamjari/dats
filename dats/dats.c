@@ -31,6 +31,7 @@
 #include "scanner.h"
 
 #ifdef DATS_DETECT_MEM_LEAK
+#define DEFINE_MEM_LEAK_DETECTOR_VARIABLES
 #include "memory-leak-detector/leak_detector.h"
 #endif
 //#include "libwav/wav.h"

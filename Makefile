@@ -11,6 +11,7 @@ clean :
 	cd libwav && make clean
 	cd dats && make clean
 	cd libsynth && make clean
+	cd memory-leak-detector && make clean
 install :
 	cd dats && make install
 	cd libwav && make install

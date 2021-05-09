@@ -9,7 +9,7 @@ ifeq ($(ENABLE_DEBUG), yes)
         CFLAGS += -DDATS_DETECT_MEM_LEAK
 endif
 
-S_SYNTHS +=  s_psg.c 
+S_SYNTHS +=  s_kpa.c 
 
 OBJ := $(patsubst %.c, %.o, $(S_SYNTHS) allsynth.c)
 

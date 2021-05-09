@@ -1,49 +1,14 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
-#include "assert.h"
-
-#define  FILE_NAME_LENGTH			256
+#include <assert.h>
 
 
-#if defined(WIN32)
+#include "leak_detector_types.h"
 
-#include <windows.h>
-typedef CRITICAL_SECTION mutex_handle_t;
-#define MUTEX_CREATE(handle) 	InitializeCriticalSection(&handle)
-#define MUTEX_LOCK(handle) 		EnterCriticalSection(&handle)
-#define MUTEX_UNLOCK(handle) 	LeaveCriticalSection(&handle)
-#define MUTEX_DESTROY(handle)	DeleteCriticalSection(&handle)
-
-#else
-
-#include <pthread.h>
-typedef pthread_mutex_t mutex_handle_t;
-#define MUTEX_CREATE(handle) pthread_mutex_init(&(handle), NULL)
-#define MUTEX_LOCK(handle) pthread_mutex_lock(&(handle))
-#define MUTEX_UNLOCK(handle) pthread_mutex_unlock(&(handle))
-#define MUTEX_DESTROY(handle) pthread_mutex_destroy(&(handle))
-
-
-#endif
-
-
-struct _MEM_INFO
-{
-  void *address;
-  unsigned int size;
-  char file_name[FILE_NAME_LENGTH];
-  char func_name[FILE_NAME_LENGTH];
-  unsigned int line;
-};
-typedef struct _MEM_INFO MEM_INFO;
-
-struct _MEM_LEAK
-{
-  MEM_INFO mem_info;
-  struct _MEM_LEAK *next;
-};
-typedef struct _MEM_LEAK MEM_LEAK;
+extern MEM_LEAK *ptr_start;
+extern MEM_LEAK *ptr_next;
+extern MEM_LEAK_ctx leak_ctx;
 
 static void add (MEM_INFO alloc_info);
 static void erase (unsigned pos);
@@ -53,19 +18,6 @@ static void add_mem_info (void *mem_ref, unsigned int size, const char *file,
 static void remove_mem_info (void *mem_ref, const char *file,
                              unsigned int line, const char *func);
 
-typedef struct _MEM_LEAK_ctx
-{
-  int num;
-  unsigned int once_max;
-  int total;
-  int used_max;
-  mutex_handle_t g_cs;
-  int is_first;
-} MEM_LEAK_ctx;
-
-static MEM_LEAK *ptr_start = NULL;
-static MEM_LEAK *ptr_next = NULL;
-static MEM_LEAK_ctx leak_ctx = { 0 };
 
 /*
  * adds allocated memory info. into the list
@@ -247,7 +199,6 @@ xfree (void *mem_ref, const char *file, unsigned int line, const char *func)
 {
   if (mem_ref==NULL) return;
   remove_mem_info (mem_ref, file, line, func);
-  free (mem_ref);
 }
 
 /*
@@ -309,8 +260,9 @@ remove_mem_info (void *mem_ref, const char *file, unsigned int line,
       fprintf (stderr,
                " %p in %s %s:%d attempting to free an unknown address %p\n",
                mem_ref, func, file, line, mem_ref);
-      //free(mem_ref);
+              return;
     }
+     free(mem_ref);
 }
 
 static int
@@ -386,6 +338,7 @@ report_mem_leak (void)
   int print_size;
   if (ptr_start != NULL)
     {
+      puts ("===================================");
       puts ("Memory Leak Summary");
       puts ("-----------------------------------");
       puts ("REPORT THIS LEAK TO https://github.com/harieamjari/dats");

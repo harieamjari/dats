@@ -76,8 +76,13 @@ void clean_all_symrec_t_all_dats_t() {
         nr_t *tmp;
         for (nr_t *nr = p->value.staff.nr; nr != NULL; nr = tmp) {
           tmp = nr->next;
-          if (nr->type == SYM_NOTE && nr != NULL)
-            free(nr->note);
+          if (nr->type == SYM_NOTE && nr != NULL){
+            note_t *nntmp;
+            for (note_t *ntmp = nr->note; ntmp!=NULL;){
+               nntmp = ntmp->next;
+               free(ntmp);
+               ntmp = nntmp;
+            }}
           free(nr);
         }
       } break; /*
@@ -137,8 +142,8 @@ symrec_t *getsym(const dats_t *const t, char const *const id) {
       continue;
     if (!strcmp(p->value.staff.identifier, id))
       return p;
-    else if (!strcmp(p->value.env.identifier, id))
-      return p;
+    /*else if (!strcmp(p->value.env.identifier, id))
+      return p;*/
   }
   return NULL;
 }

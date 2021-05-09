@@ -9,23 +9,11 @@
 #include "synth.h"
 
 static DSOption options[] = {
-  {DSOPTION_FLOAT, "volume", "the volume of synth", {.floatv = 1.0}},
-  {0,NULL, NULL, /*dummy val to prevent warning*/ {.intv = 0.0}}
+  {DSOPTION_FLOAT, "volume", "The volume of synth", {.floatv = 1.0}},
+  {DSOPTION_STRING, "test", "foo", {.strv = NULL}},
+  {0,NULL, NULL, /*dummy val to prevent warning*/ {.intv = 0.0}} 
 
 };
-
-static pcm16_t *synth (const symrec_t * const staff);
-DSSynth ss_psg = {
-  .name = "psg",
-  .options = options,/*
-  .options = (struct _option[])
-  {
-   {.name = "gain",.num = 10.0},
-   {NULL, 0}
-   },*/
-  .synth = &synth
-};
-
 
 static pcm16_t *
 synth (const symrec_t * staff)
@@ -37,7 +25,7 @@ synth (const symrec_t * staff)
   assert (pcm_ctx != NULL);
 
   uint32_t total = 0;
-  for (nr_t * n = staff->value.staff.nr; n != NULL; n = n->next)
+  for (nr_t * n = staff -> value . staff.nr; n != NULL; n = n->next)
     {
       if (n->type == SYM_NOTE)
 	{
@@ -69,7 +57,7 @@ synth (const symrec_t * staff)
     }
   putchar ('\n');
   for (DSOption *ctx = options; ctx->option_name !=NULL; ctx++){
-     printf("[s_psg] %s ", ctx->option_name);
+     printf("[s_kpa] %s ", ctx->option_name);
      switch (ctx->type){
        case DSOPTION_FLOAT: printf("%f", ctx->value.floatv); break;
        case DSOPTION_INT: printf("%d", ctx->value.intv); break;
@@ -80,6 +68,11 @@ synth (const symrec_t * staff)
   pcm_ctx->numsamples = staff->value.staff.numsamples;
   pcm_ctx->pcm = pcm;
   pcm_ctx->next = NULL;
-
   return pcm_ctx;
 }
+
+DSSynth ss_kpa = {
+  .name = "kpa",
+  .options = options,
+  .synth = &synth
+};

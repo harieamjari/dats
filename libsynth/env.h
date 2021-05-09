@@ -106,11 +106,12 @@ struct symrec_t
       nr_t *nr;
       uint32_t numsamples;
     } staff;			/* staff variables */
-    struct
+
+   /* struct
     {
       char *identifier;
       float val;
-    } env;			/* environment variables */
+    } env;*/			/* environment variables */
    
     struct
     {
@@ -129,12 +130,9 @@ struct dats_t
   FILE *fp;
   char *fname;
   int line, column;
+  symrec_t *sym_table;
 
   dats_t *next;
-
-  //uint32_t numsamples;
-  //int16_t *pcm_s16le;
-  symrec_t *sym_table;
 };
 
 #endif
