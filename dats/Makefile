@@ -1,13 +1,12 @@
-
 CC = gcc
-CFLAGS = -Wall -Wextra -O3
-OBJ := dats.o parser.o scanner.o semantic.o
+CFLAGS = -Wall -Wextra -O3 -march=native
+OBJ := dats.o parser.o scanner.o
 all : dats
 
-ENABLE_DEBUG = yes
+ENABLE_DEBUG = no
 
 ifeq ($(ENABLE_DEBUG), yes)
-	DEBUG_FLAGS = -ggdb3 -fsanitize=address -fsanitize=undefined 
+	DEBUG_FLAGS = -ggdb3 -fsanitize=address -fsanitize=undefined
 	OBJ += ../memory-leak-detector/leak_detector.o
         CFLAGS += -DDATS_DETECT_MEM_LEAK
 endif

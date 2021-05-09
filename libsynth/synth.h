@@ -14,8 +14,9 @@ typedef struct DSOption DSOption;
 struct DSOption {
    DSOptionType type;
    const char *option_name; 
+   const char *description;
    union {
-   char *name;
+   char *strv;
    float floatv;
    int   intv;
    } value;
@@ -25,12 +26,12 @@ typedef struct DSSynth DSSynth;
 struct DSSynth
 {
   const char *name;
-  const DSOption *option;
+  DSOption *options;/*
   struct _option
   {
     const char *name;
     float num;
-  } *options;
+  } *options;*/
   pcm16_t *(*const synth) (const symrec_t * const staff);
 };
 

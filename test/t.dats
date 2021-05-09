@@ -188,7 +188,7 @@ master {
 /* multi line **
    ***
    hh */
-   pcm16 tmp1 = synth.psg(apple);
+   pcm16 tmp1 = synth.psg(apple)[volume=2.13];
    pcm16 track1 = tmp1, synth.psg(apple);
    write("w.wav", track1);
 }

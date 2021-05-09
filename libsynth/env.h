@@ -50,7 +50,6 @@ enum token_t
   TOK_MUL,
   TOK_DIV,
 
-  //TOK_ENV,                    /* Environment variables 
   TOK_FLOAT,
   TOK_EOF,
   TOK_ERR,
@@ -74,6 +73,7 @@ struct note_t
   int decay;
   int sustain;
   int release;
+  note_t *next; /* a dyad or a chord maybe? */
 };
 
 typedef struct nr_t nr_t;	/* list of notes and rests with properties */
@@ -85,14 +85,6 @@ struct nr_t
   nr_t *next;
 };
 
-typedef struct symrec_t symrec_t;
-typedef struct master_t master_t;
-
-struct master_t
-{
-  symrec_t *track;		/* track is composed of series of type TOK_STAFF linked together */
-  master_t *next;		/* next track */
-};
 typedef struct pcm16_t pcm16_t;
 struct pcm16_t
 {
@@ -100,6 +92,8 @@ struct pcm16_t
   uint32_t numsamples;
   pcm16_t *next;
 };
+
+typedef struct symrec_t symrec_t;
 struct symrec_t
 {
   token_t type;
@@ -118,7 +112,6 @@ struct symrec_t
       float val;
     } env;			/* environment variables */
    
-// master_t *master;		/* a chain of track */
     struct
     {
       char *identifier;
@@ -139,8 +132,8 @@ struct dats_t
 
   dats_t *next;
 
-  uint32_t numsamples;
-  int16_t *pcm_s16le;
+  //uint32_t numsamples;
+  //int16_t *pcm_s16le;
   symrec_t *sym_table;
 };
 

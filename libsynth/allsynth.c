@@ -18,3 +18,8 @@ get_dsynth_by_name (const char *name)
 
   return NULL;
 }
+/*
+void print_all_synths(void){
+
+
+}*/

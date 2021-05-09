@@ -3,27 +3,26 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#define DATS_DETECT_MEM_LEAK
 #ifdef DATS_DETECT_MEM_LEAK
 #include "memory-leak-detector/leak_detector.h"
 #endif
 #include "synth.h"
 
-static const DSOption options[] = {
-  {DSOPTION_FLOAT, "volume", {.floatv = 0.0}},
-  {0,NULL}
+static DSOption options[] = {
+  {DSOPTION_FLOAT, "volume", "the volume of synth", {.floatv = 1.0}},
+  {0,NULL, NULL, /*dummy val to prevent warning*/ {.intv = 0.0}}
 
 };
 
 static pcm16_t *synth (const symrec_t * const staff);
 DSSynth ss_psg = {
   .name = "psg",
-  .option = options,
+  .options = options,/*
   .options = (struct _option[])
   {
    {.name = "gain",.num = 10.0},
    {NULL, 0}
-   },
+   },*/
   .synth = &synth
 };
 
@@ -63,13 +62,21 @@ synth (const symrec_t * staff)
       total += n->length;
       if ((total % 44100) < 1000)
 	{
-	  printf ("\r[synth psg] %d/%d", total,
+	  printf ("\r[s_psg] %d/%d", total,
 		  staff->value.staff.numsamples);
 	  fflush (stdout);
 	}
     }
   putchar ('\n');
-
+  for (DSOption *ctx = options; ctx->option_name !=NULL; ctx++){
+     printf("[s_psg] %s ", ctx->option_name);
+     switch (ctx->type){
+       case DSOPTION_FLOAT: printf("%f", ctx->value.floatv); break;
+       case DSOPTION_INT: printf("%d", ctx->value.intv); break;
+       case DSOPTION_STRING: printf("%s", ctx->value.strv != NULL ? ctx->value.strv: " " ); break;
+     }
+     putchar('\n');
+  }
   pcm_ctx->numsamples = staff->value.staff.numsamples;
   pcm_ctx->pcm = pcm;
   pcm_ctx->next = NULL;

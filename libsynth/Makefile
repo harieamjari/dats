@@ -1,15 +1,23 @@
 CC = gcc
-CFLAGS = -I../ -Wall -Wextra -O0 -ggdb3 -fsanitize=address -fsanitize=undefined
+CFLAGS = -Wall -Wextra -O3 -march=native
+
+ENABLE_DEBUG = no
+
+ifeq ($(ENABLE_DEBUG), yes)
+        DEBUG_FLAGS = -ggdb3 -fsanitize=address -fsanitize=undefined
+	MEM_LEAK = ../memory-leak-detector/leak_detector_pic.o
+        CFLAGS += -DDATS_DETECT_MEM_LEAK
+endif
 
 S_SYNTHS +=  s_psg.c 
 
 OBJ := $(patsubst %.c, %.o, $(S_SYNTHS) allsynth.c)
 
 libsynth.so : $(OBJ)
-	$(CC) $(CFLAGS) ../memory-leak-detector/leak_detector_pic.o -shared -O0 $^ -o $@
+	$(CC) -shared $(CFLAGS) $(MEM_LEAK)  $^ -o $@
 
 $(OBJ): %.o: %.c
-	$(CC) -c -fPIC $(CFLAGS) $<
+	$(CC) -I.. -c -fPIC $(CFLAGS) $(DEBUG_FLAGS) $<
 
 .PHONY: indent
 clean: libsynth.so $(OBJ)
