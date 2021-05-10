@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #ifdef DATS_DETECT_MEM_LEAK
 #include "memory-leak-detector/leak_detector.h"
@@ -41,7 +42,114 @@ dats_t *d;
 
 /* Returns 0 if success. Non-zero if failed. */
 static int parse_notes_rests() {
-  if (tok == TOK_BPM) {
+   if (tok == TOK_N) {
+    nr_t *cnr = malloc(sizeof(nr_t));
+    assert(cnr != NULL);
+    cnr->type = SYM_NOTE;
+    cnr->length = 0;
+    cnr->next = NULL;
+  add_lengthn:
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_FLOAT) {
+      free(cnr);
+      EXPECTING(TOK_FLOAT, d);
+    }
+
+    cnr->length += (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
+    uint32_t dotted_len =
+        (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
+  checkn:
+    tok = read_next_tok_cur_dats_t(d);
+    switch (tok) {
+    case TOK_DOT:
+      dotted_len /= 2;
+      cnr->length += dotted_len;
+      goto checkn;
+    case TOK_ADD:
+      goto add_lengthn;
+    case TOK_COMMA:
+      break;
+    default:
+      free(cnr);
+      UNEXPECTED(tok, d);
+    }
+    staff->value.staff.numsamples += cnr->length;
+    tok = read_next_tok_cur_dats_t(d);
+
+    note_t *n = malloc(sizeof(note_t));
+    note_t *f = n;
+    assert(n != NULL);
+
+    if (tok != TOK_NOTE && tok != TOK_FLOAT) {
+      free(cnr);
+      free(n);
+      UNEXPECTED(tok, d);
+    }
+
+   addn: /* add dyad */
+    f->frequency = tok_num*pow(2.0, (double) tok_octave) * pow(1.059463094, (double) tok_semitone);
+    f->attack = tok_attack;
+    f->decay = tok_decay;
+    f->sustain = tok_sustain;
+    f->release = tok_release;
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok == TOK_NOTE || tok == TOK_FLOAT){
+      f->next = malloc(sizeof(note_t));
+      assert(f!=NULL); 
+      f = f->next;
+      goto addn;
+    }
+    f->next = NULL;
+    cnr->note = n;
+
+    if (staff->value.staff.nr != NULL) {
+      for (nr_t *p = staff->value.staff.nr; 1; p = p->next) {
+        if (p->next == NULL) {
+          p->next = cnr;
+          break;
+        }
+      }
+    } else
+      staff->value.staff.nr = cnr;
+    rule_match = 1;
+  } else if (tok == TOK_R) {
+    nr_t *cnr = malloc(sizeof(nr_t));
+    assert(cnr != NULL);
+    cnr->type = SYM_REST;
+    cnr->length = 0;
+    cnr->next = NULL;
+  add_lengthr:
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_FLOAT) {
+      UNEXPECTED(tok, d);
+    }
+    cnr->length += (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
+    uint32_t dotted_len =
+        (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
+  checkr:
+    tok = read_next_tok_cur_dats_t(d);
+    switch (tok) {
+    case TOK_DOT:
+      dotted_len /= 2;
+      cnr->length += dotted_len;
+      goto checkr;
+    case TOK_ADD:
+      goto add_lengthr;
+    default:;
+    }
+    staff->value.staff.numsamples += cnr->length;
+
+    if (staff->value.staff.nr != NULL)
+      for (nr_t *p = staff->value.staff.nr; 1; p = p->next) {
+        if (p->next == NULL) {
+          p->next = cnr;
+          break;
+        }
+      }
+    else
+      staff->value.staff.nr = cnr;
+    rule_match = 1;
+  } else if (tok == TOK_BPM) {
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_EQUAL)
       UNEXPECTED(tok, d);
@@ -89,6 +197,28 @@ static int parse_notes_rests() {
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
+  } else if (tok == TOK_OCTAVE) {
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_EQUAL)
+      UNEXPECTED(tok, d);
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_FLOAT)
+      EXPECTING(TOK_FLOAT, d);
+    tok_octave = (int) tok_num;
+    rule_match = 1;
+    tok = read_next_tok_cur_dats_t(d);
+
+  } else if (tok == TOK_SEMITONE) {
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_EQUAL)
+      UNEXPECTED(tok, d);
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_FLOAT)
+      EXPECTING(TOK_FLOAT, d);
+    tok_semitone = (int) tok_num;
+    rule_match = 1;
+    tok = read_next_tok_cur_dats_t(d);
+
   } else if (tok == TOK_RELEASE) {
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_EQUAL)
@@ -100,105 +230,7 @@ static int parse_notes_rests() {
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
-  } else if (tok == TOK_N) {
-    nr_t *cnr = malloc(sizeof(nr_t));
-    assert(cnr != NULL);
-    cnr->type = SYM_NOTE;
-    cnr->length = 0;
-    cnr->next = NULL;
-  add_lengthn:
-    tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT) {
-      free(cnr);
-      EXPECTING(TOK_FLOAT, d);
-    }
-
-    cnr->length += (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
-    uint32_t dotted_len =
-        (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
-  checkn:
-    tok = read_next_tok_cur_dats_t(d);
-    switch (tok) {
-    case TOK_DOT:
-      dotted_len /= 2;
-      cnr->length += dotted_len;
-      goto checkn;
-    case TOK_ADD:
-      goto add_lengthn;
-    case TOK_COMMA:
-      break;
-    default:
-      free(cnr);
-      UNEXPECTED(tok, d);
-    }
-    staff->value.staff.numsamples += cnr->length;
-    tok = read_next_tok_cur_dats_t(d);
-
-    if (tok != TOK_NOTE && tok != TOK_FLOAT) {
-      free(cnr);
-      UNEXPECTED(tok, d);
-    }
-
-    note_t *n = malloc(sizeof(note_t));
-    assert(n != NULL);
-    n->frequency = tok_num;
-    n->attack = tok_attack;
-    n->decay = tok_decay;
-    n->sustain = tok_sustain;
-    n->release = tok_release;
-    n->next = malloc(sizeof(note_t));
-    n->next->next = NULL;
-    cnr->note = n;
-
-    if (staff->value.staff.nr != NULL) {
-      for (nr_t *p = staff->value.staff.nr; 1; p = p->next) {
-        if (p->next == NULL) {
-          p->next = cnr;
-          break;
-        }
-      }
-    } else
-      staff->value.staff.nr = cnr;
-    rule_match = 1;
-    tok = read_next_tok_cur_dats_t(d);
-  } else if (tok == TOK_R) {
-    nr_t *cnr = malloc(sizeof(nr_t));
-    assert(cnr != NULL);
-    cnr->type = SYM_REST;
-    cnr->length = 0;
-    cnr->next = NULL;
-  add_lengthr:
-    tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT) {
-      UNEXPECTED(tok, d);
-    }
-    cnr->length += (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
-    uint32_t dotted_len =
-        (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
-  checkr:
-    tok = read_next_tok_cur_dats_t(d);
-    switch (tok) {
-    case TOK_DOT:
-      dotted_len /= 2;
-      cnr->length += dotted_len;
-      goto checkr;
-    case TOK_ADD:
-      goto add_lengthr;
-    default:;
-    }
-    staff->value.staff.numsamples += cnr->length;
-
-    if (staff->value.staff.nr != NULL)
-      for (nr_t *p = staff->value.staff.nr; 1; p = p->next) {
-        if (p->next == NULL) {
-          p->next = cnr;
-          break;
-        }
-      }
-    else
-      staff->value.staff.nr = cnr;
-    rule_match = 1;
-  } else
+  }else
     return 0;
 
   if (tok != TOK_SEMICOLON)
@@ -209,6 +241,8 @@ static int parse_notes_rests() {
 
 static int parse_staff() {
   tok_bpm = 120.0;
+  tok_octave = 0;
+  tok_semitone = 0;
   tok_attack = 1.0;
   tok_decay = 1.0;
   tok_sustain = 1.0;
@@ -346,7 +380,7 @@ static int parse_stmt() {
                 expecting = TOK_STRING;
                 tok = read_next_tok_cur_dats_t(d);
                 if (tok != TOK_STRING)
-                  EXPECTING(TOK_STRING, d);
+                  UNEXPECTED(tok, d);
                 expecting = TOK_NULL;
                 driver->options[i].value.strv = tok_identifier;
                 printf("Driver num %s\n", driver->options[i].value.strv);
@@ -570,7 +604,7 @@ int parse_cur_dats_t(dats_t *const t) {
     if (tok == TOK_EOF)
       break;
   }
-  printf("[\x1b[1;32m%s:%d @ %s\x1b[0m] %s: parsing successful\n", __FILE__,
+  printf("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s: parsing successful\n", __FILE__,
          __LINE__, __func__, d->fname);
 
   return local_errors;

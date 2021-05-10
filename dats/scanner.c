@@ -49,6 +49,7 @@ void print_all_nr_t(nr_t *nr) {
 
 void clean_all_dats_t(void) {
   dats_t *n = dats_files;
+  if (n==NULL) return;
   dats_t *p;
   do {
     p = n->next;
@@ -76,35 +77,17 @@ void clean_all_symrec_t_all_dats_t() {
         nr_t *tmp;
         for (nr_t *nr = p->value.staff.nr; nr != NULL; nr = tmp) {
           tmp = nr->next;
-          if (nr->type == SYM_NOTE && nr != NULL){
+          if (nr->type == SYM_NOTE && nr != NULL) {
             note_t *nntmp;
-            for (note_t *ntmp = nr->note; ntmp!=NULL;){
-               nntmp = ntmp->next;
-               free(ntmp);
-               ntmp = nntmp;
-            }}
+            for (note_t *ntmp = nr->note; ntmp != NULL;) {
+              nntmp = ntmp->next;
+              free(ntmp);
+              ntmp = nntmp;
+            }
+          }
           free(nr);
         }
-      } break; /*
-       case TOK_MASTER:
-         {
-           master_t *mtmp;
-           for (master_t * track = p->value.master; track != NULL;
-                track = mtmp)
-             {
-               mtmp = track->next;
-               symrec_t *stmp;
-               for (symrec_t * staff = track->track; staff != NULL;
-                    staff = stmp)
-                 {
-                   stmp = staff->next;
-                   free (staff);
-
-                 }
-               free (track);
-             }
-         }
-         break;*/
+      } break;
       case TOK_PCM16: {
         pcm16_t *ptmp;
         for (pcm16_t *pcm = p->value.pcm16.pcm; pcm != NULL; pcm = ptmp) {
@@ -171,89 +154,92 @@ symrec_t *symrec_tcpy(symrec_t *const s) {
  | Scanner |
  `--------*/
 /* Read next token of current dats_t* */
-token_t read_next_tok_cur_dats_t(dats_t *const t) {
+token_t read_next_tok_cur_dats_t(dats_t *const d) {
   int c;
   char buff[100] = {0};
   /* eat whitespace */
 w:
   while (1) {
-    c = fgetc(t->fp);
+    c = fgetc(d->fp);
     if (((c != (int)' ') && c != (int)0x09) && c != (int)'\r')
       break;
-    t->column++;
+    d->column++;
     seek++;
   }
   if (c == (int)'\n') {
-    ++t->line;
+    ++d->line;
     seek++;
-    t->column = 1;
+    d->column = 1;
     goto w;
   }
-  line_token_found = t->line;
-  column_token_found = t->column;
+  line_token_found = d->line;
+  column_token_found = d->column;
 
   if (expecting == TOK_STRING) {
-    ungetc(c, t->fp);
+    ungetc(c, d->fp);
     seek--;
     int i;
-    for (i = 0; i < 99; i++) {
-      c = fgetc(t->fp);
+    for (i = 0; i < 100; i++) {
+      c = fgetc(d->fp);
       if (c == '\\')
         continue;
       else if (c == '"') {
-        ungetc(c, t->fp);
+        ungetc(c, d->fp);
         tok_identifier = strdup(buff);
         if (tok_identifier == NULL)
           return TOK_ERR;
         return TOK_STRING;
       }
       buff[i] = c;
-      t->column += 1;
+      d->column += 1;
       seek++;
     }
   }
   if (expecting == TOK_STRING) {
-    ERROR("ERROR: Too long name\n");
+    ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
+          "error" COLOR_OFF ": Too long string\n",
+          __FILE__, __LINE__, __func__, d->fname, line_token_found,
+          column_token_found);
     return TOK_ERR;
   }
   if (c == (int)'/') {
-    c = fgetc(t->fp);
-    t->column++;
+    c = fgetc(d->fp);
+    d->column++;
     seek++;
     if (c == (int)'/') {
-      while ((c = fgetc(t->fp)) != EOF)
+      while ((c = fgetc(d->fp)) != EOF)
         if (c == '\n') {
-          t->line++;
-          t->column = 1;
+          d->line++;
+          d->column = 1;
           seek++;
           goto w;
         }
     } else if (c == (int)'*') {
-      while ((c = fgetc(t->fp)) != EOF) {
+      while ((c = fgetc(d->fp)) != EOF) {
         switch (c) {
         case '*':
-          if ((c = fgetc(t->fp)) == '/') {
+          if ((c = fgetc(d->fp)) == '/') {
             seek++;
             goto w;
           } else if (c == '\n') {
-            t->line++;
-            t->column = 1;
+            d->line++;
+            d->column = 1;
             seek++;
           }
           break;
         case '\n':
-          t->line++;
-          t->column = 1;
+          d->line++;
+          d->column = 1;
           seek++;
         }
       }
       ERROR(
           "%s:%d:%d: \x1b[1;31merror\x1b[0m: unterminated multi line comment\n",
-          t->fname, line_token_found, column_token_found);
+          d->fname, line_token_found, column_token_found);
       return TOK_ERR;
     }
-    t->column--;
-    ungetc(c, t->fp);
+    d->column--;
+    ungetc(c, d->fp);
     seek--;
     c = '/';
   }
@@ -276,9 +262,9 @@ w:
     // clang-format on
     {
       int nchar;
-      ungetc(c, t->fp);
-      (void)fscanf(t->fp, "%99[a-zA-Z0-9_#]%n", buff, &nchar);
-      t->column += nchar;
+      ungetc(c, d->fp);
+      (void)fscanf(d->fp, "%99[a-zA-Z0-9_#]%n", buff, &nchar);
+      d->column += nchar;
       seek += nchar;
       if (!strcmp("staff", buff))
         return TOK_STAFF;
@@ -310,7 +296,7 @@ w:
           break;
         default:
           ERROR("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
-                t->fname, line_token_found, column_token_found, buff);
+                d->fname, line_token_found, column_token_found, buff);
           return TOK_ERR;
         }
         if ((buff[1] == '#' || buff[1] == 'b') && isdigit(buff[2]) &&
@@ -336,7 +322,7 @@ w:
           return TOK_NOTE;
         } else
           ERROR("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
-                t->fname, line_token_found, column_token_found, buff);
+                d->fname, line_token_found, column_token_found, buff);
         return TOK_ERR;
 
       } /*
@@ -350,6 +336,10 @@ w:
         return TOK_R;
       else if (!strcmp("bpm", buff))
         return TOK_BPM;
+      else if (!strcmp("octave", buff))
+        return TOK_OCTAVE;
+      else if (!strcmp("semitone", buff))
+        return TOK_SEMITONE;
       else if (!strcmp("attack", buff))
         return TOK_ATTACK;
       else if (!strcmp("decay", buff))
@@ -380,8 +370,8 @@ w:
     /* *INDENT-ON* */
     {
       int nchar;
-      ungetc(c, t->fp);
-      (void)fscanf(t->fp, "%99[0-9.]%n", buff, &nchar);
+      ungetc(c, d->fp);
+      (void)fscanf(d->fp, "%99[0-9.]%n", buff, &nchar);
       char *end;
       tok_num = strtof(buff, &end);
       {
@@ -395,98 +385,145 @@ w:
               ;
             if (i != nchar)
               for (int a = nchar - 1; a != i - 1; a--) {
-                ungetc(buff[a], t->fp);
+                ungetc(buff[a], d->fp);
                 printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
                        buff[a], buff[a]);
-                t->column--;
+                d->column--;
               }
           } else {
-            ungetc('.', t->fp);
-            t->column--;
+            ungetc('.', d->fp);
+            d->column--;
           }
         }
       }
       if (*end)
         ERROR("Warning: non numeric character/s %s\n", end);
-      t->column += nchar;
+      d->column += nchar;
       seek++;
       return TOK_FLOAT;
     }
   case '{':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_LCURLY_BRACE;
   case '}':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_RCURLY_BRACE;
   case '(':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_LPAREN;
   case ')':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_RPAREN;
   case '[':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_LBRACKET;
   case ']':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_RBRACKET;
   case ';':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_SEMICOLON;
   case '"':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_DQUOTE;
   case '\'':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_SQUOTE;
   case '.':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_DOT;
   case '=':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_EQUAL;
   case ',':
-    t->column += 1;
+    d->column++;
     seek++;
     return TOK_COMMA;
   case '+':
-    t->column += 1;
+    d->column++;;
     seek++;
     return TOK_ADD;
   case '-':
-    t->column += 1;
+    c = fgetc(d->fp);
+    d->column++;
     seek++;
+    switch (c) {
+      // clang-format off
+      /* *INDENT-OFF* */
+    case '0': case '1': case '2': case '3':
+    case '4': case '5': case '6': case '7':
+    case '8': case '9':
+      // clang-format on
+      /* *INDENT-ON* */
+      {
+        int nchar;
+        ungetc(c, d->fp);
+        (void)fscanf(d->fp, "%99[0-9.]%n", buff, &nchar);
+        char *end;
+        tok_num = strtof(buff, &end);
+        {
+          int i = 0;
+          while (isdigit(buff[i]))
+            i++;
+          if (buff[i] == (char)'.') {
+            i++;
+            if (isdigit(buff[i])) {
+              while (isdigit(buff[++i]))
+                ;
+              if (i != nchar)
+                for (int a = nchar - 1; a != i - 1; a--) {
+                  ungetc(buff[a], d->fp);
+                  printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
+                         buff[a], buff[a]);
+                  d->column--;
+                }
+            } else {
+              ungetc('.', d->fp);
+              d->column--;
+            }
+          }
+        }
+        if (*end)
+          ERROR("Warning: non numeric character/s %s\n", end);
+        d->column += nchar;
+        seek++;
+        return TOK_FLOAT;
+      }
+    default:
+      break;
+    }
+    ungetc(c, d->fp);
     return TOK_SUB;
   case '/':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_DIV;
   case '*':
-    t->column += 1;
+    d->column += 1;
     seek++;
     return TOK_MUL;
   case EOF:
     return TOK_EOF;
   default:
-    ERROR("[\x1b[1;32m%s:%d @ %p\x1b[0m] %s:%d:%d \x1b[1;31merror\x1b[0m: "
+    ERROR("[" GREEN_ON "%s:%d @ %p" COLOR_OFF "%s:%d:%d " RED_ON "error" COLOR_OFF "m: "
           "illegal symbol '%c'\n",
-          __FILE__, __LINE__, read_next_tok_cur_dats_t, t->fname, t->line,
-          t->column, c);
+          __FILE__, __LINE__, read_next_tok_cur_dats_t, d->fname, d->line,
+          d->column, c);
     return TOK_ERR;
   }
 
-  fclose(t->fp);
+  fclose(d->fp);
   ERROR("SYSTEM ERROR!!!\n");
   return TOK_ERR;
 }
@@ -507,6 +544,10 @@ const char *token_t_to_str(const token_t t) {
     return "sustain";
   case TOK_RELEASE:
     return "release";
+  case TOK_SEMITONE:
+    return "semitone";
+  case TOK_OCTAVE:
+    return "octave";
   case TOK_LCURLY_BRACE:
     return "'{'";
   case TOK_RCURLY_BRACE:

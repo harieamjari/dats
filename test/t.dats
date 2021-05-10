@@ -190,7 +190,7 @@ master {
    ***
    hh */
   /* pcm16 tmp1 = synth.kpa(apple);*/
-   pcm16 track1 = synth.kpa(apple)[test="Al-buharie test"], track1;
+   pcm16 track1 = synth.kpa(apple)[test="Al-buharie test l"], track1;
    write("w.wav", track1);
 }
 

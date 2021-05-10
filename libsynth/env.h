@@ -21,15 +21,19 @@ enum token_t
   /* Macros */
   TOK_REPEAT,
   TOK_WRITE,
+  TOK_READ,
+  TOK_NOTE,
+  TOK_N,
+  TOK_R,
+
+  /* env */
   TOK_BPM,
   TOK_ATTACK,
   TOK_DECAY,
   TOK_SUSTAIN,
   TOK_RELEASE,
-  TOK_READ,
-  TOK_NOTE,
-  TOK_N,
-  TOK_R,
+  TOK_SEMITONE,
+  TOK_OCTAVE,
 
   /* Symbols */
   TOK_LPAREN,

@@ -11,7 +11,7 @@
 static DSOption options[] = {
   {DSOPTION_FLOAT, "volume", "The volume of synth", {.floatv = 1.0}},
   {DSOPTION_STRING, "test", "foo", {.strv = NULL}},
-  {0,NULL, NULL, /*dummy val to prevent warning*/ {.intv = 0.0}} 
+  {NULL} 
 
 };
 
@@ -35,7 +35,7 @@ synth (const symrec_t * staff)
 	  int16_t prev = 0;
 	  uint32_t cur = 0;
 	  for (uint32_t i = 0;
-	       i < n->length + (uint32_t) 22050
+	       i < n->length + (uint32_t) 44100
 	       && i + total < staff->value.staff.numsamples; i++)
 	    {
 	      wavetable[cur] = ((wavetable[cur] / 2) + (prev / 2));
@@ -73,6 +73,7 @@ synth (const symrec_t * staff)
 
 DSSynth ss_kpa = {
   .name = "kpa",
+  .description = "A Karplus-Strong synthesizer",
   .options = options,
   .synth = &synth
 };

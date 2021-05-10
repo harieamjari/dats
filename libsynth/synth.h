@@ -26,6 +26,7 @@ typedef struct DSSynth DSSynth;
 struct DSSynth
 {
   const char *name;
+  const char *description;
   DSOption *options;/*
   struct _option
   {

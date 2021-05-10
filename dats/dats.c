@@ -20,7 +20,7 @@
  */
 
 #include <assert.h>
-#include <getopt.h>
+//#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,13 +47,13 @@ extern int parse_cur_dats_t(dats_t *const t);
  */
 int process_args(const int argc, char *const *argv) {
   if (argc == 1) {
-    ERROR("No argument supplied!\nUse -h to print help\n");
+    ERROR("No argument supplied!\nUse --help to print help\n");
     return 1;
   }
   FILE *fp;
-  int c; // option_index, out_files = 0;
-  const struct option long_options[] = {
-      {"dats-file", required_argument, 0, 'i'}, {0, 0, 0, 0}};
+  // option_index, out_files = 0;
+  /*const struct option long_options[] = {
+      {"dats-file", required_argument, 0, 'i'}, {0, 0, 0, 0}};*/
 
   /* Makes sure that all files entered exist and other arguments
    * are correct, so I won't have to deal with figuring out how to
@@ -62,68 +62,62 @@ int process_args(const int argc, char *const *argv) {
    */
 
   /* Pass 1 */
-  int err = 0;
-  while (1) {
-    c = getopt_long(argc, argv, "i:h", long_options, NULL);
-    if (c == -1)
-      break;
-    switch (c) {
-    case 'i':
-      fp = fopen(optarg, "r");
-      if (fp == NULL) {
-        perror(optarg);
-        err++;
-        break;
-      } else {
-        fclose(fp);
-        struct stat path_stat;
-        stat(optarg, &path_stat);
-        if (!S_ISREG(path_stat.st_mode)) {
-          ERROR("%s: %s: not a regular file\n", argv[0], optarg);
-          err++;
-        }
+   /*
+   while (1) {
+     c = getopt_long(argc, argv, "i:h", long_options, NULL);
+     if (c == -1)
+       break;
+     switch (c) {
+     case 'i':
+       fp = fopen(optarg, "r");
+       if (fp == NULL) {
+         perror(optarg);
+         err++;
+         break;
+       } else {
+         fclose(fp);
+         struct stat path_stat;
+         stat(optarg, &path_stat);
+         if (!S_ISREG(path_stat.st_mode)) {
+           ERROR("%s: %s: not a regular file\n", argv[0], optarg);
+           err++;
+         }
+       }
+       break;
+     case 'h':
+       puts("Dats interpreter Draft-2.0.0\n"
+            "\n"
+            "options:\n"
+            "-i                   input dats files\n");
+       exit(0);
+     default:
+       return 1;
+     }
+   }*/
+  for (int i = 1; i < argc; i++) {
+    switch (argv[i][0]) {
+    case '-':
+      if (argv[i][1] == '-' && !strcmp(&argv[i][2], "help")) {
+        puts("Dats interpreter Draft-2.0.0");
+        printf("%s [dats file]\n", argv[0]);
+        return 0;
       }
+      ERROR(RED_ON "error" COLOR_OFF ": unknown option '%s'\n", argv[i]);
+      global_errors++;
       break;
-    case 'h':
-      puts("Dats interpreter Draft-2.0.0\n"
-           "\n"
-           "options:\n"
-           "-i                   input dats files\n");
-      exit(0);
     default:
-      return 1;
-    }
-  }
-  if (optind < argc) {
-    while (optind < argc)
-      ERROR("\x1b[1;31merror\x1b[0m: unknown option '%s'\n", argv[optind++]);
-    return 1;
-  }
-  if (err) {
-    return 1;
-  }
-  /* retry parsing arguments */
-  optind = 1;
-  while (1) {
-    c = getopt_long(argc, argv, "i:", long_options, NULL);
-    if (c == -1)
-      break;
-    switch (c) {
-    case 'i':
-      fp = fopen(optarg, "r");
+      fp = fopen(argv[i], "r");
       if (fp == NULL) {
-        perror(optarg);
+        perror(argv[i]);
         return 1;
       }
       dats_t *p = malloc(sizeof(dats_t));
       assert(p != NULL);
       p->fp = fp;
-      p->fname = strdup(optarg);
+      p->fname = strdup(argv[i]);
       assert(p->fname != NULL);
       p->line = 1;
       p->column = 1;
-      //p->numsamples = 0;
-      //p->pcm_s16le = NULL;
       p->sym_table = NULL;
       p->next = dats_files;
       dats_files = p;
@@ -131,7 +125,7 @@ int process_args(const int argc, char *const *argv) {
     }
   }
 
-  return 0;
+  return global_errors;
 }
 
 int main(int argc, char **argv) {
@@ -141,7 +135,7 @@ int main(int argc, char **argv) {
   int ret;
   ret = process_args(argc, argv);
   if (ret)
-    return 1;
+    goto err;
 
   /* Individually parse each dats_t* */
   for (dats_t *p = dats_files; p != NULL; p = p->next) {
@@ -160,5 +154,5 @@ err:
 
   clean_all_symrec_t_all_dats_t();
   clean_all_dats_t();
-  return 0;
+  return global_errors ? 1 : 0;
 }

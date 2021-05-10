@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -O3 -march=native
 
-ENABLE_DEBUG = no
+ENABLE_DEBUG = yes
 
 ifeq ($(ENABLE_DEBUG), yes)
         DEBUG_FLAGS = -ggdb3 -fsanitize=address -fsanitize=undefined

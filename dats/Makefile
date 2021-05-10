@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -O3 -march=native
 OBJ := dats.o parser.o scanner.o
 all : dats
 
-ENABLE_DEBUG = no
+ENABLE_DEBUG = yes
 
 ifeq ($(ENABLE_DEBUG), yes)
 	DEBUG_FLAGS = -ggdb3 -fsanitize=address -fsanitize=undefined
@@ -23,8 +23,8 @@ clean:
 	rm dats $(OBJ)
 
 test : dats
-	./dats -i ../test/t.dats
-	./dats -i ../test/terr.dats -i ../test/t.dats
+	./dats ../test/t.dats
+	./dats  ../test/terr.dats ../test/t.dats
 install:  dats
 	cp $^ $(PREFIX)/bin
 indent :
