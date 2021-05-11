@@ -8,7 +8,7 @@ staff apple{
 bpm = 169;
 attack = 2;
 
-n 4, a#3;
+n 4, a#3 a#4;
 n 4, c4;
 n 8.0., c#4;
 n 16, c4;
@@ -192,6 +192,6 @@ master {
    hh */
   /* pcm16 tmp1 = synth.kpa(apple);*/
    pcm16 track1 = synth.kpa(apple)[test="Al-buharie test l"], track1;
-   write("w.wav", track1);
+   write("wj.wav", track1);
 }
 

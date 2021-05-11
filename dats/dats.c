@@ -1,4 +1,4 @@
-/*  Dats compiler
+/*  Dats interpreter
  *
  * Copyright (c) 2021 Al-buharie Amjari
  *
@@ -20,7 +20,6 @@
  */
 
 #include <assert.h>
-//#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,11 +35,8 @@
 #endif
 //#include "libwav/wav.h"
 
-/* Performs syntatic analysis */
+/* Parses dats_t */
 extern int parse_cur_dats_t(dats_t *const t);
-
-/* Performs semantic analysis */
-//__attribute__((deprecated)) extern int semantic_cur_dats_t(dats_t *const t);
 
 /* process_args returns the value 0 if sucesss and nonzero if
  * failed.
@@ -117,7 +113,7 @@ int process_args(const int argc, char *const *argv) {
       p->fname = strdup(argv[i]);
       assert(p->fname != NULL);
       p->line = 1;
-      p->column = 1;
+      p->column = 0;
       p->sym_table = NULL;
       p->next = dats_files;
       dats_files = p;

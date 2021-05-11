@@ -69,9 +69,9 @@ EXTERN dats_t *dats_files;
             column_token_found, token_t_to_str(x),                             \
             x == TOK_IDENTIFIER ? tok_identifier : "");                        \
       char buff[300] = {0};                                                    \
-      int length = sprintf(buff, "  %d | %s", line_token_found, line);         \
+      int length = sprintf(buff, "    %d | %s", line_token_found, line);         \
       ERROR("%s", buff);                                                       \
-      ERROR("%*s\n", length-strlen(tok_identifier), "^");                      \
+      ERROR("%*s\n", column_token_found+(length-(int)strlen(line)), "^");                      \
     }                                                                          \
     return 1;                                                                  \
   }
@@ -79,7 +79,7 @@ EXTERN dats_t *dats_files;
   ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON               \
         "warning" COLOR_OFF ": %s",                                            \
         __FILE__, __LINE__, __func__, d->fname, line_token_found,              \
-        column_token_found, str)
+        column_token_found+1, str)
 
 #define C_ERROR(...)                                                           \
   {                                                                            \
@@ -99,6 +99,10 @@ EXTERN dats_t *dats_files;
             "error" COLOR_OFF ": expecting %s\n",                              \
             __FILE__, __LINE__, __func__, d->fname, line_token_found,          \
             column_token_found, token_t_to_str(x));                            \
+      char buff[300] = {0};                                                    \
+      int length = sprintf(buff, "    %d | %s", line_token_found, line);         \
+      ERROR("%s", buff);                                                       \
+      ERROR("%*s\n", column_token_found+(length-(int)strlen(line)), "^");                      \
     return 1;                                                                  \
   }
 #define REPORT(...)                                                            \

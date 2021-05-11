@@ -171,7 +171,7 @@ w:
   if (c == (int)'\n') {
     ++d->line;
     seek++;
-    d->column = 1;
+    d->column = 0;
     if (fgets(line, 256, d->fp) != NULL)
       fseek(d->fp, -(long)(strlen(line)), SEEK_CUR);
     goto w;
@@ -181,23 +181,26 @@ w:
 
   if (expecting == TOK_STRING) {
     ungetc(c, d->fp);
+    d->column--;
     seek--;
     int i;
     for (i = 0; i < 100; i++) {
       c = fgetc(d->fp);
+      d->column++;
       if (c == '\\')
         continue;
       else if (c == '"') {
         ungetc(c, d->fp);
         seek--;
+        d->column--;
         tok_identifier = strdup(buff);
         if (tok_identifier == NULL)
           return TOK_ERR;
         return TOK_STRING;
       }
-      buff[i] = c;
-      d->column += 1;
-      seek++;
+      buff[i] = c;/*
+      d->column++;
+      seek++;*/
     }
   }
   if (expecting == TOK_STRING) {
@@ -215,7 +218,7 @@ w:
       while ((c = fgetc(d->fp)) != EOF)
         if (c == '\n') {
           d->line++;
-          d->column = 1;
+          d->column = 0;
           seek++;
           if (fgets(line, 256, d->fp) != NULL)
             fseek(d->fp, -(long)(strlen(line)), SEEK_CUR);
@@ -230,23 +233,23 @@ w:
             goto w;
           } else if (c == '\n') {
             d->line++;
-            d->column = 1;
+            d->column = 0;
             seek++;
-            if (fgets(line, 256, d->fp) != NULL)
-              fseek(d->fp, -(long)(strlen(line)), SEEK_CUR);
           }
           break;
         case '\n':
           d->line++;
-          d->column = 1;
+          d->column = 0;
           seek++;
-          if (fgets(line, 256, d->fp) != NULL)
-            fseek(d->fp, -(long)(strlen(line)), SEEK_CUR);
         }
       }
       ERROR(
-          "%s:%d:%d: \x1b[1;31merror\x1b[0m: unterminated multi line comment\n",
+          "%s:%d:%d: " RED_ON "error" COLOR_OFF ": unterminated multi line comment\n",
           d->fname, line_token_found, column_token_found);
+      char buff[300] = {0};                                                   
+      int length = sprintf(buff, "    %d | %s", line_token_found, line);        
+      ERROR("%s", buff);                                                       
+      ERROR("%*s\n", column_token_found+(length-(int)strlen(line)), "^");                                                                               
       return TOK_ERR;
     }
     d->column--;
@@ -256,7 +259,7 @@ w:
   }
   switch (c) {
     // clang-format off
-/* *INDENT-OFF* */
+    /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
     case 'k': case 'l': case 'm': case 'n': case 'o':
@@ -269,20 +272,21 @@ w:
     case 'P': case 'Q': case 'R': case 'S': case 'T':
     case 'U': case 'V': case 'W': case 'X': case 'Y':
     case 'Z':
-/* *INDENT-ON* */
+    /* *INDENT-ON* */
     // clang-format on
     {
       int nchar;
       ungetc(c, d->fp);
       seek--;
+      d->column--;
       (void)fscanf(d->fp, "%99[a-zA-Z0-9_#]%n", buff, &nchar);
       d->column += nchar;
+      //printf("nchar %d %s column %d <----\n",  nchar, buff, column_token_found);
       seek += nchar;
       if (!strcmp("staff", buff))
         return TOK_STAFF;
       else if ((buff[0] >= 'a' && buff[0] <= 'g') &&
                (((buff[1] == '#' || buff[1] == 'b') && isdigit(buff[2]))
-                /*(buff[2] >= '0' && buff[2] <= '9') */
                 || (buff[1] >= '0' && buff[1] <= '9'))) {
         switch (buff[0]) {
         case 'a':
@@ -333,7 +337,7 @@ w:
             ERROR("Warning: non numeric character/s %s\n", end);
           return TOK_NOTE;
         } else
-          ERROR("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
+          ERROR("%s:%d:%d: " RED_ON "error" COLOR_OFF ": illegal key \"%s\"\n",
                 d->fname, line_token_found, column_token_found, buff);
         return TOK_ERR;
 
@@ -374,7 +378,7 @@ w:
       }
     }
     // clang-format off
-/* *INDENT-OFF* */
+    /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':
     case '8': case '9':
@@ -383,10 +387,11 @@ w:
     {
       int nchar;
       ungetc(c, d->fp);
+      d->column--;
       seek--;
       (void)fscanf(d->fp, "%99[0-9.]%n", buff, &nchar);
-      char *end;
-      tok_num = strtof(buff, &end);
+      d->column += nchar;
+      //printf("nchar %d %s column %d <----\n",  nchar, buff, column_token_found);
       {
         int i = 0;
         while (isdigit(buff[i]))
@@ -399,9 +404,10 @@ w:
             if (i != nchar)
               for (int a = nchar - 1; a != i - 1; a--) {
                 ungetc(buff[a], d->fp);
+                buff[a] = 0;
                 seek--;
-                printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
-                       buff[a], buff[a]);
+               /* printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
+                       buff[a], buff[a]);*/
                 d->column--;
               }
           } else {
@@ -411,61 +417,37 @@ w:
           }
         }
       }
-      d->column += nchar;
+
+      char *end;
+      tok_num = strtof(buff, &end);
       seek += nchar;
       return TOK_FLOAT;
     }
   case '{':
-    d->column += 1;
-    seek++;
     return TOK_LCURLY_BRACE;
   case '}':
-    d->column += 1;
-    seek++;
     return TOK_RCURLY_BRACE;
   case '(':
-    d->column += 1;
-    seek++;
     return TOK_LPAREN;
   case ')':
-    d->column += 1;
-    seek++;
     return TOK_RPAREN;
   case '[':
-    d->column += 1;
-    seek++;
     return TOK_LBRACKET;
   case ']':
-    d->column += 1;
-    seek++;
     return TOK_RBRACKET;
   case ';':
-    d->column += 1;
-    seek++;
     return TOK_SEMICOLON;
   case '"':
-    d->column += 1;
-    seek++;
     return TOK_DQUOTE;
   case '\'':
-    d->column += 1;
-    seek++;
     return TOK_SQUOTE;
   case '.':
-    d->column += 1;
-    seek++;
     return TOK_DOT;
   case '=':
-    d->column += 1;
-    seek++;
     return TOK_EQUAL;
   case ',':
-    d->column++;
-    seek++;
     return TOK_COMMA;
   case '+':
-    d->column++;
-    seek++;
     return TOK_ADD;
   case '-':
     c = fgetc(d->fp);
@@ -482,8 +464,10 @@ w:
       {
         int nchar;
         ungetc(c, d->fp);
+        d->column--;
         seek--;
         (void)fscanf(d->fp, "%99[0-9.]%n", buff, &nchar);
+        d->column += nchar;
         char *end;
         tok_num = strtof(buff, &end);
         {
@@ -499,8 +483,8 @@ w:
                 for (int a = nchar - 1; a != i - 1; a--) {
                   ungetc(buff[a], d->fp);
                   seek--;
-                  printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
-                         buff[a], buff[a]);
+                 /*printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
+                         buff[a], buff[a]);*/
                   d->column--;
                 }
             } else {
@@ -510,7 +494,6 @@ w:
             }
           }
         }
-        d->column += nchar;
         seek += nchar;
         return TOK_FLOAT;
       }
@@ -519,23 +502,20 @@ w:
     }
     ungetc(c, d->fp);
     seek--;
+    d->column--;
     return TOK_SUB;
   case '/':
-    d->column += 1;
-    seek++;
     return TOK_DIV;
   case '*':
-    d->column += 1;
-    seek++;
     return TOK_MUL;
   case EOF:
     return TOK_EOF;
   default:
     ERROR("[" GREEN_ON "%s:%d @ %p" COLOR_OFF "%s:%d:%d " RED_ON
-          "error" COLOR_OFF "m: "
+          "error" COLOR_OFF ": "
           "illegal symbol '%c'\n",
-          __FILE__, __LINE__, read_next_tok_cur_dats_t, d->fname, d->line,
-          d->column, c);
+          __FILE__, __LINE__, read_next_tok_cur_dats_t, d->fname, line_token_found,
+          column_token_found, c);
     return TOK_ERR;
   }
 
