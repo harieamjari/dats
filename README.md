@@ -16,12 +16,13 @@ staff pol {
 }
 
 master {
-  // This uses the synthesizer named "psg"
-  pcm16 kol = synth.psg(pol);
+  // This uses the synthesizer named "kpa"
+  // An implementation of Karplus-Strong Algorithm
+  pcm16 kol = synth.kpa(pol);
   write("sample.wav", kol);
 }
 ```
-Execute dats file as `dats -i file.dats`
+Execute dats file as `dats file.dats`
 
 # Building
 

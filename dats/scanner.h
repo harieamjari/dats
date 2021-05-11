@@ -28,6 +28,7 @@ EXTERN void print_all_symrec_t_cur_dats_t(const dats_t *const t);
 
 EXTERN int line_token_found;
 EXTERN int column_token_found;
+EXTERN char line[256];
 
 EXTERN int local_errors;
 EXTERN int global_errors;
@@ -39,10 +40,9 @@ EXTERN float tok_attack;
 EXTERN float tok_decay;
 EXTERN float tok_sustain;
 EXTERN float tok_release;
-EXTERN int   tok_octave;
-EXTERN int   tok_semitone;
+EXTERN int tok_octave;
+EXTERN int tok_semitone;
 EXTERN char *tok_identifier;
-EXTERN int tok_master;
 EXTERN token_t expecting;
 
 EXTERN dats_t *dats_files;
@@ -62,11 +62,17 @@ EXTERN dats_t *dats_files;
 #define UNEXPECTED(x, d)                                                       \
   {                                                                            \
     local_errors++;                                                            \
-    if (x != TOK_ERR)                                                          \
+    if (x != TOK_ERR) {                                                        \
       ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON           \
-            "error" COLOR_OFF ": unexpected %s\n",                             \
+            "error" COLOR_OFF ": unexpected %s %s\n",                          \
             __FILE__, __LINE__, __func__, d->fname, line_token_found,          \
-            column_token_found, token_t_to_str(x));                            \
+            column_token_found, token_t_to_str(x),                             \
+            x == TOK_IDENTIFIER ? tok_identifier : "");                        \
+      char buff[300] = {0};                                                    \
+      int length = sprintf(buff, "  %d | %s", line_token_found, line);         \
+      ERROR("%s", buff);                                                       \
+      ERROR("%*s\n", length-strlen(tok_identifier), "^");                      \
+    }                                                                          \
     return 1;                                                                  \
   }
 #define WARNING(str)                                                           \
@@ -96,8 +102,11 @@ EXTERN dats_t *dats_files;
     return 1;                                                                  \
   }
 #define REPORT(...)                                                            \
-  local_errors++;                                                              \
-  ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s", __FILE__, __LINE__, __func__,      \
-        __VA_ARGS__)
+  {                                                                            \
+    local_errors++;                                                            \
+    ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] ", __FILE__, __LINE__,        \
+          __func__);                                                           \
+    ERROR(__VA_ARGS__);                                                        \
+  }
 
 #endif /* SCANNER_H */

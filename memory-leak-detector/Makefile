@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -fsanitize=address -ggdb3
+CFLAGS = -Wall -Wextra -O3 -march=native # -fsanitize=address -ggdb3
 
 all: leak_detector.o leak_detector_pic.o
 

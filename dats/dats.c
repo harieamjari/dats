@@ -62,38 +62,38 @@ int process_args(const int argc, char *const *argv) {
    */
 
   /* Pass 1 */
-   /*
-   while (1) {
-     c = getopt_long(argc, argv, "i:h", long_options, NULL);
-     if (c == -1)
-       break;
-     switch (c) {
-     case 'i':
-       fp = fopen(optarg, "r");
-       if (fp == NULL) {
-         perror(optarg);
-         err++;
-         break;
-       } else {
-         fclose(fp);
-         struct stat path_stat;
-         stat(optarg, &path_stat);
-         if (!S_ISREG(path_stat.st_mode)) {
-           ERROR("%s: %s: not a regular file\n", argv[0], optarg);
-           err++;
-         }
-       }
-       break;
-     case 'h':
-       puts("Dats interpreter Draft-2.0.0\n"
-            "\n"
-            "options:\n"
-            "-i                   input dats files\n");
-       exit(0);
-     default:
-       return 1;
-     }
-   }*/
+  /*
+  while (1) {
+    c = getopt_long(argc, argv, "i:h", long_options, NULL);
+    if (c == -1)
+      break;
+    switch (c) {
+    case 'i':
+      fp = fopen(optarg, "r");
+      if (fp == NULL) {
+        perror(optarg);
+        err++;
+        break;
+      } else {
+        fclose(fp);
+        struct stat path_stat;
+        stat(optarg, &path_stat);
+        if (!S_ISREG(path_stat.st_mode)) {
+          ERROR("%s: %s: not a regular file\n", argv[0], optarg);
+          err++;
+        }
+      }
+      break;
+    case 'h':
+      puts("Dats interpreter Draft-2.0.0\n"
+           "\n"
+           "options:\n"
+           "-i                   input dats files\n");
+      exit(0);
+    default:
+      return 1;
+    }
+  }*/
   for (int i = 1; i < argc; i++) {
     switch (argv[i][0]) {
     case '-':

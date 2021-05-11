@@ -19,10 +19,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #ifdef DATS_DETECT_MEM_LEAK
 #include "memory-leak-detector/leak_detector.h"
@@ -42,7 +42,7 @@ dats_t *d;
 
 /* Returns 0 if success. Non-zero if failed. */
 static int parse_notes_rests() {
-   if (tok == TOK_N) {
+  if (tok == TOK_N) {
     nr_t *cnr = malloc(sizeof(nr_t));
     assert(cnr != NULL);
     cnr->type = SYM_NOTE;
@@ -86,16 +86,17 @@ static int parse_notes_rests() {
       UNEXPECTED(tok, d);
     }
 
-   addn: /* add dyad */
-    f->frequency = tok_num*pow(2.0, (double) tok_octave) * pow(1.059463094, (double) tok_semitone);
+  addn: /* add dyad */
+    f->frequency = tok_num * pow(2.0, (double)tok_octave) *
+                   pow(1.059463094, (double)tok_semitone);
     f->attack = tok_attack;
     f->decay = tok_decay;
     f->sustain = tok_sustain;
     f->release = tok_release;
     tok = read_next_tok_cur_dats_t(d);
-    if (tok == TOK_NOTE || tok == TOK_FLOAT){
+    if (tok == TOK_NOTE || tok == TOK_FLOAT) {
       f->next = malloc(sizeof(note_t));
-      assert(f!=NULL); 
+      assert(f != NULL);
       f = f->next;
       goto addn;
     }
@@ -204,7 +205,7 @@ static int parse_notes_rests() {
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_FLOAT)
       EXPECTING(TOK_FLOAT, d);
-    tok_octave = (int) tok_num;
+    tok_octave = (int)tok_num;
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
@@ -215,7 +216,7 @@ static int parse_notes_rests() {
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_FLOAT)
       EXPECTING(TOK_FLOAT, d);
-    tok_semitone = (int) tok_num;
+    tok_semitone = (int)tok_num;
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
@@ -230,7 +231,7 @@ static int parse_notes_rests() {
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
-  }else
+  } else
     return 0;
 
   if (tok != TOK_SEMICOLON)
@@ -279,6 +280,11 @@ static int parse_staff() {
   if (tok != TOK_RCURLY_BRACE)
     UNEXPECTED(tok, d);
   return 0;
+}
+
+static symrec_t *parse_pcm16() {
+  int i;
+  return NULL;
 }
 
 static int parse_stmt() {
@@ -604,8 +610,8 @@ int parse_cur_dats_t(dats_t *const t) {
     if (tok == TOK_EOF)
       break;
   }
-  printf("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s: parsing successful\n", __FILE__,
-         __LINE__, __func__, d->fname);
+  printf("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s: parsing successful\n",
+         __FILE__, __LINE__, __func__, d->fname);
 
   return local_errors;
 }

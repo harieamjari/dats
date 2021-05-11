@@ -15,6 +15,14 @@ static DSOption options[] = {
 
 };
 
+static void free_string_options(void){
+    for (int i = 0; options[i].option_name!=NULL; i++){
+      if (options[i].type!=DSOPTION_STRING) continue;
+      free (options[i].value.strv);
+    }
+
+}
+
 static pcm16_t *
 synth (const symrec_t * staff)
 {
@@ -68,6 +76,7 @@ synth (const symrec_t * staff)
   pcm_ctx->numsamples = staff->value.staff.numsamples;
   pcm_ctx->pcm = pcm;
   pcm_ctx->next = NULL;
+  free_string_options();
   return pcm_ctx;
 }
 
