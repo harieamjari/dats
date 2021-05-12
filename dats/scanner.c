@@ -1,4 +1,4 @@
-/*  Dats compiler
+/*  Dats interpreter
  *
  * Copyright (c) 2021 Al-buharie Amjari
  *
@@ -135,7 +135,6 @@ symrec_t *getsym(const dats_t *const t, char const *const id) {
 symrec_t *symrec_tcpy(symrec_t *const s) {
   symrec_t *copy = malloc(sizeof(symrec_t));
   assert(copy != NULL);
-  //*copy = *s;
   switch (s->type) {
   case TOK_STAFF:
     copy->type = s->type;
@@ -151,6 +150,22 @@ symrec_t *symrec_tcpy(symrec_t *const s) {
   return copy;
 }
 
+void print_debugging_info(const token_t tok) {
+  switch (tok) {
+  case TOK_IDENTIFIER:
+    ERROR(", '%s'\n", tok_identifier);
+    break;
+  case TOK_FLOAT:
+    ERROR(", %f\n", tok_num);
+    break;
+  default:
+    ERROR("\n");
+  }
+  char buff[300] = {0};
+  int length = sprintf(buff, "    %d | %s", line_token_found, line);
+  ERROR("%s", buff);
+  ERROR("%*s\n", column_token_found + (length - (int)strlen(line)), "^");
+}
 /*---------.
  | Scanner |
  `--------*/
@@ -169,7 +184,7 @@ w:
       break;
   }
   if (c == (int)'\n') {
-    ++d->line;
+    d->line++;
     seek++;
     d->column = 0;
     if (fgets(line, 256, d->fp) != NULL)
@@ -198,9 +213,9 @@ w:
           return TOK_ERR;
         return TOK_STRING;
       }
-      buff[i] = c;/*
-      d->column++;
-      seek++;*/
+      buff[i] = c; /*
+       d->column++;
+       seek++;*/
     }
   }
   if (expecting == TOK_STRING) {
@@ -243,13 +258,13 @@ w:
           seek++;
         }
       }
-      ERROR(
-          "%s:%d:%d: " RED_ON "error" COLOR_OFF ": unterminated multi line comment\n",
-          d->fname, line_token_found, column_token_found);
-      char buff[300] = {0};                                                   
-      int length = sprintf(buff, "    %d | %s", line_token_found, line);        
-      ERROR("%s", buff);                                                       
-      ERROR("%*s\n", column_token_found+(length-(int)strlen(line)), "^");                                                                               
+      local_errors++;
+      ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
+            "error" COLOR_OFF ": ",
+            __FILE__, __LINE__, __func__, d->fname, line_token_found,
+            column_token_found);
+      ERROR("unterminated multi-line comment");
+      print_debugging_info(TOK_NULL);
       return TOK_ERR;
     }
     d->column--;
@@ -258,7 +273,7 @@ w:
     c = '/';
   }
   switch (c) {
-    // clang-format off
+  // clang-format off
     /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
@@ -281,13 +296,14 @@ w:
       d->column--;
       (void)fscanf(d->fp, "%99[a-zA-Z0-9_#]%n", buff, &nchar);
       d->column += nchar;
-      //printf("nchar %d %s column %d <----\n",  nchar, buff, column_token_found);
+      // printf("nchar %d %s column %d <----\n",  nchar, buff,
+      // column_token_found);
       seek += nchar;
       if (!strcmp("staff", buff))
         return TOK_STAFF;
       else if ((buff[0] >= 'a' && buff[0] <= 'g') &&
-               (((buff[1] == '#' || buff[1] == 'b') && isdigit(buff[2]))
-                || (buff[1] >= '0' && buff[1] <= '9'))) {
+               (((buff[1] == '#' || buff[1] == 'b') && isdigit(buff[2])) ||
+                (buff[1] >= '0' && buff[1] <= '9'))) {
         switch (buff[0]) {
         case 'a':
           tok_num = 27.50;
@@ -311,8 +327,13 @@ w:
           tok_num = 24.49;
           break;
         default:
-          ERROR("%s:%d:%d: \x1b[1;31merror\x1b[0m: illegal key \"%s\"\n",
-                d->fname, line_token_found, column_token_found, buff);
+          local_errors++;
+          ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
+                "error" COLOR_OFF ": ",
+                __FILE__, __LINE__, __func__, d->fname, line_token_found,
+                column_token_found);
+          ERROR("illegal key");
+          print_debugging_info(TOK_NULL);
           return TOK_ERR;
         }
         if ((buff[1] == '#' || buff[1] == 'b') && isdigit(buff[2]) &&
@@ -337,8 +358,13 @@ w:
             ERROR("Warning: non numeric character/s %s\n", end);
           return TOK_NOTE;
         } else
-          ERROR("%s:%d:%d: " RED_ON "error" COLOR_OFF ": illegal key \"%s\"\n",
-                d->fname, line_token_found, column_token_found, buff);
+          local_errors++;
+        ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
+              "error" COLOR_OFF ": ",
+              __FILE__, __LINE__, __func__, d->fname, line_token_found,
+              column_token_found);
+        ERROR("illegal key");
+        print_debugging_info(TOK_NULL);
         return TOK_ERR;
 
       } /*
@@ -377,7 +403,7 @@ w:
         return TOK_IDENTIFIER;
       }
     }
-    // clang-format off
+  // clang-format off
     /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':
@@ -391,7 +417,8 @@ w:
       seek--;
       (void)fscanf(d->fp, "%99[0-9.]%n", buff, &nchar);
       d->column += nchar;
-      //printf("nchar %d %s column %d <----\n",  nchar, buff, column_token_found);
+      // printf("nchar %d %s column %d <----\n",  nchar, buff,
+      // column_token_found);
       {
         int i = 0;
         while (isdigit(buff[i]))
@@ -406,8 +433,8 @@ w:
                 ungetc(buff[a], d->fp);
                 buff[a] = 0;
                 seek--;
-               /* printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
-                       buff[a], buff[a]);*/
+                /* printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
+                        buff[a], buff[a]);*/
                 d->column--;
               }
           } else {
@@ -466,10 +493,9 @@ w:
         ungetc(c, d->fp);
         d->column--;
         seek--;
-        (void)fscanf(d->fp, "%99[0-9.]%n", buff, &nchar);
+        buff[0] = '-';
+        (void)fscanf(d->fp, "%99[0-9.]%n", buff + 1, &nchar);
         d->column += nchar;
-        char *end;
-        tok_num = strtof(buff, &end);
         {
           int i = 0;
           while (isdigit(buff[i]))
@@ -482,9 +508,10 @@ w:
               if (i != nchar)
                 for (int a = nchar - 1; a != i - 1; a--) {
                   ungetc(buff[a], d->fp);
+                  buff[a] = 0;
                   seek--;
-                 /*printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
-                         buff[a], buff[a]);*/
+                  /*printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
+                          buff[a], buff[a]);*/
                   d->column--;
                 }
             } else {
@@ -494,6 +521,8 @@ w:
             }
           }
         }
+        char *end;
+        tok_num = strtof(buff, &end);
         seek += nchar;
         return TOK_FLOAT;
       }
@@ -511,11 +540,13 @@ w:
   case EOF:
     return TOK_EOF;
   default:
-    ERROR("[" GREEN_ON "%s:%d @ %p" COLOR_OFF "%s:%d:%d " RED_ON
-          "error" COLOR_OFF ": "
-          "illegal symbol '%c'\n",
-          __FILE__, __LINE__, read_next_tok_cur_dats_t, d->fname, line_token_found,
-          column_token_found, c);
+    local_errors++;
+    ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
+          "error" COLOR_OFF ": ",
+          __FILE__, __LINE__, __func__, d->fname, line_token_found,
+          column_token_found);
+    ERROR("illegal symbol");
+    print_debugging_info(TOK_NULL);
     return TOK_ERR;
   }
 
@@ -529,7 +560,7 @@ const char *token_t_to_str(const token_t t) {
   case TOK_STAFF:
     return "staff";
   case TOK_IDENTIFIER:
-    return "identifier,";
+    return "identifier";
   case TOK_BPM:
     return "bpm";
   case TOK_ATTACK:

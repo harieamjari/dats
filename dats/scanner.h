@@ -14,7 +14,6 @@
 
 EXTERN void clean_all_dats_t(void);
 /*
-
 EXTERN void clean_all_symrec_t_cur_dats_t (const dats_t * const t);*/
 
 EXTERN void clean_all_symrec_t_all_dats_t(void);
@@ -25,6 +24,7 @@ EXTERN const char *token_t_to_str(const token_t t);
 EXTERN symrec_t *getsym(const dats_t *const t, char const *const id);
 EXTERN token_t read_next_tok_cur_dats_t(dats_t *const t);
 EXTERN void print_all_symrec_t_cur_dats_t(const dats_t *const t);
+EXTERN void print_debugging_info(const token_t tok);
 
 EXTERN int line_token_found;
 EXTERN int column_token_found;
@@ -64,22 +64,17 @@ EXTERN dats_t *dats_files;
     local_errors++;                                                            \
     if (x != TOK_ERR) {                                                        \
       ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON           \
-            "error" COLOR_OFF ": unexpected %s %s\n",                          \
+            "error" COLOR_OFF ": unexpected %s",                               \
             __FILE__, __LINE__, __func__, d->fname, line_token_found,          \
-            column_token_found, token_t_to_str(x),                             \
-            x == TOK_IDENTIFIER ? tok_identifier : "");                        \
-      char buff[300] = {0};                                                    \
-      int length = sprintf(buff, "    %d | %s", line_token_found, line);         \
-      ERROR("%s", buff);                                                       \
-      ERROR("%*s\n", column_token_found+(length-(int)strlen(line)), "^");                      \
+            column_token_found, token_t_to_str(x));                            \
+      print_debugging_info(x);                                                 \
     }                                                                          \
-    return 1;                                                                  \
   }
 #define WARNING(str)                                                           \
   ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON               \
         "warning" COLOR_OFF ": %s",                                            \
         __FILE__, __LINE__, __func__, d->fname, line_token_found,              \
-        column_token_found+1, str)
+        column_token_found + 1, str)
 
 #define C_ERROR(...)                                                           \
   {                                                                            \
@@ -89,22 +84,23 @@ EXTERN dats_t *dats_files;
           __FILE__, __LINE__, __func__, d->fname, line_token_found,            \
           column_token_found);                                                 \
     ERROR(__VA_ARGS__);                                                        \
-    return 1;                                                                  \
+    print_debugging_info(TOK_NULL);                                            \
   }
 #define EXPECTING(x, d)                                                        \
   {                                                                            \
     local_errors++;                                                            \
     if (x != TOK_ERR)                                                          \
       ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON           \
-            "error" COLOR_OFF ": expecting %s\n",                              \
+            "error" COLOR_OFF ": expecting %s",                                \
             __FILE__, __LINE__, __func__, d->fname, line_token_found,          \
             column_token_found, token_t_to_str(x));                            \
-      char buff[300] = {0};                                                    \
-      int length = sprintf(buff, "    %d | %s", line_token_found, line);         \
-      ERROR("%s", buff);                                                       \
-      ERROR("%*s\n", column_token_found+(length-(int)strlen(line)), "^");                      \
-    return 1;                                                                  \
+    print_debugging_info(TOK_NULL);                                            \
   }
+/*
+    char buff[300] = {0};                                                      \
+    int length = sprintf(buff, "    %d | %s", line_token_found, line);         \
+    ERROR("%s", buff);                                                         \
+    ERROR("%*s\n", column_token_found + (length - (int)strlen(line)), "^"); \*/
 #define REPORT(...)                                                            \
   {                                                                            \
     local_errors++;                                                            \

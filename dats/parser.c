@@ -1,4 +1,4 @@
-/* Dats compiler
+/* Dats interpreter
  *
  * Copyright (c) 2021 Al-buharie Amjari
  *
@@ -18,6 +18,7 @@
  * License along with Dats; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -53,6 +54,7 @@ static int parse_notes_rests() {
     if (tok != TOK_FLOAT) {
       free(cnr);
       EXPECTING(TOK_FLOAT, d);
+      return 1;
     }
 
     cnr->length += (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
@@ -72,6 +74,7 @@ static int parse_notes_rests() {
     default:
       free(cnr);
       UNEXPECTED(tok, d);
+      return 1;
     }
     staff->value.staff.numsamples += cnr->length;
     tok = read_next_tok_cur_dats_t(d);
@@ -84,6 +87,7 @@ static int parse_notes_rests() {
       free(cnr);
       free(n);
       UNEXPECTED(tok, d);
+      return 1;
     }
 
   addn: /* add dyad */
@@ -123,6 +127,7 @@ static int parse_notes_rests() {
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_FLOAT) {
       UNEXPECTED(tok, d);
+      return 1;
     }
     cnr->length += (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
     uint32_t dotted_len =
@@ -152,11 +157,15 @@ static int parse_notes_rests() {
     rule_match = 1;
   } else if (tok == TOK_BPM) {
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_EQUAL)
+    if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
+      return 1;
+    }
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT)
+    if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
+      return 1;
+    }
     if (tok_num == 0.0) {
       WARNING("0 bpm is illegal. Now setting to 120\n");
       tok_num = 120.0;
@@ -167,66 +176,90 @@ static int parse_notes_rests() {
 
   } else if (tok == TOK_ATTACK) {
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_EQUAL)
+    if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
+      return 1;
+    }
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT)
+    if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
+      return 1;
+    }
     tok_attack = tok_num;
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
   } else if (tok == TOK_DECAY) {
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_EQUAL)
+    if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
+      return 1;
+    }
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT)
+    if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
+      return 1;
+    }
     tok_decay = tok_num;
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
   } else if (tok == TOK_SUSTAIN) {
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_EQUAL)
+    if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
+      return 1;
+    }
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT)
+    if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
+      return 1;
+    }
     tok_sustain = tok_num;
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
   } else if (tok == TOK_OCTAVE) {
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_EQUAL)
+    if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
+      return 1;
+    }
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT)
+    if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
+      return 1;
+    }
     tok_octave = (int)tok_num;
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
   } else if (tok == TOK_SEMITONE) {
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_EQUAL)
+    if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
+      return 1;
+    }
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT)
+    if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
+      return 1;
+    }
     tok_semitone = (int)tok_num;
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
   } else if (tok == TOK_RELEASE) {
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_EQUAL)
+    if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
+      return 1;
+    }
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT)
+    if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
+      return 1;
+    }
     tok_release = tok_num;
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
@@ -234,8 +267,10 @@ static int parse_notes_rests() {
   } else
     return 0;
 
-  if (tok != TOK_SEMICOLON)
+  if (tok != TOK_SEMICOLON) {
     UNEXPECTED(tok, d);
+    return 1;
+  }
   tok = read_next_tok_cur_dats_t(d);
   return 0;
 }
@@ -250,8 +285,10 @@ static int parse_staff() {
   tok_release = 1.0;
 
   tok = read_next_tok_cur_dats_t(d);
-  if (tok != TOK_IDENTIFIER)
+  if (tok != TOK_IDENTIFIER) {
     EXPECTING(TOK_IDENTIFIER, d);
+    return 1;
+  }
   /* insert symrec_t */
   staff = malloc(sizeof(symrec_t));
   assert(staff != NULL);
@@ -268,6 +305,7 @@ static int parse_staff() {
   tok = read_next_tok_cur_dats_t(d);
   if (tok != TOK_LCURLY_BRACE) {
     UNEXPECTED(tok, d);
+    return 1;
   }
 
   tok = read_next_tok_cur_dats_t(d);
@@ -277,244 +315,482 @@ static int parse_staff() {
       return 1;
   } while (rule_match);
 
-  if (tok != TOK_RCURLY_BRACE)
+  if (tok != TOK_RCURLY_BRACE) {
     UNEXPECTED(tok, d);
+    return 1;
+  }
   return 0;
 }
 
-static symrec_t *parse_pcm16() {
-  int i;
-  return NULL;
+static symrec_t *parse_pcm16(char *id) {
+  symrec_t *pcm16 = malloc(sizeof(symrec_t));
+  assert(pcm16 != NULL);
+  pcm16->type = TOK_PCM16;
+  pcm16->value.pcm16.pcm = NULL;
+  pcm16->value.pcm16.total_numsamples = 0;
+  pcm16->value.pcm16.identifier = id;
+  tok_identifier = NULL;
+  pcm16->next = d->sym_table;
+  d->sym_table = pcm16;
+  /*
+      tok = read_next_tok_cur_dats_t(d);
+     if (tok != TOK_EQUAL)
+        UNEXPECTED(tok, d);*/
+append:
+  tok = read_next_tok_cur_dats_t(d);
+  switch (tok) {
+  case TOK_SYNTH:
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_DOT) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_IDENTIFIER) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+
+    const DSSynth *driver = get_dsynth_by_name(tok_identifier);
+    if (driver == NULL) {
+      C_ERROR("No synth %s\n", tok_identifier);
+      return NULL;
+    }
+    printf("Synth %s found\n", tok_identifier);
+    free(tok_identifier);
+    tok_identifier = NULL;
+
+    pcm16_t *(*const synth)(const symrec_t *const staff) = driver->synth;
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_LPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_IDENTIFIER) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+
+    symrec_t *staff = getsym(d, tok_identifier);
+    if (staff == NULL) {
+      C_ERROR("Undefined reference to %s\n", tok_identifier);
+      return NULL;
+    }
+
+    free(tok_identifier);
+    tok_identifier = NULL;
+
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_RPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+
+    if (staff->type != TOK_STAFF) {
+      C_ERROR("Synths takes staff not %s\n", token_t_to_str(staff->type));
+      return NULL;
+    }
+
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok == TOK_LBRACKET) {
+      do {
+        tok = read_next_tok_cur_dats_t(d);
+        if (tok != TOK_IDENTIFIER) {
+          C_ERROR("Expecting options\n");
+          return NULL;
+        }
+        for (int i = 0; driver->options[i].option_name != NULL; i++) {
+          if (!strcmp(driver->options[i].option_name, tok_identifier)) {
+            free(tok_identifier);
+            tok_identifier = NULL;
+            tok = read_next_tok_cur_dats_t(d);
+            if (tok != TOK_EQUAL)
+              EXPECTING(TOK_EQUAL, d);
+            switch (driver->options[i].type) {
+            case DSOPTION_FLOAT:
+              tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_FLOAT)
+                EXPECTING(TOK_FLOAT, d);
+              driver->options[i].value.floatv = tok_num;
+              printf("Driver num %f\n", driver->options[i].value.floatv);
+              tok = read_next_tok_cur_dats_t(d);
+              break;
+            case DSOPTION_INT:
+              tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_FLOAT)
+                EXPECTING(TOK_FLOAT, d);
+              driver->options[i].value.intv = (int)tok_num;
+              printf("Driver num %d\n", driver->options[i].value.intv);
+              tok = read_next_tok_cur_dats_t(d);
+              break;
+            case DSOPTION_STRING:
+              tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_DQUOTE) {
+                C_ERROR(
+                    "`write`, expects an identifier between double quote\n");
+                return NULL;
+              }
+              expecting = TOK_STRING;
+              tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_STRING)
+                UNEXPECTED(tok, d);
+              expecting = TOK_NULL;
+              driver->options[i].value.strv = tok_identifier;
+              printf("Driver num %s\n", driver->options[i].value.strv);
+              tok_identifier = NULL;
+              tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_DQUOTE) {
+                C_ERROR("Identifier must end with a double quote\n");
+                return NULL;
+              }
+              tok = read_next_tok_cur_dats_t(d);
+              break;
+            }
+            break;
+          } else if (driver->options[i + 1].option_name == NULL) {
+            C_ERROR("No such option, %s\n", tok_identifier);
+            return NULL;
+          }
+        }
+      } while (tok == TOK_COMMA);
+      if (tok != TOK_RBRACKET) {
+        EXPECTING(TOK_RBRACKET, d);
+        return NULL;
+      }
+      tok = read_next_tok_cur_dats_t(d);
+    }
+    pcm16_t *p = synth(staff);
+    assert(p != NULL);
+    pcm16->value.pcm16.total_numsamples += p->numsamples;
+    p->next = NULL;
+    if (pcm16->value.pcm16.pcm != NULL)
+      for (pcm16_t *pcma = pcm16->value.pcm16.pcm; 1; pcma = pcma->next) {
+        if (pcma->next == NULL) {
+          pcma->next = p;
+          break;
+        }
+      }
+    else
+      pcm16->value.pcm16.pcm = p;
+
+    if (tok == TOK_COMMA)
+      goto append;
+    break;
+  case TOK_IDENTIFIER: {
+    symrec_t *pcm = getsym(d, tok_identifier);
+    if (pcm == NULL) {
+      C_ERROR("Undefined reference to %s\n", tok_identifier);
+      return NULL;
+    }
+    free(tok_identifier);
+    tok_identifier = NULL;
+    if (pcm->type != TOK_PCM16) {
+      C_ERROR("Assignment of type %s to pcm16 is illegal",
+              token_t_to_str(pcm->type));
+      return NULL;
+    }
+    pcm16_t *copy = malloc(sizeof(pcm16_t));
+    assert(copy != NULL);
+    copy->pcm = malloc(pcm->value.pcm16.pcm->numsamples * sizeof(int16_t));
+    assert(copy != NULL);
+    memcpy(copy->pcm, pcm->value.pcm16.pcm->pcm,
+           pcm->value.pcm16.pcm->numsamples * sizeof(int16_t));
+    copy->numsamples = pcm->value.pcm16.pcm->numsamples;
+    copy->next = NULL;
+    pcm16->value.pcm16.total_numsamples += copy->numsamples;
+
+    if (pcm16->value.pcm16.pcm != NULL)
+      for (pcm16_t *pcma = pcm16->value.pcm16.pcm; 1; pcma = pcma->next) {
+        if (pcma->next == NULL) {
+          pcma->next = copy;
+          break;
+        }
+      }
+    else
+      pcm16->value.pcm16.pcm = copy;
+
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok == TOK_COMMA)
+      goto append;
+    // else if (tok == TOK_RPAREN) break;
+  } break;
+  default:
+    UNEXPECTED(tok, d);
+    return NULL;
+  }
+  pcm16_t *p = malloc(sizeof(pcm16_t));
+  int16_t *pcm = malloc(pcm16->value.pcm16.total_numsamples * sizeof(int16_t));
+  assert(pcm != NULL && p != NULL);
+  pcm16_t *pptmp;
+  uint32_t cur = 0;
+  for (pcm16_t *pp = pcm16->value.pcm16.pcm; pp != NULL; pp = pptmp) {
+    pptmp = pp->next;
+    memcpy(pcm + cur, pp->pcm, pp->numsamples * sizeof(int16_t));
+    cur += pp->numsamples;
+    free(pp->pcm);
+    free(pp);
+  }
+  p->pcm = pcm;
+  p->numsamples = cur;
+  p->next = NULL;
+
+  pcm16->value.pcm16.pcm = p;
+  return pcm16;
 }
 
 static int parse_stmt() {
   /* statements */
   if (tok == TOK_PCM16) {
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_IDENTIFIER)
+    if (tok != TOK_IDENTIFIER) {
       UNEXPECTED(tok, d);
-    symrec_t *pcm16 = malloc(sizeof(symrec_t));
-    assert(pcm16 != NULL);
-    pcm16->type = TOK_PCM16;
-    pcm16->value.pcm16.pcm = NULL;
-    pcm16->value.pcm16.total_numsamples = 0;
-    pcm16->value.pcm16.identifier = tok_identifier;
-    tok_identifier = NULL;
-    pcm16->next = d->sym_table;
-    d->sym_table = pcm16;
+      return 1;
+    }
+    char *id = tok_identifier;
+    symrec_t *pcm16 = NULL; // malloc(sizeof(symrec_t));
+    /*
+        assert(pcm16 != NULL);
+        pcm16->type = TOK_PCM16;
+        pcm16->value.pcm16.pcm = NULL;
+        pcm16->value.pcm16.total_numsamples = 0;
+        pcm16->value.pcm16.identifier = tok_identifier;
+        tok_identifier = NULL;
+        pcm16->next = d->sym_table;
+        d->sym_table = pcm16;*/
 
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_EQUAL)
+    if (tok != TOK_EQUAL) {
+      free(id);
+      if (tok == TOK_IDENTIFIER)
+        free(tok_identifier);
+      tok_identifier = NULL;
       UNEXPECTED(tok, d);
+      return 1;
+    }
 
-  append:
-    tok = read_next_tok_cur_dats_t(d);
-    switch (tok) {
-    case TOK_SYNTH:
-      tok = read_next_tok_cur_dats_t(d);
-      if (tok != TOK_DOT)
-        UNEXPECTED(tok, d);
-      tok = read_next_tok_cur_dats_t(d);
-      if (tok != TOK_IDENTIFIER)
-        UNEXPECTED(tok, d);
-
-      const DSSynth *driver = get_dsynth_by_name(tok_identifier);
-      if (driver == NULL)
-        C_ERROR("No synth %s\n", tok_identifier);
-      printf("Synth %s found\n", tok_identifier);
-      free(tok_identifier);
-      tok_identifier = NULL;
-
-      pcm16_t *(*const synth)(const symrec_t *const staff) = driver->synth;
-      tok = read_next_tok_cur_dats_t(d);
-      if (tok != TOK_LPAREN)
-        UNEXPECTED(tok, d);
-
-      tok = read_next_tok_cur_dats_t(d);
-      if (tok != TOK_IDENTIFIER)
-        UNEXPECTED(tok, d);
-
-      symrec_t *staff = getsym(d, tok_identifier);
-      if (staff == NULL)
-        C_ERROR("Undefined reference to %s\n", tok_identifier);
-
-      free(tok_identifier);
-      tok_identifier = NULL;
-
-      tok = read_next_tok_cur_dats_t(d);
-      if (tok != TOK_RPAREN)
-        UNEXPECTED(tok, d);
-
-      if (staff->type != TOK_STAFF)
-        C_ERROR("Synths takes staff not %s\n", token_t_to_str(staff->type));
-
-      tok = read_next_tok_cur_dats_t(d);
-      if (tok == TOK_LBRACKET) {
-        do {
+    pcm16 = parse_pcm16(id);
+    if (pcm16 == NULL)
+      return 1;
+    /*
+      append:
+        tok = read_next_tok_cur_dats_t(d);
+        switch (tok) {
+        case TOK_SYNTH:
+          tok = read_next_tok_cur_dats_t(d);
+          if (tok != TOK_DOT)
+            UNEXPECTED(tok, d);
           tok = read_next_tok_cur_dats_t(d);
           if (tok != TOK_IDENTIFIER)
-            C_ERROR("Expecting options\n");
-          for (int i = 0; driver->options[i].option_name != NULL; i++) {
-            if (!strcmp(driver->options[i].option_name, tok_identifier)) {
-              free(tok_identifier);
-              tok_identifier = NULL;
+            UNEXPECTED(tok, d);
+
+          const DSSynth *driver = get_dsynth_by_name(tok_identifier);
+          if (driver == NULL)
+            C_ERROR("No synth %s\n", tok_identifier);
+          printf("Synth %s found\n", tok_identifier);
+          free(tok_identifier);
+          tok_identifier = NULL;
+
+          pcm16_t *(*const synth)(const symrec_t *const staff) = driver->synth;
+          tok = read_next_tok_cur_dats_t(d);
+          if (tok != TOK_LPAREN)
+            UNEXPECTED(tok, d);
+
+          tok = read_next_tok_cur_dats_t(d);
+          if (tok != TOK_IDENTIFIER)
+            UNEXPECTED(tok, d);
+
+          symrec_t *staff = getsym(d, tok_identifier);
+          if (staff == NULL)
+            C_ERROR("Undefined reference to %s\n", tok_identifier);
+
+          free(tok_identifier);
+          tok_identifier = NULL;
+
+          tok = read_next_tok_cur_dats_t(d);
+          if (tok != TOK_RPAREN)
+            UNEXPECTED(tok, d);
+
+          if (staff->type != TOK_STAFF)
+            C_ERROR("Synths takes staff not %s\n", token_t_to_str(staff->type));
+
+          tok = read_next_tok_cur_dats_t(d);
+          if (tok == TOK_LBRACKET) {
+            do {
               tok = read_next_tok_cur_dats_t(d);
-              if (tok != TOK_EQUAL)
-                EXPECTING(TOK_EQUAL, d);
-              switch (driver->options[i].type) {
-              case DSOPTION_FLOAT:
-                tok = read_next_tok_cur_dats_t(d);
-                if (tok != TOK_FLOAT)
-                  EXPECTING(TOK_FLOAT, d);
-                driver->options[i].value.floatv = tok_num;
-                printf("Driver num %f\n", driver->options[i].value.floatv);
-                tok = read_next_tok_cur_dats_t(d);
-                break;
-              case DSOPTION_INT:
-                tok = read_next_tok_cur_dats_t(d);
-                if (tok != TOK_FLOAT)
-                  EXPECTING(TOK_FLOAT, d);
-                driver->options[i].value.intv = (int)tok_num;
-                printf("Driver num %d\n", driver->options[i].value.intv);
-                tok = read_next_tok_cur_dats_t(d);
-                break;
-              case DSOPTION_STRING:
-                tok = read_next_tok_cur_dats_t(d);
-                if (tok != TOK_DQUOTE)
-                  C_ERROR(
-                      "`write`, expects an identifier between double quote\n");
-                expecting = TOK_STRING;
-                tok = read_next_tok_cur_dats_t(d);
-                if (tok != TOK_STRING)
-                  UNEXPECTED(tok, d);
-                expecting = TOK_NULL;
-                driver->options[i].value.strv = tok_identifier;
-                printf("Driver num %s\n", driver->options[i].value.strv);
-                tok_identifier = NULL;
-                tok = read_next_tok_cur_dats_t(d);
-                if (tok != TOK_DQUOTE)
-                  C_ERROR("Identifier must end with a double quote\n");
-                tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_IDENTIFIER)
+                C_ERROR("Expecting options\n");
+              for (int i = 0; driver->options[i].option_name != NULL; i++) {
+                if (!strcmp(driver->options[i].option_name, tok_identifier)) {
+                  free(tok_identifier);
+                  tok_identifier = NULL;
+                  tok = read_next_tok_cur_dats_t(d);
+                  if (tok != TOK_EQUAL)
+                    EXPECTING(TOK_EQUAL, d);
+                  switch (driver->options[i].type) {
+                  case DSOPTION_FLOAT:
+                    tok = read_next_tok_cur_dats_t(d);
+                    if (tok != TOK_FLOAT)
+                      EXPECTING(TOK_FLOAT, d);
+                    driver->options[i].value.floatv = tok_num;
+                    printf("Driver num %f\n", driver->options[i].value.floatv);
+                    tok = read_next_tok_cur_dats_t(d);
+                    break;
+                  case DSOPTION_INT:
+                    tok = read_next_tok_cur_dats_t(d);
+                    if (tok != TOK_FLOAT)
+                      EXPECTING(TOK_FLOAT, d);
+                    driver->options[i].value.intv = (int)tok_num;
+                    printf("Driver num %d\n", driver->options[i].value.intv);
+                    tok = read_next_tok_cur_dats_t(d);
+                    break;
+                  case DSOPTION_STRING:
+                    tok = read_next_tok_cur_dats_t(d);
+                    if (tok != TOK_DQUOTE)
+                      C_ERROR(
+                          "`write`, expects an identifier between double
+      quote\n"); expecting = TOK_STRING; tok = read_next_tok_cur_dats_t(d); if
+      (tok != TOK_STRING) UNEXPECTED(tok, d); expecting = TOK_NULL;
+                    driver->options[i].value.strv = tok_identifier;
+                    printf("Driver num %s\n", driver->options[i].value.strv);
+                    tok_identifier = NULL;
+                    tok = read_next_tok_cur_dats_t(d);
+                    if (tok != TOK_DQUOTE)
+                      C_ERROR("Identifier must end with a double quote\n");
+                    tok = read_next_tok_cur_dats_t(d);
+                    break;
+                  }
+                  break;
+                } else if (driver->options[i + 1].option_name == NULL)
+                  C_ERROR("No such option %s\n", tok_identifier);
+              }
+            } while (tok == TOK_COMMA);
+            if (tok != TOK_RBRACKET)
+              EXPECTING(TOK_RBRACKET, d);
+            tok = read_next_tok_cur_dats_t(d);
+          }
+          pcm16_t *p = synth(staff);
+          assert(p != NULL);
+          pcm16->value.pcm16.total_numsamples += p->numsamples;
+          p->next = NULL;
+          if (pcm16->value.pcm16.pcm != NULL)
+            for (pcm16_t *pcma = pcm16->value.pcm16.pcm; 1; pcma = pcma->next) {
+              if (pcma->next == NULL) {
+                pcma->next = p;
                 break;
               }
-              break;
-            } else if (driver->options[i + 1].option_name == NULL)
-              C_ERROR("No such option %s\n", tok_identifier);
-          }
-        } while (tok == TOK_COMMA);
-        if (tok != TOK_RBRACKET)
-          EXPECTING(TOK_RBRACKET, d);
-        tok = read_next_tok_cur_dats_t(d);
-      }
-      pcm16_t *p = synth(staff);
-      assert(p != NULL);
-      pcm16->value.pcm16.total_numsamples += p->numsamples;
-      p->next = NULL;
-      if (pcm16->value.pcm16.pcm != NULL)
-        for (pcm16_t *pcma = pcm16->value.pcm16.pcm; 1; pcma = pcma->next) {
-          if (pcma->next == NULL) {
-            pcma->next = p;
-            break;
-          }
+            }
+          else
+            pcm16->value.pcm16.pcm = p;
+
+          if (tok == TOK_COMMA)
+            goto append;
+          break;
+        case TOK_IDENTIFIER: {
+          symrec_t *pcm = getsym(d, tok_identifier);
+          if (pcm == NULL)
+            C_ERROR("Undefined reference to %s\n", tok_identifier);
+          free(tok_identifier);
+          if (pcm->type != TOK_PCM16)
+            C_ERROR("Assignment of type %s to pcm16 is illegal",
+                    token_t_to_str(pcm->type));
+          pcm16_t *copy = malloc(sizeof(pcm16_t));
+          assert(copy != NULL);
+          copy->pcm = malloc(pcm->value.pcm16.pcm->numsamples *
+      sizeof(int16_t)); assert(copy != NULL); memcpy(copy->pcm,
+      pcm->value.pcm16.pcm->pcm, pcm->value.pcm16.pcm->numsamples *
+      sizeof(int16_t)); copy->numsamples = pcm->value.pcm16.pcm->numsamples;
+          copy->next = NULL;
+          pcm16->value.pcm16.total_numsamples += copy->numsamples;
+
+          if (pcm16->value.pcm16.pcm != NULL)
+            for (pcm16_t *pcma = pcm16->value.pcm16.pcm; 1; pcma = pcma->next) {
+              if (pcma->next == NULL) {
+                pcma->next = copy;
+                break;
+              }
+            }
+          else
+            pcm16->value.pcm16.pcm = copy;
+
+          tok = read_next_tok_cur_dats_t(d);
+          if (tok == TOK_COMMA)
+            goto append;
+        } break;
+        default:
+          UNEXPECTED(tok, d);
         }
-      else
-        pcm16->value.pcm16.pcm = p;
-
-      if (tok == TOK_COMMA)
-        goto append;
-      break;
-    case TOK_IDENTIFIER: {
-      symrec_t *pcm = getsym(d, tok_identifier);
-      if (pcm == NULL)
-        C_ERROR("Undefined reference to %s\n", tok_identifier);
-      free(tok_identifier);
-      if (pcm->type != TOK_PCM16)
-        C_ERROR("Assignment of type %s to pcm16 is illegal",
-                token_t_to_str(pcm->type));
-      pcm16_t *copy = malloc(sizeof(pcm16_t));
-      assert(copy != NULL);
-      copy->pcm = malloc(pcm->value.pcm16.pcm->numsamples * sizeof(int16_t));
-      assert(copy != NULL);
-      memcpy(copy->pcm, pcm->value.pcm16.pcm->pcm,
-             pcm->value.pcm16.pcm->numsamples * sizeof(int16_t));
-      copy->numsamples = pcm->value.pcm16.pcm->numsamples;
-      copy->next = NULL;
-      pcm16->value.pcm16.total_numsamples += copy->numsamples;
-
-      if (pcm16->value.pcm16.pcm != NULL)
-        for (pcm16_t *pcma = pcm16->value.pcm16.pcm; 1; pcma = pcma->next) {
-          if (pcma->next == NULL) {
-            pcma->next = copy;
-            break;
-          }
+        pcm16_t *p = malloc(sizeof(pcm16_t));
+        int16_t *pcm =
+            malloc(pcm16->value.pcm16.total_numsamples * sizeof(int16_t));
+        assert(pcm != NULL && p != NULL);
+        pcm16_t *pptmp;
+        uint32_t cur = 0;
+        for (pcm16_t *pp = pcm16->value.pcm16.pcm; pp != NULL; pp = pptmp) {
+          pptmp = pp->next;
+          memcpy(pcm + cur, pp->pcm, pp->numsamples * sizeof(int16_t));
+          cur += pp->numsamples;
+          free(pp->pcm);
+          free(pp);
         }
-      else
-        pcm16->value.pcm16.pcm = copy;
+        p->pcm = pcm;
+        p->numsamples = cur;
+        p->next = NULL;
 
-      tok = read_next_tok_cur_dats_t(d);
-      if (tok == TOK_COMMA)
-        goto append;
-    } break;
-    default:
-      UNEXPECTED(tok, d);
-    }
-    pcm16_t *p = malloc(sizeof(pcm16_t));
-    int16_t *pcm =
-        malloc(pcm16->value.pcm16.total_numsamples * sizeof(int16_t));
-    assert(pcm != NULL && p != NULL);
-    pcm16_t *pptmp;
-    uint32_t cur = 0;
-    for (pcm16_t *pp = pcm16->value.pcm16.pcm; pp != NULL; pp = pptmp) {
-      pptmp = pp->next;
-      memcpy(pcm + cur, pp->pcm, pp->numsamples * sizeof(int16_t));
-      cur += pp->numsamples;
-      free(pp->pcm);
-      free(pp);
-    }
-    p->pcm = pcm;
-    p->numsamples = cur;
-    p->next = NULL;
-
-    pcm16->value.pcm16.pcm = p;
+        pcm16->value.pcm16.pcm = p;*/
     rule_match = 1;
   } else if (tok == TOK_WRITE) {
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_LPAREN)
+    if (tok != TOK_LPAREN) {
       EXPECTING(TOK_LPAREN, d);
+      return 1;
+    }
 
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_DQUOTE)
+    if (tok != TOK_DQUOTE) {
       C_ERROR("`write`, expects an identifier between double quote\n");
+      return 1;
+    }
     expecting = TOK_STRING;
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_STRING)
+    if (tok != TOK_STRING) {
       EXPECTING(TOK_STRING, d);
+      return 1;
+    }
     expecting = TOK_NULL;
     FILE *fp = fopen(tok_identifier, "wb");
     if (fp == NULL) {
       perror(tok_identifier);
       C_ERROR("ERROR!\n");
+      return 1;
     }
     free(tok_identifier);
     tok_identifier = NULL;
 
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_DQUOTE)
+    if (tok != TOK_DQUOTE) {
       C_ERROR("Identifier must end with a double quote\n");
+      return 1;
+    }
 
     tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_COMMA)
+    if (tok != TOK_COMMA) {
       EXPECTING(TOK_COMMA, d);
-    tok = read_next_tok_cur_dats_t(d);
+      return 1;
+    }
+    /*
+       tok = read_next_tok_cur_dats_t(d);
+       if (tok != TOK_IDENTIFIER)
+         EXPECTING(TOK_IDENTIFIER, d);*/
 
-    if (tok != TOK_IDENTIFIER)
-      EXPECTING(TOK_IDENTIFIER, d);
-
-    symrec_t *pcm16 = getsym(d, tok_identifier);
+    symrec_t *pcm16 = parse_pcm16(NULL); // getsym(d, tok_identifier);
     if (pcm16 == NULL)
-      C_ERROR("Undefined reference to %s\n", tok_identifier);
-    if (pcm16->type != TOK_PCM16)
+      return 1;
+    if (pcm16->type != TOK_PCM16) {
       C_ERROR("Macro, `write`, needs pcm16 variable type\n");
+      return 1;
+    }
     struct WAV_info wav = {
         .fp = fp,
         .Subchunk1Size = 16,
@@ -532,17 +808,21 @@ static int parse_stmt() {
     free(tok_identifier);
     tok_identifier = NULL;
 
-    tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_RPAREN)
+    /* tok = read_next_tok_cur_dats_t(d);*/
+    if (tok != TOK_RPAREN) {
       EXPECTING(TOK_RPAREN, d);
+      return 1;
+    }
 
     tok = read_next_tok_cur_dats_t(d);
     rule_match = 1;
   } else
     return 0;
 
-  if (tok != TOK_SEMICOLON)
+  if (tok != TOK_SEMICOLON) {
     UNEXPECTED(tok, d);
+    return 1;
+  }
 
   tok = read_next_tok_cur_dats_t(d);
 
@@ -552,8 +832,10 @@ static int parse_stmt() {
 static int parse_master() {
 
   tok = read_next_tok_cur_dats_t(d);
-  if (tok != TOK_LCURLY_BRACE)
+  if (tok != TOK_LCURLY_BRACE) {
     UNEXPECTED(tok, d);
+    return 1;
+  }
 
   tok = read_next_tok_cur_dats_t(d);
   do {
@@ -562,8 +844,10 @@ static int parse_master() {
       return 1;
   } while (rule_match);
 
-  if (tok != TOK_RCURLY_BRACE)
+  if (tok != TOK_RCURLY_BRACE) {
     UNEXPECTED(tok, d);
+    return 1;
+  }
 
   return 0;
 }
@@ -587,6 +871,7 @@ static int start() {
     return local_errors;
   default:
     UNEXPECTED(tok, d);
+    return 1;
   }
 
   return local_errors;
