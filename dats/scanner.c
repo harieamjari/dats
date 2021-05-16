@@ -150,7 +150,7 @@ symrec_t *symrec_tcpy(symrec_t *const s) {
   return copy;
 }
 
-void print_debugging_info(const token_t tok) {
+void print_debugging_info(const token_t tok, const dats_t *const d) {
   switch (tok) {
   case TOK_IDENTIFIER:
     ERROR(", '%s'\n", tok_identifier);
@@ -162,9 +162,10 @@ void print_debugging_info(const token_t tok) {
     ERROR("\n");
   }
   char buff[300] = {0};
-  int length = sprintf(buff, "    %d | %s", line_token_found, line);
+  int length = sprintf(buff, "    %d | %s", line_token_found, d->scan_line);
   ERROR("%s", buff);
-  ERROR("%*s\n", column_token_found + (length - (int)strlen(line)), "^");
+  ERROR("%*s\n", column_token_found + (length - (int)strlen(d->scan_line)),
+        "^");
 }
 /*---------.
  | Scanner |
@@ -187,8 +188,8 @@ w:
     d->line++;
     seek++;
     d->column = 0;
-    if (fgets(line, 256, d->fp) != NULL)
-      fseek(d->fp, -(long)(strlen(line)), SEEK_CUR);
+    if (fgets(d->scan_line, 256, d->fp) != NULL)
+      fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
     goto w;
   }
   line_token_found = d->line;
@@ -235,8 +236,8 @@ w:
           d->line++;
           d->column = 0;
           seek++;
-          if (fgets(line, 256, d->fp) != NULL)
-            fseek(d->fp, -(long)(strlen(line)), SEEK_CUR);
+          if (fgets(d->scan_line, 500, d->fp) != NULL)
+            fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
           goto w;
         }
     } else if (c == (int)'*') {
@@ -264,7 +265,7 @@ w:
             __FILE__, __LINE__, __func__, d->fname, line_token_found,
             column_token_found);
       ERROR("unterminated multi-line comment");
-      print_debugging_info(TOK_NULL);
+      print_debugging_info(TOK_NULL, d);
       return TOK_ERR;
     }
     d->column--;
@@ -273,7 +274,7 @@ w:
     c = '/';
   }
   switch (c) {
-  // clang-format off
+    // clang-format off
     /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
@@ -333,7 +334,7 @@ w:
                 __FILE__, __LINE__, __func__, d->fname, line_token_found,
                 column_token_found);
           ERROR("illegal key");
-          print_debugging_info(TOK_NULL);
+          print_debugging_info(TOK_NULL, d);
           return TOK_ERR;
         }
         if ((buff[1] == '#' || buff[1] == 'b') && isdigit(buff[2]) &&
@@ -364,7 +365,7 @@ w:
               __FILE__, __LINE__, __func__, d->fname, line_token_found,
               column_token_found);
         ERROR("illegal key");
-        print_debugging_info(TOK_NULL);
+        print_debugging_info(TOK_NULL, d);
         return TOK_ERR;
 
       } /*
@@ -403,7 +404,7 @@ w:
         return TOK_IDENTIFIER;
       }
     }
-  // clang-format off
+    // clang-format off
     /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':
@@ -546,7 +547,7 @@ w:
           __FILE__, __LINE__, __func__, d->fname, line_token_found,
           column_token_found);
     ERROR("illegal symbol");
-    print_debugging_info(TOK_NULL);
+    print_debugging_info(TOK_NULL, d);
     return TOK_ERR;
   }
 

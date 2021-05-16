@@ -11,10 +11,15 @@ endif
 
 libwav.so : wav.c
 	$(CC) -I.. -fPIC -shared $(CFLAGS) $(MEM_LEAK) $(DEBUG_FLAGS) $^ -o $@
+
 clean: libwav.so
 	rm $^
+
 install: libwav.so
 	cp $^ $(PREFIX)/lib
+
+uninstall: libwav.so
+	rm $(PREFIX)/lib/$^
 
 .PHONY: indent
 indent:

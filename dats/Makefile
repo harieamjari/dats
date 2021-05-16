@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -O3 -march=native
 OBJ := dats.o parser.o scanner.o
-all : dats
+#all : dats
 
 ENABLE_DEBUG = no
 
@@ -10,10 +10,10 @@ ifeq ($(ENABLE_DEBUG), yes)
 	OBJ += ../memory-leak-detector/leak_detector.o
         CFLAGS += -DDATS_DETECT_MEM_LEAK
 endif
+
 dats : $(OBJ)
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $^  \
 	 -L../libwav -L../libsynth -lm -lwav -lsynth -o $@
-
 
 $(OBJ) :%.o:%.c $(wildcard *.h)
 	gcc -c -I.. $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
@@ -25,8 +25,13 @@ clean:
 test : dats
 	./dats ../test/t.dats
 	./dats  ../test/terr.dats ../test/t.dats
+
 install:  dats
 	cp $^ $(PREFIX)/bin
+
+uninstall: dats
+	rm $(PREFIX)/bin/$^
+
 indent :
 	indent *.[ch] -nut || clang-format *.[ch]
 

@@ -22,8 +22,11 @@ $(OBJ): %.o: %.c
 .PHONY: indent
 clean: libsynth.so $(OBJ)
 	rm $^
+
 install: libsynth.so
 	cp $^ $(PREFIX)/lib
 
+uninstall: libsynth.so
+	rm $(PREFIX)/lib/$^
 indent:
 	indent *.[ch]

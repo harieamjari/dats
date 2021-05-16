@@ -133,7 +133,7 @@ struct dats_t
 {
   FILE *fp;
   char *fname;
-  char prev_line[500];
+  char scan_line[500];
   int line, column;
   symrec_t *sym_table;
 
