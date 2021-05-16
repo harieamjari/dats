@@ -1,19 +1,17 @@
 #ifndef ENV_H
 #define ENV_H
-#include <stdio.h>
 #include <stdint.h>
-
+#include <stdio.h>
 
 typedef enum token_t token_t;
-enum token_t
-{
+enum token_t {
   TOK_IDENTIFIER,
   TOK_STRING,
 
   /* Data types */
   TOK_STAFF,
   TOK_TRACK,
-  //TOK_SAMPLE,
+  // TOK_SAMPLE,
   TOK_SYNTH,
   TOK_MASTER,
   TOK_PCM16,
@@ -45,8 +43,8 @@ enum token_t
   TOK_SEMICOLON,
   TOK_COMMA,
   TOK_DOT,
-  TOK_DQUOTE,			//  double quote
-  TOK_SQUOTE,			// single qoute
+  TOK_DQUOTE, //  double quote
+  TOK_SQUOTE, // single qoute
 
   TOK_EQUAL,
   TOK_ADD,
@@ -61,15 +59,10 @@ enum token_t
 };
 
 typedef enum music_symbol music_symbol;
-enum music_symbol
-{
-  SYM_REST,
-  SYM_NOTE
-};
+enum music_symbol { SYM_REST, SYM_NOTE };
 
 typedef struct note_t note_t;
-struct note_t
-{
+struct note_t {
   float frequency;
   int velocity;
   int volume;
@@ -80,45 +73,39 @@ struct note_t
   note_t *next; /* a dyad or a chord maybe? */
 };
 
-typedef struct nr_t nr_t;	/* list of notes and rests with properties */
-struct nr_t
-{
+typedef struct nr_t nr_t; /* list of notes and rests with properties */
+struct nr_t {
   music_symbol type;
   uint32_t length;
-  note_t *note;			/* if type = NOTE */
+  note_t *note; /* if type = NOTE */
   nr_t *next;
 };
 
 typedef struct pcm16_t pcm16_t;
-struct pcm16_t
-{
+struct pcm16_t {
   int16_t *pcm;
   uint32_t numsamples;
   pcm16_t *next;
 };
 
 typedef struct symrec_t symrec_t;
-struct symrec_t
-{
+struct symrec_t {
   token_t type;
   int line, column;
-  union
-  {
-    struct
-    {
+  union {
+    struct {
       char *identifier;
       nr_t *nr;
       uint32_t numsamples;
-    } staff;			/* staff variables */
+    } staff; /* staff variables */
 
-   /* struct
-    {
-      char *identifier;
-      float val;
-    } env;*/			/* environment variables */
-   
-    struct
-    {
+    /* struct
+     {
+       char *identifier;
+       float val;
+     } env;*/			/* environment variables */
+
+    struct {
       char *identifier;
       uint32_t total_numsamples;
       pcm16_t *pcm;
@@ -129,8 +116,7 @@ struct symrec_t
 };
 
 typedef struct dats_t dats_t;
-struct dats_t
-{
+struct dats_t {
   FILE *fp;
   char *fname;
   char scan_line[500];

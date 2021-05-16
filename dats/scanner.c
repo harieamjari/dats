@@ -188,7 +188,7 @@ w:
     d->line++;
     seek++;
     d->column = 0;
-    if (fgets(d->scan_line, 256, d->fp) != NULL)
+    if (fgets(d->scan_line, 500, d->fp) != NULL)
       fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
     goto w;
   }

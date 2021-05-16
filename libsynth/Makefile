@@ -9,12 +9,13 @@ ifeq ($(ENABLE_DEBUG), yes)
         CFLAGS += -DDATS_DETECT_MEM_LEAK
 endif
 
-S_SYNTHS +=  s_kpa.c 
+S_SYNTHS += s_kpa.c
+S_SYNTHS += s_sin.c 
 
 OBJ := $(patsubst %.c, %.o, $(S_SYNTHS) allsynth.c)
 
 libsynth.so : $(OBJ)
-	$(CC) -shared $(CFLAGS) $(MEM_LEAK)  $^ -o $@
+	$(CC) -shared $(CFLAGS) $(MEM_LEAK) -lm $^ -o $@
 
 $(OBJ): %.o: %.c
 	$(CC) -I.. -c -fPIC $(CFLAGS) $(DEBUG_FLAGS) $<

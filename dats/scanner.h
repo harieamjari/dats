@@ -28,7 +28,6 @@ EXTERN void print_debugging_info(const token_t tok, const dats_t *const d);
 
 EXTERN int line_token_found;
 EXTERN int column_token_found;
-//EXTERN char line[256];
 
 EXTERN int local_errors;
 EXTERN int global_errors;
@@ -59,6 +58,7 @@ EXTERN dats_t *dats_files;
 #endif
 
 #define ERROR(...) fprintf(stderr, __VA_ARGS__)
+
 #define UNEXPECTED(x, d)                                                       \
   {                                                                            \
     local_errors++;                                                            \
@@ -70,6 +70,7 @@ EXTERN dats_t *dats_files;
       print_debugging_info(x, d);                                              \
     }                                                                          \
   }
+
 #define WARNING(str)                                                           \
   ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON               \
         "warning" COLOR_OFF ": %s",                                            \
@@ -86,6 +87,7 @@ EXTERN dats_t *dats_files;
     ERROR(__VA_ARGS__);                                                        \
     print_debugging_info(TOK_NULL, d);                                         \
   }
+
 #define EXPECTING(x, d)                                                        \
   {                                                                            \
     local_errors++;                                                            \
@@ -96,11 +98,7 @@ EXTERN dats_t *dats_files;
             column_token_found, token_t_to_str(x));                            \
     print_debugging_info(TOK_NULL, d);                                         \
   }
-/*
-    char buff[300] = {0};                                                      \
-    int length = sprintf(buff, "    %d | %s", line_token_found, line);         \
-    ERROR("%s", buff);                                                         \
-    ERROR("%*s\n", column_token_found + (length - (int)strlen(line)), "^"); \*/
+
 #define REPORT(...)                                                            \
   {                                                                            \
     local_errors++;                                                            \

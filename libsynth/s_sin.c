@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -9,7 +10,6 @@
 
 static DSOption options[] = {
     {DSOPTION_FLOAT, "volume", "The volume of synth", {.floatv = 1.0}},
-    {DSOPTION_STRING, "test", "foo", {.strv = NULL}},
     {.option_name = NULL}
 
 };
@@ -24,40 +24,29 @@ static void free_string_options(void) {
 
 static pcm16_t *synth(const symrec_t *staff) {
   int16_t *pcm = calloc(sizeof(int16_t), (size_t)staff->value.staff.numsamples);
+  assert(pcm != NULL);
   pcm16_t *pcm_ctx = malloc(sizeof(pcm16_t));
-  if (pcm_ctx == NULL || pcm == NULL) return NULL;
+  assert(pcm_ctx != NULL);
 
   uint32_t total = 0;
   for (nr_t *n = staff->value.staff.nr; n != NULL; n = n->next) {
     if (n->type == SYM_NOTE) {
       for (note_t *nn = n->note; nn != NULL; nn = nn->next) {
-        int16_t wavetable[(int)(44100.0 / nn->frequency)];
-        for (int i = 0; i < (int)(44100.0 / nn->frequency); i++)
-          wavetable[i] = rand();
-        int16_t prev = 0;
-        uint32_t cur = 0;
-        for (uint32_t i = 0; i < n->length + (uint32_t)44100 &&
-                             i + total < staff->value.staff.numsamples;
-             i++) {
-          wavetable[cur] = ((wavetable[cur] / 2) + (prev / 2));
-          pcm[total + i] += wavetable[cur];
-          prev = wavetable[cur];
-          cur++;
-          cur %= (int)(44100.0 / nn->frequency);
+        for (uint32_t i = 0; i < n->length; i++) {
+          pcm[total + i] +=
+              13000 * sin(2.0 * M_PI * nn->frequency * (double)i / 44100.0);
         }
-        prev = 0;
-        cur = 0;
       }
     }
     total += n->length;
     if ((total % 44100) < 1000) {
-      printf("\r[s_psg] %d/%d", total, staff->value.staff.numsamples);
+      printf("\r[s_sin] %d/%d", total, staff->value.staff.numsamples);
       fflush(stdout);
     }
   }
   putchar('\n');
   for (DSOption *ctx = options; ctx->option_name != NULL; ctx++) {
-    printf("[s_kpa] %s ", ctx->option_name);
+    printf("[s_sin] %s ", ctx->option_name);
     switch (ctx->type) {
     case DSOPTION_FLOAT:
       printf("%f", ctx->value.floatv);
@@ -78,7 +67,7 @@ static pcm16_t *synth(const symrec_t *staff) {
   return pcm_ctx;
 }
 
-DSSynth ss_kpa = {.name = "kpa",
-                  .description = "A Karplus-Strong synthesizer",
+DSSynth ss_sin = {.name = "sin",
+                  .description = "A sine waver",
                   .options = options,
                   .synth = &synth};
