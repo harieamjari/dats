@@ -32,6 +32,7 @@ enum token_t {
   TOK_RELEASE,
   TOK_SEMITONE,
   TOK_OCTAVE,
+  TOK_VOLUME,
 
   /* Symbols */
   TOK_LPAREN,
@@ -64,12 +65,12 @@ enum music_symbol { SYM_REST, SYM_NOTE };
 typedef struct note_t note_t;
 struct note_t {
   float frequency;
-  int velocity;
+  float velocity;
+  float attack;
+  float decay;
+  float sustain;
+  float release;
   int volume;
-  int attack;
-  int decay;
-  int sustain;
-  int release;
   note_t *next; /* a dyad or a chord maybe? */
 };
 

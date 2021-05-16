@@ -11,6 +11,7 @@ endif
 
 S_SYNTHS += s_kpa.c
 S_SYNTHS += s_sin.c 
+S_SYNTHS += s_square.c
 
 OBJ := $(patsubst %.c, %.o, $(S_SYNTHS) allsynth.c)
 
@@ -18,7 +19,7 @@ libsynth.so : $(OBJ)
 	$(CC) -shared $(CFLAGS) $(MEM_LEAK) -lm $^ -o $@
 
 $(OBJ): %.o: %.c
-	$(CC) -I.. -c -fPIC $(CFLAGS) $(DEBUG_FLAGS) $<
+	$(CC) -I.. -c -fPIC $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
 
 .PHONY: indent
 clean: libsynth.so $(OBJ)

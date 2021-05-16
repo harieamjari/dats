@@ -274,7 +274,7 @@ w:
     c = '/';
   }
   switch (c) {
-    // clang-format off
+  // clang-format off
     /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
@@ -391,6 +391,8 @@ w:
         return TOK_SUSTAIN;
       else if (!strcmp("release", buff))
         return TOK_RELEASE;
+      else if (!strcmp("volume", buff))
+        return TOK_VOLUME;
       else if (!strcmp("master", buff))
         return TOK_MASTER;
       else if (!strcmp("synth", buff))
@@ -404,7 +406,7 @@ w:
         return TOK_IDENTIFIER;
       }
     }
-    // clang-format off
+  // clang-format off
     /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':
@@ -576,6 +578,8 @@ const char *token_t_to_str(const token_t t) {
     return "semitone";
   case TOK_OCTAVE:
     return "octave";
+  case TOK_VOLUME:
+    return "volume";
   case TOK_LCURLY_BRACE:
     return "'{'";
   case TOK_RCURLY_BRACE:

@@ -1,4 +1,3 @@
-#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -25,7 +24,8 @@ static void free_string_options(void) {
 static pcm16_t *synth(const symrec_t *staff) {
   int16_t *pcm = calloc(sizeof(int16_t), (size_t)staff->value.staff.numsamples);
   pcm16_t *pcm_ctx = malloc(sizeof(pcm16_t));
-  if (pcm_ctx == NULL || pcm == NULL) return NULL;
+  if (pcm_ctx == NULL || pcm == NULL)
+    return NULL;
 
   uint32_t total = 0;
   for (nr_t *n = staff->value.staff.nr; n != NULL; n = n->next) {
@@ -78,7 +78,11 @@ static pcm16_t *synth(const symrec_t *staff) {
   return pcm_ctx;
 }
 
-DSSynth ss_kpa = {.name = "kpa",
-                  .description = "A Karplus-Strong synthesizer",
-                  .options = options,
-                  .synth = &synth};
+/* clang-format off */
+DSSynth ss_kpa = {
+  .name = "kpa",
+  .description = "A Karplus-Strong synthesizer",
+  .options = options,
+  .synth = &synth
+};
+/* clang-format on */

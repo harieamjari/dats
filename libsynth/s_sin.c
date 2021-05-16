@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -9,7 +8,6 @@
 #include "synth.h"
 
 static DSOption options[] = {
-    {DSOPTION_FLOAT, "volume", "The volume of synth", {.floatv = 1.0}},
     {.option_name = NULL}
 
 };
@@ -24,17 +22,17 @@ static void free_string_options(void) {
 
 static pcm16_t *synth(const symrec_t *staff) {
   int16_t *pcm = calloc(sizeof(int16_t), (size_t)staff->value.staff.numsamples);
-  assert(pcm != NULL);
   pcm16_t *pcm_ctx = malloc(sizeof(pcm16_t));
-  assert(pcm_ctx != NULL);
+  if (pcm_ctx == NULL || pcm == NULL)
+    return NULL;
 
   uint32_t total = 0;
   for (nr_t *n = staff->value.staff.nr; n != NULL; n = n->next) {
     if (n->type == SYM_NOTE) {
       for (note_t *nn = n->note; nn != NULL; nn = nn->next) {
         for (uint32_t i = 0; i < n->length; i++) {
-          pcm[total + i] +=
-              13000 * sin(2.0 * M_PI * nn->frequency * (double)i / 44100.0);
+          pcm[total + i] += (int16_t) (
+             (double) nn->volume * sin(2.0 * M_PI * nn->frequency * (double)i / 44100.0));
         }
       }
     }
@@ -67,7 +65,11 @@ static pcm16_t *synth(const symrec_t *staff) {
   return pcm_ctx;
 }
 
-DSSynth ss_sin = {.name = "sin",
-                  .description = "A sine waver",
-                  .options = options,
-                  .synth = &synth};
+/* clang-format off */
+DSSynth ss_sin = {
+  .name = "sin",
+  .description = "A sine wave synth",
+  .options = options,
+  .synth = &synth
+};
+/* clang-format on */

@@ -97,6 +97,7 @@ static int parse_notes_rests() {
     f->decay = tok_decay;
     f->sustain = tok_sustain;
     f->release = tok_release;
+    f->volume = tok_volume;
     tok = read_next_tok_cur_dats_t(d);
     if (tok == TOK_NOTE || tok == TOK_FLOAT) {
       f->next = malloc(sizeof(note_t));
@@ -171,6 +172,21 @@ static int parse_notes_rests() {
       tok_num = 120.0;
     }
     tok_bpm = tok_num;
+    rule_match = 1;
+    tok = read_next_tok_cur_dats_t(d);
+
+  } else if (tok == TOK_VOLUME) {
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_EQUAL) {
+      UNEXPECTED(tok, d);
+      return 1;
+    }
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_FLOAT) {
+      EXPECTING(TOK_FLOAT, d);
+      return 1;
+    }
+    tok_volume = (int) tok_num;
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
@@ -279,6 +295,7 @@ static int parse_staff() {
   tok_bpm = 120.0;
   tok_octave = 0;
   tok_semitone = 0;
+  tok_volume = 10000;
   tok_attack = 1.0;
   tok_decay = 1.0;
   tok_sustain = 1.0;
