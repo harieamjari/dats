@@ -7,10 +7,11 @@
 #endif
 #include "synth.h"
 
-static DSOption options[] = {
-    {.option_name = NULL}
+/* clang-format off */
+static DSOption options[] = {{.option_name = NULL}
 
 };
+/* clang-format on */
 
 static void free_string_options(void) {
   for (int i = 0; options[i].option_name != NULL; i++) {
@@ -30,9 +31,10 @@ static pcm16_t *synth(const symrec_t *staff) {
   for (nr_t *n = staff->value.staff.nr; n != NULL; n = n->next) {
     if (n->type == SYM_NOTE) {
       for (note_t *nn = n->note; nn != NULL; nn = nn->next) {
-        for (uint32_t i = 0; i < n->length; i++) {
-          pcm[total + i] += (int16_t) (
-             (double) nn->volume * sin(2.0 * M_PI * nn->frequency * (double)i / 44100.0));
+        for (uint32_t i = 0; i < nn->duration; i++) {
+          pcm[total + i] +=
+              (int16_t)((double)nn->volume *
+                        sin(2.0 * M_PI * nn->frequency * (double)i / 44100.0));
         }
       }
     }

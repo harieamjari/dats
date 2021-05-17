@@ -21,8 +21,9 @@ static void free_string_options(void) {
   }
 }
 
-static pcm16_t *synth(const symrec_t *staff) {
-  int16_t *pcm = calloc(sizeof(int16_t), (size_t)staff->value.staff.numsamples);
+static pcm16_t *synth(const symrec_t *restrict staff) {
+  int16_t *pcm =
+      calloc(sizeof(int16_t), (size_t)staff->value.staff.numsamples + 1000);
   pcm16_t *pcm_ctx = malloc(sizeof(pcm16_t));
   if (pcm_ctx == NULL || pcm == NULL)
     return NULL;
@@ -36,7 +37,7 @@ static pcm16_t *synth(const symrec_t *staff) {
           wavetable[i] = rand();
         int16_t prev = 0;
         uint32_t cur = 0;
-        for (uint32_t i = 0; i < n->length + (uint32_t)44100 &&
+        for (uint32_t i = 0; i < nn->duration + (uint32_t)1000 &&
                              i + total < staff->value.staff.numsamples;
              i++) {
           wavetable[cur] = ((wavetable[cur] / 2) + (prev / 2));
@@ -71,7 +72,7 @@ static pcm16_t *synth(const symrec_t *staff) {
     }
     putchar('\n');
   }
-  pcm_ctx->numsamples = staff->value.staff.numsamples;
+  pcm_ctx->numsamples = staff->value.staff.numsamples + 1000;
   pcm_ctx->pcm = pcm;
   pcm_ctx->next = NULL;
   free_string_options();

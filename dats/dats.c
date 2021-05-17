@@ -27,6 +27,8 @@
 
 #include <sys/stat.h>
 
+#include "libfilter/allfilter.h"
+#include "libsynth/allsynth.h"
 #include "scanner.h"
 
 #ifdef DATS_DETECT_MEM_LEAK
@@ -50,9 +52,17 @@ int process_args(const int argc, char *const *argv) {
   for (int i = 1; i < argc; i++) {
     switch (argv[i][0]) {
     case '-':
-      if (argv[i][1] == '-' && !strcmp(&argv[i][2], "help")) {
-        puts("Dats interpreter Draft-2.0.0");
-        printf("%s [dats file]\n", argv[0]);
+      if (argv[i][0] == '-') {
+        if (!strcmp(&argv[i][2], "help")) {
+          /* clang-format off */
+          puts("Dats interpreter Draft-2.0.0");
+          printf("%s [dats file]\noptions:\n\n", argv[0]);
+          printf("--list-synths                        prints all available synths\n"
+                 "--list-filters (draft)               prints all available filters\n");
+          /* clang-format on */
+          return 0;
+        } else if (!strcmp(&argv[i][2], "list-synths"))
+          print_synths();
         return 0;
       }
       ERROR(RED_ON "error" COLOR_OFF ": unknown option '%s'\n", argv[i]);

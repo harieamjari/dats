@@ -20,6 +20,7 @@ enum token_t {
   TOK_REPEAT,
   TOK_WRITE,
   TOK_READ,
+  TOK_MIX,
   TOK_NOTE,
   TOK_N,
   TOK_R,
@@ -64,6 +65,7 @@ enum music_symbol { SYM_REST, SYM_NOTE };
 
 typedef struct note_t note_t;
 struct note_t {
+  uint32_t duration; // for staccato and staccatissimo
   float frequency;
   float velocity;
   float attack;

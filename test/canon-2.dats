@@ -9,6 +9,4 @@ staff m1 {
   n 1, b3;
 }
 
-master {
-  write("w.wav", synth.square(m1));
-}
+master { write("w.wav", synth.kpa(m1)); }

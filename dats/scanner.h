@@ -3,14 +3,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "libsynth/env.h"
-#include "libsynth/synth.h"
-
 #ifdef DEFINE_SCANNER_VARIABLES
 #define EXTERN
 #else
 #define EXTERN extern
 #endif
+
+#include "libsynth/env.h"
 
 EXTERN void clean_all_dats_t(void);
 /*

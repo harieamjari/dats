@@ -274,7 +274,7 @@ w:
     c = '/';
   }
   switch (c) {
-  // clang-format off
+    // clang-format off
     /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
@@ -401,12 +401,14 @@ w:
         return TOK_READ;
       else if (!strcmp("write", buff))
         return TOK_WRITE;
+      else if (!strcmp("mix", buff))
+        return TOK_MIX;
       else {
         tok_identifier = strdup(buff);
         return TOK_IDENTIFIER;
       }
     }
-  // clang-format off
+    // clang-format off
     /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':
@@ -497,7 +499,7 @@ w:
         d->column--;
         seek--;
         buff[0] = '-';
-        (void)fscanf(d->fp, "%99[0-9.]%n", buff + 1, &nchar);
+        (void)fscanf(d->fp, "%98[0-9.]%n", buff + 1, &nchar);
         d->column += nchar;
         {
           int i = 0;
@@ -625,9 +627,11 @@ const char *token_t_to_str(const token_t t) {
   case TOK_WRITE:
     return "write";
   case TOK_READ:
-    return "read"; /*
-   case TOK_REPEAT:
-     return "repeat";*/
+    return "read";
+  case TOK_MIX:
+    return "mix"; /*
+    case TOK_REPEAT:
+      return "repeat";*/
   case TOK_EOF:
     return "end of file";
   default:

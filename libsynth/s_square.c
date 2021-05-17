@@ -6,12 +6,13 @@
 #endif
 #include "synth.h"
 
+/* clang-format off */
 static DSOption options[] = {
-    {DSOPTION_FLOAT, "rise", "Rise of the square wave (rise=1-fall) default: 0.5", {.floatv = 0.5}},
-    {.option_name = NULL}
-
+  {DSOPTION_FLOAT, "rise", "Duty cycle of the square wave, default: 0.5", {.floatv = 0.5}},
+  {.option_name = NULL}
 };
 
+/* clang-format on */
 static void free_string_options(void) {
   for (int i = 0; options[i].option_name != NULL; i++) {
     if (options[i].type != DSOPTION_STRING)
@@ -31,17 +32,18 @@ static pcm16_t *synth(const symrec_t *staff) {
     if (n->type == SYM_NOTE) {
       for (note_t *nn = n->note; nn != NULL; nn = nn->next) {
         int16_t wavetable[(int)(44100.0 / nn->frequency)];
-        int rise = (int) (44100.0*options[0].value.floatv/ nn->frequency);
-        for (int i = 0; i < (int)(44100.0 / nn->frequency); i++){
-          if (i < rise) wavetable[i] = (int16_t) nn->volume;
-          else wavetable[i] = 0;
+        int rise = (int)(44100.0 * options[0].value.floatv / nn->frequency);
+        for (int i = 0; i < (int)(44100.0 / nn->frequency); i++) {
+          if (i < rise)
+            wavetable[i] = (int16_t)nn->volume;
+          else
+            wavetable[i] = 0;
         }
         uint32_t cur = 0;
-        for (uint32_t i = 0; i < n->length;
-             i++) {
+        for (uint32_t i = 0; i < nn->duration; i++) {
           pcm[total + i] += wavetable[cur];
           cur++;
-          cur %= (int)(44100.0 / nn->frequency);
+          cur %= (uint32_t)(44100.0 / nn->frequency);
         }
         cur = 0;
       }

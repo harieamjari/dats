@@ -98,7 +98,12 @@ static int parse_notes_rests() {
     f->sustain = tok_sustain;
     f->release = tok_release;
     f->volume = tok_volume;
+    f->duration = cnr->length;
     tok = read_next_tok_cur_dats_t(d);
+    if (tok == TOK_DOT) {
+      f->duration /= 2;
+      tok = read_next_tok_cur_dats_t(d);
+    }
     if (tok == TOK_NOTE || tok == TOK_FLOAT) {
       f->next = malloc(sizeof(note_t));
       assert(f != NULL);
@@ -186,7 +191,7 @@ static int parse_notes_rests() {
       EXPECTING(TOK_FLOAT, d);
       return 1;
     }
-    tok_volume = (int) tok_num;
+    tok_volume = (int)tok_num;
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
@@ -533,6 +538,97 @@ append:
       goto append;
     // else if (tok == TOK_RPAREN) break;
   } break;
+  case TOK_MIX:
+    // mix
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_LPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    // mix(
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_LPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    // mix((
+    symrec_t *pcm16_mix1 = parse_pcm16(NULL);
+    if (pcm16_mix1 == NULL)
+      return NULL;
+    // mix((pcm16
+    if (tok != TOK_RPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    // mix((pcm16)
+
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_COMMA) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    // mix((pcm16),
+
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_LPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    // mix((pcm16), (
+    symrec_t *pcm16_mix2 = parse_pcm16(NULL);
+    if (pcm16_mix2 == NULL)
+      return NULL;
+
+    // mix((pcm16), (pcm16
+    if (tok != TOK_RPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    // mix((pcm16), (pcm16)
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_RPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    // mix((pcm16), (pcm16))
+
+    uint32_t length = (pcm16_mix1->value.pcm16.pcm->numsamples >
+                               pcm16_mix2->value.pcm16.pcm->numsamples
+                           ? pcm16_mix1->value.pcm16.pcm->numsamples
+                           : pcm16_mix2->value.pcm16.pcm->numsamples);
+    pcm16_t *mix_result = malloc(sizeof(pcm16_t));
+    int16_t *pcm = malloc(length * sizeof(int16_t));
+    if (mix_result == NULL || pcm == NULL) {
+      ERROR("%s:%d NO MEMORY\n", __FILE__, __LINE__);
+      return NULL;
+    }
+
+    for (uint32_t i = 0; i < length; i++) {
+      pcm[i] = (i < pcm16_mix1->value.pcm16.pcm->numsamples
+                    ? pcm16_mix1->value.pcm16.pcm->pcm[i]
+                    : 0) +
+               (i < pcm16_mix2->value.pcm16.pcm->numsamples
+                    ? pcm16_mix2->value.pcm16.pcm->pcm[i]
+                    : 0);
+    }
+    mix_result->pcm = pcm;
+    mix_result->numsamples = length;
+    mix_result->next = NULL;
+    pcm16->value.pcm16.total_numsamples += mix_result->numsamples;
+
+    if (pcm16->value.pcm16.pcm != NULL)
+      for (pcm16_t *pcma = pcm16->value.pcm16.pcm; 1; pcma = pcma->next) {
+        if (pcma->next == NULL) {
+          pcma->next = mix_result;
+          break;
+        }
+      }
+    else
+      pcm16->value.pcm16.pcm = mix_result;
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok == TOK_COMMA)
+      goto append;
+    break;
   default:
     UNEXPECTED(tok, d);
     return NULL;
