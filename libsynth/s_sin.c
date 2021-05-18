@@ -8,15 +8,20 @@
 #include "synth.h"
 
 /* clang-format off */
-static DSOption options[] = {{.option_name = NULL}
-
+static DSOption options[] = {
+   {DSOPTION_FLOAT, "vibrato_frequency", "Vibrato frequency", {.floatv = 0}},
+   {DSOPTION_FLOAT, "vibrato_magnitude", "Vibrato magnitude", {.floatv = 0}},
+   {.option_name = NULL}
 };
 /* clang-format on */
 
 static void free_string_options(void) {
   for (int i = 0; options[i].option_name != NULL; i++) {
-    if (options[i].type != DSOPTION_STRING)
+    if (options[i].type != DSOPTION_STRING) {
+      options[i].value.intv = 0;
+      options[i].value.floatv = 0.0;
       continue;
+    }
     free(options[i].value.strv);
   }
 }
@@ -32,9 +37,22 @@ static pcm16_t *synth(const symrec_t *staff) {
     if (n->type == SYM_NOTE) {
       for (note_t *nn = n->note; nn != NULL; nn = nn->next) {
         for (uint32_t i = 0; i < nn->duration; i++) {
+          int16_t sample1 = (int16_t)(
+              (double)nn->volume *
+              sin(2.0 * M_PI *
+                  (nn->frequency + sin(2.0 * M_PI * options[0].value.floatv *
+                                       (double)i / 44100.0) *
+                                       options[1].value.floatv) *
+                  (double)i / 44100.0));
+
           pcm[total + i] +=
-              (int16_t)((double)nn->volume *
-                        sin(2.0 * M_PI * nn->frequency * (double)i / 44100.0));
+              i < nn->duration - 250
+                  ? sample1
+                  : -(int16_t)((((double)i - (double)(nn->duration - 250)) /
+                                44100 / 0) *
+                                   0.5 -
+                               1) *
+                        sample1;
         }
       }
     }

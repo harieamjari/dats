@@ -17,8 +17,11 @@ static DSOption options[] = {
 
 static void free_string_options(void) {
   for (int i = 0; options[i].option_name != NULL; i++) {
-    if (options[i].type != DSOPTION_STRING)
+    if (options[i].type != DSOPTION_STRING) {
+      options[i].value.intv = 0;
+      options[i].value.floatv = 0.0;
       continue;
+    }
     free(options[i].value.strv);
   }
 }

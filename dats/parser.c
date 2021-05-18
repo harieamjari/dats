@@ -625,9 +625,11 @@ append:
       }
     else
       pcm16->value.pcm16.pcm = mix_result;
+
     tok = read_next_tok_cur_dats_t(d);
     if (tok == TOK_COMMA)
       goto append;
+
     break;
   default:
     UNEXPECTED(tok, d);

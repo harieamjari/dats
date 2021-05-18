@@ -6,17 +6,22 @@
 #endif
 #include "synth.h"
 
+/* clang-format off */
 static DSOption options[] = {
     {DSOPTION_FLOAT, "volume", "The volume of synth", {.floatv = 1.0}},
     {DSOPTION_STRING, "test", "foo", {.strv = NULL}},
     {.option_name = NULL}
 
 };
+/* clang-format on */
 
 static void free_string_options(void) {
   for (int i = 0; options[i].option_name != NULL; i++) {
-    if (options[i].type != DSOPTION_STRING)
+    if (options[i].type != DSOPTION_STRING) {
+      options[i].value.intv = 0;
+      options[i].value.floatv = 0.0;
       continue;
+    }
     free(options[i].value.strv);
   }
 }

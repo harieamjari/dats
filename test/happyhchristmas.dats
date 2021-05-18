@@ -109,14 +109,241 @@ staff m1 {
 }
 
 staff m2 {
+// part 1
   octave = -1;
-  volume = 1000;
+  volume = 1200;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
   n 12, d4;
   n 12, f#4;
   n 12, a4;
 
+  n 12, b3;
+  n 12, d4;
+  n 12, g4;
+  n 12, b3;
+  n 12, d4;
+  n 12, g4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+
+  n 12, b3;
+  n 12, d4;
+  n 12, g4;
+  n 12, b3;
+  n 12, d4;
+  n 12, g4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+
+  n 12, e4;
+  n 12, g4;
+  n 12, b4;
+  n 12, e4;
+  n 12, g4;
+  n 12, b4;
+  n 12, a4;
+  n 12, c#5;
+  n 12, e5;
+  n 12, c#5;
+  n 12, a4;
+  n 12, g4;
+
+ // repeat 1
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+
+  n 12, b3;
+  n 12, d4;
+  n 12, g4;
+  n 12, b3;
+  n 12, d4;
+  n 12, g4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+
+  n 12, b3;
+  n 12, d4;
+  n 12, g4;
+  n 12, b3;
+  n 12, d4;
+  n 12, g4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+
+  n 12, e4;
+  n 12, g4;
+  n 12, b4;
+  n 12, e4;
+  n 12, g4;
+  n 12, b4;
+  n 12, a4;
+  n 12, c#5;
+  n 12, e5;
+  n 12, c#5;
+  n 12, a4;
+  n 12, g4;
+// end repeat
+  
+  n 12, g3;
+  n 12, b3;
+  n 12, d4;
+  n 12, g3;
+  n 12, b3;
+  n 12, d4;
+  n 12, a3;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a3;
+  n 12, d4;
+  n 12, f#4;
+
+  n 12, g#3;
+  n 12, b3;
+  n 12, e4;
+  n 12, g#3;
+  n 12, b3;
+  n 12, e4;
+  n 12, a4;
+  n 12, c#5;
+  n 12, e5;
+  n 12, a3;
+  n 12, a4;
+  n 12, a5;
+
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+
+  n 12, b3;
+  n 12, d4;
+  n 12, g4;
+  n 12, b3;
+  n 12, d4;
+  n 12, g4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+
+  n 12, c#4;
+  n 12, e4;
+  n 12, g4;
+  n 12, a4;
+  n 12, e4;
+  n 12, c#4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+
+  n 12, c#4;
+  n 12, e4;
+  n 12, a4 e5;
+  n 12, g4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, f#4;
+  n 12, a4;
+  n 12, d4;
+  n 12, f#4;
+  n 12, a4;
 }
+
+staff m3 {
+  octave = -1;
+// part 1
+  n 4, d3;
+  n 4, f#3;
+  n 4, a3;
+  n 4, d4;
+
+  n 4, g3;
+  n 4, b3;
+  n 4, d4;
+  n 4, f#3;
+
+  n 4, g3;
+  n 4, b3;
+  n 4, d3;
+  n 4, f#3;
+
+  n 4, e3;
+  n 4, g#3;
+  n 4, a3;
+  n 4, c3;
+// repeat 1
+  n 4, d3;
+  n 4, f#3;
+  n 4, a3;
+  n 4, d4;
+
+  n 4, g3;
+  n 4, b3;
+  n 4, d4;
+  n 4, f#3;
+
+  n 4, g3;
+  n 4, b3;
+  n 4, d3;
+  n 4, f#3;
+
+  n 4, e3;
+  n 4, g#3;
+  n 4, a3;
+  n 4, c3;
+}
+
 master {
-  write("t.wav", mix((synth.sin(m1)), (synth.square(m2))));
+  write("t.wav", mix((synth.sin(m1)[
+    vibrato_frequency=5.0, vibrato_magnitude=2.0]),
+    (mix((synth.square(m2)),(mix((synth.sin(m2)), (synth.sin(m3))))))));
 
 }

@@ -52,7 +52,7 @@ int process_args(const int argc, char *const *argv) {
   for (int i = 1; i < argc; i++) {
     switch (argv[i][0]) {
     case '-':
-      if (argv[i][0] == '-') {
+      if (argv[i][1] == '-') {
         if (!strcmp(&argv[i][2], "help")) {
           /* clang-format off */
           puts("Dats interpreter Draft-2.0.0");
@@ -61,9 +61,10 @@ int process_args(const int argc, char *const *argv) {
                  "--list-filters (draft)               prints all available filters\n");
           /* clang-format on */
           return 0;
-        } else if (!strcmp(&argv[i][2], "list-synths"))
+        } else if (!strcmp(&argv[i][2], "list-synths")) {
           print_synths();
-        return 0;
+          return 0;
+        }
       }
       ERROR(RED_ON "error" COLOR_OFF ": unknown option '%s'\n", argv[i]);
       global_errors++;
