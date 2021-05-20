@@ -110,7 +110,7 @@ staff m1 {
 
 staff m2 {
 // part 1
-  octave = -1;
+  octave = 0;
   volume = 1200;
   n 12, d4;
   n 12, f#4;
@@ -342,8 +342,9 @@ staff m3 {
 }
 
 master {
-  write("t.wav", mix((synth.sin(m1)[
-    vibrato_frequency=5.0, vibrato_magnitude=2.0]),
-    (mix((synth.square(m2)),(mix((synth.sin(m2)), (synth.sin(m3))))))));
+  pcm16 tr1 = mix((synth.sin(m1)[
+    vibrato_frequency=8, vibrato_magnitude=2.0]),
+    (mix((synth.square(m2)),(mix((synth.sin(m2)), (synth.sin(m3)))))));
+  write("t.wav", tr1, tr1);
 
 }

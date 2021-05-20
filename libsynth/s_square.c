@@ -50,13 +50,13 @@ static pcm16_t *synth(const symrec_t *staff) {
     }
     total += n->length;
     if ((total % 44100) < 1000) {
-      printf("\r[s_psg] %d/%d", total, staff->value.staff.numsamples);
+      printf("\r[s_square] %d/%d", total, staff->value.staff.numsamples);
       fflush(stdout);
     }
   }
   putchar('\n');
   for (DSOption *ctx = options; ctx->option_name != NULL; ctx++) {
-    printf("[s_kpa] %s ", ctx->option_name);
+    printf("[s_square] %s ", ctx->option_name);
     switch (ctx->type) {
     case DSOPTION_FLOAT:
       printf("%f", ctx->value.floatv);

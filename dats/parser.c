@@ -301,10 +301,10 @@ static int parse_staff() {
   tok_octave = 0;
   tok_semitone = 0;
   tok_volume = 10000;
-  tok_attack = 1.0;
-  tok_decay = 1.0;
+  tok_attack = 300.0;
+  tok_decay = 300.0;
   tok_sustain = 1.0;
-  tok_release = 1.0;
+  tok_release = 300.0;
 
   tok = read_next_tok_cur_dats_t(d);
   if (tok != TOK_IDENTIFIER) {

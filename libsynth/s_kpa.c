@@ -57,7 +57,7 @@ static pcm16_t *synth(const symrec_t *restrict staff) {
     }
     total += n->length;
     if ((total % 44100) < 1000) {
-      printf("\r[s_psg] %d/%d", total, staff->value.staff.numsamples);
+      printf("\r[s_kpa] %d/%d", total, staff->value.staff.numsamples);
       fflush(stdout);
     }
   }

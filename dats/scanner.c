@@ -161,7 +161,7 @@ void print_debugging_info(const token_t tok, const dats_t *const d) {
   default:
     ERROR("\n");
   }
-  char buff[300] = {0};
+  char buff[1000] = {0};
   int length = sprintf(buff, "    %d | %s", line_token_found, d->scan_line);
   ERROR("%s", buff);
   ERROR("%*s\n", column_token_found + (length - (int)strlen(d->scan_line)),
@@ -227,8 +227,10 @@ w:
     return TOK_ERR;
   }
   if (c == (int)'/') {
-    c = fgetc(d->fp);
+    char prev_line[1000];
+    strcpy(prev_line, d->scan_line);
     d->column++;
+    c = fgetc(d->fp);
     seek++;
     if (c == (int)'/') {
       while ((c = fgetc(d->fp)) != EOF)
@@ -242,23 +244,31 @@ w:
         }
     } else if (c == (int)'*') {
       while ((c = fgetc(d->fp)) != EOF) {
+        d->column++;
         switch (c) {
         case '*':
+          d->column++;
           if ((c = fgetc(d->fp)) == '/') {
             seek++;
             goto w;
           } else if (c == '\n') {
             d->line++;
             d->column = 0;
+          if (fgets(d->scan_line, 500, d->fp) != NULL)
+            fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
             seek++;
           }
           break;
         case '\n':
           d->line++;
           d->column = 0;
+          if (fgets(d->scan_line, 500, d->fp) != NULL)
+            fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
           seek++;
+          break;
         }
       }
+      strcpy(d->scan_line, prev_line);
       local_errors++;
       ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
             "error" COLOR_OFF ": ",
@@ -654,7 +664,7 @@ void print_all_symrec_t_cur_dats_t(const dats_t *const t) {
              token_t_to_str(TOK_STAFF));
       break;
     case TOK_PCM16:
-      printf("  %-20s    %-20s\n", p->value.pcm16.identifier,
+      printf("  %-20s    %-20s\n", p->value.staff.identifier == NULL? "(null)": p->value.staff.identifier,
              token_t_to_str(TOK_PCM16));
       break;
     default:

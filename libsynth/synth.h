@@ -20,14 +20,21 @@ struct DSOption {
 
 typedef struct DSSynth DSSynth;
 struct DSSynth {
+  /* Synth name */
   const char *name;
+
+  /* Short unique description of the synth */
   const char *description;
-  DSOption *options; /*
-   struct _option
-   {
-     const char *name;
-     float num;
-   } *options;*/
+
+  /* Possible options to be set for your synth.
+   * Set this to NULL if there are none */
+  DSOption *options;
+
+  /* Prints documentation on stdout.
+   * This must always point to something, not NULL! */
+  void (*const print_documentation)(void);
+  
+  /* This is set to your implementation of synth. */ 
   pcm16_t *(*const synth)(const symrec_t *const staff);
 };
 

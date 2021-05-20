@@ -11,6 +11,10 @@
 static DSOption options[] = {
    {DSOPTION_FLOAT, "vibrato_frequency", "Vibrato frequency", {.floatv = 0}},
    {DSOPTION_FLOAT, "vibrato_magnitude", "Vibrato magnitude", {.floatv = 0}},
+   {DSOPTION_INT, "attack_type", "Attack type (linear=0, exponential=1)", {.intv = 0}},
+   {DSOPTION_INT, "decay_type", "Decay type (linear=0, exponential=1)", {.intv = 0}},
+   /*{DSOPTION_INT, "attack_s", "Attack ending in samples", {.intv = 0}},
+   {DSOPTION_INT, "decay_s", "Decay begin in samples", {.intv=  0}},*/
    {.option_name = NULL}
 };
 /* clang-format on */
@@ -37,7 +41,7 @@ static pcm16_t *synth(const symrec_t *staff) {
     if (n->type == SYM_NOTE) {
       for (note_t *nn = n->note; nn != NULL; nn = nn->next) {
         for (uint32_t i = 0; i < nn->duration; i++) {
-          int16_t sample1 = (int16_t)(
+          double sample1 = (
               (double)nn->volume *
               sin(2.0 * M_PI *
                   (nn->frequency + sin(2.0 * M_PI * options[0].value.floatv *
@@ -45,14 +49,10 @@ static pcm16_t *synth(const symrec_t *staff) {
                                        options[1].value.floatv) *
                   (double)i / 44100.0));
 
-          pcm[total + i] +=
-              i < nn->duration - 250
-                  ? sample1
-                  : -(int16_t)((((double)i - (double)(nn->duration - 250)) /
-                                44100 / 0) *
-                                   0.5 -
-                               1) *
-                        sample1;
+          pcm[total + i] += (int16_t)
+           /* simple linear attack and linear drcay filter */
+              (double)sample1*( i < (uint32_t)nn->attack? (double)i/ nn->attack : (i > nn->duration-(uint32_t)nn->release ?
+            (-(double)i+(double)(nn->duration))/nn->release: 1.0));
         }
       }
     }
