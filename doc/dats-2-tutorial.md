@@ -16,7 +16,7 @@ The Hello World of dats:
 # The Basics
 
 Toward playing music, there must be series of notes written for the player to read.
-For dats, a note is declared with the keyowrd `n`. `n` must contain two arguments,
+For dats, a note is declared with the keyword `n`. `n` must contain two arguments,
 a length and a pitch, each are separated by a comma:
 
 ```
@@ -55,8 +55,8 @@ is then stored into a variable, usually a type of `pcm16`:
 ```
 This is then written into a file named, "w.wav". (Currently, Dats only supports writing wav files.)
 
-To append one or more pcm16 to another pcm16, you may simply just add a comma, preceded by the pcm16
-you were appending:
+To append one or more pcm16 to another pcm16, you may simply just add a comma, followed by the pcm16
+you were appending with:
 
 ```
   pcm16 tr1 = synth.kpa(/* some staff */);
@@ -98,13 +98,13 @@ Inside a staff, there exist environment variables that can be tweaked by assignm
 
 - bpm (default: 120.0) This sets the bpm of the next following note
 and may be assigned anywhere before or after a note.
-- attack (default: 300) This sets how long the attack is. We are using samples as a unit and 44100 is
-1 second.
+- attack (default: 300) This sets how long the attack is. We are using sample as a unit of measurement
+and 44100 samples is 1 second.
 - decay (not usable)
 - sustain (not usable)
-- release (default: 300) This sets hoe long the release is. Also, using samples as a unit of measurement.
+- release (default: 300) This sets how long the release is. Also using samples as a unit of measurement.
 - volume (default 10000) Self explanatory.
-- octave (default 0) This raises the octave of next the preceeding note by the assigned value. To raise
+- octave (default 0) This raises the octave of next the following note by the assigned value. To raise
 the note an octave, set `octave = 1;`
 - semitone (default 0) This raises the next following note inside the staff by the assigned value. To raise
 the note a semitone, set `semitone = 1;`

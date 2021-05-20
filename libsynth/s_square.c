@@ -41,7 +41,15 @@ static pcm16_t *synth(const symrec_t *staff) {
         }
         uint32_t cur = 0;
         for (uint32_t i = 0; i < nn->duration; i++) {
-          pcm[total + i] += wavetable[cur];
+          pcm[total + i] +=
+              (int16_t)
+              /* simple linear attack and linear decay filter */
+              (double)wavetable[cur] *
+              (i < (uint32_t)nn->attack
+                   ? (double)i / nn->attack
+                   : (i > nn->duration - (uint32_t)nn->release
+                          ? (-(double)i + (double)(nn->duration)) / nn->release
+                          : 1.0));
           cur++;
           cur %= (uint32_t)(44100.0 / nn->frequency);
         }

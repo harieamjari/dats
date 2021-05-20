@@ -41,18 +41,23 @@ static pcm16_t *synth(const symrec_t *staff) {
     if (n->type == SYM_NOTE) {
       for (note_t *nn = n->note; nn != NULL; nn = nn->next) {
         for (uint32_t i = 0; i < nn->duration; i++) {
-          double sample1 = (
-              (double)nn->volume *
-              sin(2.0 * M_PI *
-                  (nn->frequency + sin(2.0 * M_PI * options[0].value.floatv *
-                                       (double)i / 44100.0) *
-                                       options[1].value.floatv) *
-                  (double)i / 44100.0));
+          double sample1 =
+              ((double)nn->volume *
+               sin(2.0 * M_PI *
+                   (nn->frequency + sin(2.0 * M_PI * options[0].value.floatv *
+                                        (double)i / 44100.0) *
+                                        options[1].value.floatv) *
+                   (double)i / 44100.0));
 
-          pcm[total + i] += (int16_t)
-           /* simple linear attack and linear drcay filter */
-              (double)sample1*( i < (uint32_t)nn->attack? (double)i/ nn->attack : (i > nn->duration-(uint32_t)nn->release ?
-            (-(double)i+(double)(nn->duration))/nn->release: 1.0));
+          pcm[total + i] +=
+              (int16_t)
+              /* simple linear attack and linear decay filter */
+              (double)sample1 *
+              (i < (uint32_t)nn->attack
+                   ? (double)i / nn->attack
+                   : (i > nn->duration - (uint32_t)nn->release
+                          ? (-(double)i + (double)(nn->duration)) / nn->release
+                          : 1.0));
         }
       }
     }

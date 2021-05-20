@@ -33,8 +33,8 @@ struct DSSynth {
   /* Prints documentation on stdout.
    * This must always point to something, not NULL! */
   void (*const print_documentation)(void);
-  
-  /* This is set to your implementation of synth. */ 
+
+  /* This is set to your implementation of synth. */
   pcm16_t *(*const synth)(const symrec_t *const staff);
 };
 

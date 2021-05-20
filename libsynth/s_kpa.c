@@ -9,7 +9,6 @@
 /* clang-format off */
 static DSOption options[] = {
     {DSOPTION_FLOAT, "volume", "The volume of synth", {.floatv = 1.0}},
-    {DSOPTION_STRING, "test", "foo", {.strv = NULL}},
     {.option_name = NULL}
 
 };
