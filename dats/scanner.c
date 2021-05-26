@@ -150,7 +150,7 @@ symrec_t *symrec_tcpy(symrec_t *const s) {
   return copy;
 }
 
-void print_debugging_info(const token_t tok, const dats_t *const d) {
+void print_debugging_info(const token_t tok, dats_t *d) {
   switch (tok) {
   case TOK_IDENTIFIER:
     ERROR(", '%s'\n", tok_identifier);
@@ -162,6 +162,16 @@ void print_debugging_info(const token_t tok, const dats_t *const d) {
     ERROR("\n");
   }
   char buff[1000] = {0};
+  if (d->scan_line[strlen(d->scan_line)-1] != '\n'){
+    int ls = strlen(d->scan_line);
+    d->scan_line[ls] = '\n';
+    d->scan_line[ls+1] = 0;
+  }
+  if (d->scan_line[strlen(d->scan_line)-2] != '\r'){
+    int ls = strlen(d->scan_line);
+    memcpy(d->scan_line+(ls-2), d->scan_line+(ls-1), 2);
+  }
+  
   int length = sprintf(buff, "    %d | %s", line_token_found, d->scan_line);
   ERROR("%s", buff);
   ERROR("%*s\n", column_token_found + (length - (int)strlen(d->scan_line)),

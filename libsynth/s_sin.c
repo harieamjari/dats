@@ -13,6 +13,12 @@ static DSOption options[] = {
    {DSOPTION_FLOAT, "vibrato_magnitude", "Vibrato magnitude", {.floatv = 0}},
    {DSOPTION_INT, "attack_type", "Attack type (linear=0, exponential=1)", {.intv = 0}},
    {DSOPTION_INT, "decay_type", "Decay type (linear=0, exponential=1)", {.intv = 0}},
+   {DSOPTION_INT, "sustain_type", "Sustain type (linear=0, exponential=1)", {.intv = 0}},
+   {DSOPTION_INT, "release_type", "Release type (linear=0, exponential=1)", {.intv = 0}},
+   {DSOPTION_FLOAT, "attack_exp_coeff", "Attack exponential coefficiant", {.floatv = 0.0}},
+   {DSOPTION_FLOAT, "decay_exp_coeff", "Attack exponential coefficiant", {.floatv = 0.0}},
+   {DSOPTION_FLOAT, "sustain_exp_coeff", "Attack exponential coefficiant", {.floatv = 0.0}},
+   {DSOPTION_FLOAT, "release_exp_coeff", "Decay exponential coefficiant", {.floatv = 0.0}},
    /*{DSOPTION_INT, "attack_s", "Attack ending in samples", {.intv = 0}},
    {DSOPTION_INT, "decay_s", "Decay begin in samples", {.intv=  0}},*/
    {.option_name = NULL}
@@ -30,7 +36,38 @@ static void free_string_options(void) {
   }
 }
 
+static double linear_attack(double x, double n){
+  return x / n;
+}
+
+static double linear_release(double x, double n){
+  return x / n;
+}
+
+static double exponential_attack(double x, double n){
+  return pow(M_E, x-n);
+}
+static double exponential_release(double x, double n){
+  return pow(M_E, (-x-n)+1.0);
+}
 static pcm16_t *synth(const symrec_t *staff) {
+
+  double (*attack_ret)(double, double) = NULL;
+  double (*release_ret)(double, double) = NULL;
+
+  switch (options[2].value.intv){
+    case 0: attack_ret = linear_attack; break;
+    case 1: attack_ret = exponential_attack; break;
+    default: fprintf(stderr, "unknown attack type: %d\n", options[2].value.intv);
+        return NULL;
+  }
+
+  switch (options[5].value.intv){
+    case 0: release_ret = linear_release; break;
+    case 1: release_ret = exponential_release; break;
+    default: fprintf(stderr, "unknown attack type: %d\n", options[5].value.intv);
+        return NULL;
+  }
   int16_t *pcm = calloc(sizeof(int16_t), (size_t)staff->value.staff.numsamples);
   pcm16_t *pcm_ctx = malloc(sizeof(pcm16_t));
   if (pcm_ctx == NULL || pcm == NULL)
@@ -54,9 +91,9 @@ static pcm16_t *synth(const symrec_t *staff) {
               /* simple linear attack and linear decay filter */
               (double)sample1 *
               (i < (uint32_t)nn->attack
-                   ? (double)i / nn->attack
+                   ? attack_ret((double)i, nn->attack)
                    : (i > nn->duration - (uint32_t)nn->release
-                          ? (-(double)i + (double)(nn->duration)) / nn->release
+                          ? release_ret(-(double)i+nn->duration, nn->release)
                           : 1.0));
         }
       }

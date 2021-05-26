@@ -39,7 +39,7 @@ extern void print_all_nr_t(nr_t *nr);
 static token_t tok;
 static symrec_t *staff;
 static int rule_match = 0;
-dats_t *d;
+static dats_t *d;
 
 /* Returns 0 if success. Non-zero if failed. */
 static int parse_notes_rests() {
@@ -472,7 +472,7 @@ append:
             }
             break;
           } else if (driver->options[i + 1].option_name == NULL) {
-            C_ERROR(d, "No such option, %s\n", tok_identifier);
+            C_ERROR(d, "no such option, '%s'", tok_identifier);
             return NULL;
           }
         }

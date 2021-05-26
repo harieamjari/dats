@@ -1,6 +1,6 @@
 staff m1 {
   bpm = 120;
-  octave = 0; // raise a 0 octave
+  octave = 1; // raise an octave
   semitone = 0; // raise a 0 semitone
 
 // part 1
@@ -111,7 +111,7 @@ staff m1 {
 staff m2 {
 // part 1
   octave = 0;
-  volume = 1200;
+  volume = 1100;
   n 12, d4;
   n 12, f#4;
   n 12, a4;
@@ -343,8 +343,8 @@ staff m3 {
 
 master {
   pcm16 tr1 = mix((synth.sin(m1)[
-    vibrato_frequency=8, vibrato_magnitude=2.0]),
-    (mix((synth.square(m2)),(mix((synth.sin(m2)), (synth.sin(m3)))))));
-  write("t.wav", tr1, tr1);
+    vibrato_frequency=8, vibrato_magnitude=3]),
+    (mix((synth.square(m2)),(synth.sin(m2)))));
+  write("t.wav", tr1);
 
 }

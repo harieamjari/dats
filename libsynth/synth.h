@@ -28,7 +28,7 @@ struct DSSynth {
 
   /* Possible options to be set for your synth.
    * Set this to NULL if there are none */
-  DSOption *options;
+  DSOption *const options;
 
   /* Prints documentation on stdout.
    * This must always point to something, not NULL! */
