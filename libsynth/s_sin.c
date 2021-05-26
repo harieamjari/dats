@@ -36,37 +36,41 @@ static void free_string_options(void) {
   }
 }
 
-static double linear_attack(double x, double n){
-  return x / n;
-}
+static double linear_attack(double x, double n) { return x / n; }
 
-static double linear_release(double x, double n){
-  return x / n;
-}
+static double linear_release(double x, double n) { return x / n; }
 
-static double exponential_attack(double x, double n){
-  return pow(M_E, x-n);
-}
-static double exponential_release(double x, double n){
-  return pow(M_E, (-x-n)+1.0);
+static double exponential_attack(double x, double n) { return pow(M_E, x - n); }
+static double exponential_release(double x, double n) {
+  return pow(M_E, (-x - n) + 1.0);
 }
 static pcm16_t *synth(const symrec_t *staff) {
 
   double (*attack_ret)(double, double) = NULL;
   double (*release_ret)(double, double) = NULL;
 
-  switch (options[2].value.intv){
-    case 0: attack_ret = linear_attack; break;
-    case 1: attack_ret = exponential_attack; break;
-    default: fprintf(stderr, "unknown attack type: %d\n", options[2].value.intv);
-        return NULL;
+  switch (options[2].value.intv) {
+  case 0:
+    attack_ret = linear_attack;
+    break;
+  case 1:
+    attack_ret = exponential_attack;
+    break;
+  default:
+    fprintf(stderr, "unknown attack type: %d\n", options[2].value.intv);
+    return NULL;
   }
 
-  switch (options[5].value.intv){
-    case 0: release_ret = linear_release; break;
-    case 1: release_ret = exponential_release; break;
-    default: fprintf(stderr, "unknown attack type: %d\n", options[5].value.intv);
-        return NULL;
+  switch (options[5].value.intv) {
+  case 0:
+    release_ret = linear_release;
+    break;
+  case 1:
+    release_ret = exponential_release;
+    break;
+  default:
+    fprintf(stderr, "unknown attack type: %d\n", options[5].value.intv);
+    return NULL;
   }
   int16_t *pcm = calloc(sizeof(int16_t), (size_t)staff->value.staff.numsamples);
   pcm16_t *pcm_ctx = malloc(sizeof(pcm16_t));
@@ -93,7 +97,7 @@ static pcm16_t *synth(const symrec_t *staff) {
               (i < (uint32_t)nn->attack
                    ? attack_ret((double)i, nn->attack)
                    : (i > nn->duration - (uint32_t)nn->release
-                          ? release_ret(-(double)i+nn->duration, nn->release)
+                          ? release_ret(-(double)i + nn->duration, nn->release)
                           : 1.0));
         }
       }

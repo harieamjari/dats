@@ -70,7 +70,7 @@ int process_args(const int argc, char *const *argv) {
       global_errors++;
       break;
     default:
-      fp = fopen(argv[i], "r");
+      fp = fopen(argv[i], "rb");
       if (fp == NULL) {
         perror(argv[i]);
         return 1;

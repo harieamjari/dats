@@ -162,19 +162,20 @@ void print_debugging_info(const token_t tok, dats_t *d) {
     ERROR("\n");
   }
   char buff[1000] = {0};
-  if (d->scan_line[strlen(d->scan_line)-1] != '\n'){
+  if (d->scan_line[strlen(d->scan_line) - 1] != '\n') {
     int ls = strlen(d->scan_line);
     d->scan_line[ls] = '\n';
-    d->scan_line[ls+1] = 0;
+    d->scan_line[ls + 1] = 0;
   }
-  if (d->scan_line[strlen(d->scan_line)-2] != '\r'){
+  if (d->scan_line[strlen(d->scan_line) - 2] == '\r') {
     int ls = strlen(d->scan_line);
-    memcpy(d->scan_line+(ls-2), d->scan_line+(ls-1), 2);
+    memcpy(d->scan_line + (ls - 2), d->scan_line + (ls - 1), 2);
   }
-  
+
   int length = sprintf(buff, "    %d | %s", line_token_found, d->scan_line);
   ERROR("%s", buff);
-  ERROR("%*s\n", column_token_found + (length - (int)strlen(d->scan_line)),
+  ERROR("%*s\n", column_token_found +
+            (length - (int)strlen(d->scan_line)),
         "^");
 }
 /*---------.
@@ -198,8 +199,14 @@ w:
     d->line++;
     seek++;
     d->column = 0;
-    if (fgets(d->scan_line, 500, d->fp) != NULL)
+    void *p = fgets(d->scan_line, 500, d->fp);
+    if (p != NULL)
       fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
+    else {
+       d->scan_line[0] = ' ';
+       d->scan_line[1] = 0;
+    }
+
     goto w;
   }
   line_token_found = d->line;
@@ -264,8 +271,8 @@ w:
           } else if (c == '\n') {
             d->line++;
             d->column = 0;
-          if (fgets(d->scan_line, 500, d->fp) != NULL)
-            fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
+            if (fgets(d->scan_line, 500, d->fp) != NULL)
+              fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
             seek++;
           }
           break;
@@ -294,7 +301,7 @@ w:
     c = '/';
   }
   switch (c) {
-  // clang-format off
+    // clang-format off
     /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
@@ -428,7 +435,7 @@ w:
         return TOK_IDENTIFIER;
       }
     }
-  // clang-format off
+    // clang-format off
     /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':
@@ -674,7 +681,9 @@ void print_all_symrec_t_cur_dats_t(const dats_t *const t) {
              token_t_to_str(TOK_STAFF));
       break;
     case TOK_PCM16:
-      printf("  %-20s    %-20s\n", p->value.staff.identifier == NULL? "(null)": p->value.staff.identifier,
+      printf("  %-20s    %-20s\n",
+             p->value.staff.identifier == NULL ? "(null)"
+                                               : p->value.staff.identifier,
              token_t_to_str(TOK_PCM16));
       break;
     default:

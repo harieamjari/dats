@@ -54,7 +54,7 @@ static pcm16_t *synth(const symrec_t *restrict staff) {
                    : (i > nn->duration - (uint32_t)nn->release
                           ? (-(double)i + (double)(nn->duration)) / nn->release
                           : 1.0));
-          //pcm[total + i] += wavetable[cur];
+          // pcm[total + i] += wavetable[cur];
           prev = wavetable[cur];
           cur++;
           cur %= (int)(44100.0 / nn->frequency);
