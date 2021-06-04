@@ -30,9 +30,9 @@
 #endif
 
 #include "scanner.h"
+#include "wav.h"
 
 #include "libsynth/allsynth.h"
-#include "libwav/wav.h"
 
 extern void print_all_nr_t(nr_t *nr);
 

@@ -8,7 +8,6 @@
 
 /* clang-format off */
 static DSOption options[] = {
-    {DSOPTION_FLOAT, "volume", "The volume of synth", {.floatv = 1.0}},
     {.option_name = NULL}
 
 };
@@ -41,8 +40,7 @@ static pcm16_t *synth(const symrec_t *restrict staff) {
           wavetable[i] = rand();
         int16_t prev = 0;
         uint32_t cur = 0;
-        for (uint32_t i = 0; i < nn->duration + (uint32_t)1000 &&
-                             i + total < staff->value.staff.numsamples;
+        for (uint32_t i = 0; i < nn->duration;
              i++) {
           wavetable[cur] = ((wavetable[cur] / 2) + (prev / 2));
           pcm[total + i] +=

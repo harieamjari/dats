@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -O3 -march=native
-OBJ := dats.o parser.o scanner.o
+OBJ := dats.o parser.o scanner.o wav.o
 #all : dats
 
 ENABLE_DEBUG = no
@@ -13,7 +13,7 @@ endif
 
 dats : $(OBJ)
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $^  \
-	 -L../libwav -L../libsynth -lm -lwav -lsynth -o $@
+	 -L../libsynth -lsynth -lm -o $@
 
 $(OBJ) :%.o:%.c $(wildcard *.h)
 	gcc -c -I.. $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
