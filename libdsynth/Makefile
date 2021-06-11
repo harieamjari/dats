@@ -16,20 +16,20 @@ S_SYNTHS += s_synth.c
 
 OBJ := $(patsubst %.c, %.o, $(S_SYNTHS) allsynth.c)
 
-libsynth.so : $(OBJ)
+libdsynth.so : $(OBJ)
 	$(CC) -shared $(CFLAGS) $(MEM_LEAK) $^ -lm -o $@
 
 $(OBJ): %.o: %.c
-	$(CC) -I.. -c -fPIC $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+	$(CC) -I.. -I../include -c -fPIC $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
 
 .PHONY: indent
-clean: libsynth.so $(OBJ)
+clean: libdsynth.so $(OBJ)
 	rm $^
 
-install: libsynth.so
+install: libdsynth.so
 	cp $^ $(PREFIX)/lib
 
-uninstall: libsynth.so
+uninstall: libdsynth.so
 	rm $(PREFIX)/lib/$^
 indent:
 	indent *.[ch]

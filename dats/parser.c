@@ -32,7 +32,7 @@
 #include "scanner.h"
 #include "wav.h"
 
-#include "libsynth/allsynth.h"
+#include "libdsynth/allsynth.h"
 
 extern void print_all_nr_t(nr_t *nr);
 
@@ -428,21 +428,27 @@ append:
             free(tok_identifier);
             tok_identifier = NULL;
             tok = read_next_tok_cur_dats_t(d);
-            if (tok != TOK_EQUAL)
+            if (tok != TOK_EQUAL) {
               EXPECTING(TOK_EQUAL, d);
+              return NULL;
+            }
             switch (driver->options[i].type) {
             case DSOPTION_FLOAT:
               tok = read_next_tok_cur_dats_t(d);
-              if (tok != TOK_FLOAT)
+              if (tok != TOK_FLOAT) {
                 EXPECTING(TOK_FLOAT, d);
+                return NULL;
+              }
               driver->options[i].value.floatv = tok_num;
               printf("Driver num %f\n", driver->options[i].value.floatv);
               tok = read_next_tok_cur_dats_t(d);
               break;
             case DSOPTION_INT:
               tok = read_next_tok_cur_dats_t(d);
-              if (tok != TOK_FLOAT)
+              if (tok != TOK_FLOAT) {
                 EXPECTING(TOK_FLOAT, d);
+                return NULL;
+              }
               driver->options[i].value.intv = (int)tok_num;
               printf("Driver num %d\n", driver->options[i].value.intv);
               tok = read_next_tok_cur_dats_t(d);
@@ -456,8 +462,10 @@ append:
               }
               expecting = TOK_STRING;
               tok = read_next_tok_cur_dats_t(d);
-              if (tok != TOK_STRING)
+              if (tok != TOK_STRING) {
                 UNEXPECTED(tok, d);
+                return NULL;
+              }
               expecting = TOK_NULL;
               driver->options[i].value.strv = tok_identifier;
               printf("Driver num %s\n", driver->options[i].value.strv);

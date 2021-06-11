@@ -27,8 +27,8 @@
 
 #include <sys/stat.h>
 
-#include "libfilter/allfilter.h"
-#include "libsynth/allsynth.h"
+#include "libdfilter/allfilter.h"
+#include "libdsynth/allsynth.h"
 #include "scanner.h"
 
 #ifdef DATS_DETECT_MEM_LEAK

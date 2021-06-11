@@ -9,7 +9,7 @@
 #define EXTERN extern
 #endif
 
-#include "libsynth/env.h"
+#include "env.h"
 
 EXTERN void clean_all_dats_t(void);
 /*

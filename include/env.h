@@ -11,10 +11,10 @@ enum token_t {
   /* Data types */
   TOK_STAFF,
   TOK_TRACK,
-  // TOK_SAMPLE,
   TOK_SYNTH,
   TOK_MASTER,
   TOK_PCM16,
+  TOK_FLOAT,
 
   /* Macros */
   TOK_REPEAT,
@@ -54,7 +54,7 @@ enum token_t {
   TOK_MUL,
   TOK_DIV,
 
-  TOK_FLOAT,
+  /* Misc */
   TOK_EOF,
   TOK_ERR,
   TOK_NULL
@@ -80,7 +80,7 @@ typedef struct nr_t nr_t; /* list of notes and rests with properties */
 struct nr_t {
   music_symbol type;
   uint32_t length;
-  note_t *note; /* if type = NOTE */
+  note_t *note; /* if type = SYM_NOTE */
   nr_t *next;
 };
 

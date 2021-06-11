@@ -13,10 +13,10 @@ endif
 
 dats : $(OBJ)
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $^  \
-	 -L../libsynth -lsynth -lm -o $@
+	 -L../libdsynth -ldsynth -lm -o $@
 
 $(OBJ) :%.o:%.c $(wildcard *.h)
-	gcc -c -I.. $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+	gcc -c -I.. -I../include $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
 
 .PHONY : clean test indent
 clean: 

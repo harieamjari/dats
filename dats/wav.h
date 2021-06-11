@@ -1,11 +1,11 @@
 #ifndef WAV_H
 #define WAV_H
+#include <stdio.h>
 #include <stdint.h>
 
 typedef struct WAV_info WAV_info;
 
-struct WAV_info
-{
+struct WAV_info {
   FILE *fp;
   uint32_t Subchunk1Size;
   int16_t AudioFormat;
@@ -15,6 +15,6 @@ struct WAV_info
   uint16_t BitsPerSample;
 };
 
-extern int wav_write_header (const struct WAV_info *const wav);
+extern int wav_write_header(const struct WAV_info *const wav);
 
 #endif /* WAV_H */

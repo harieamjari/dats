@@ -174,8 +174,7 @@ void print_debugging_info(const token_t tok, dats_t *d) {
 
   int length = sprintf(buff, "    %d | %s", line_token_found, d->scan_line);
   ERROR("%s", buff);
-  ERROR("%*s\n", column_token_found +
-            (length - (int)strlen(d->scan_line)),
+  ERROR("%*s\n", column_token_found + (length - (int)strlen(d->scan_line)),
         "^");
 }
 /*---------.
@@ -203,8 +202,8 @@ w:
     if (p != NULL)
       fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
     else {
-       d->scan_line[0] = ' ';
-       d->scan_line[1] = 0;
+      d->scan_line[0] = ' ';
+      d->scan_line[1] = 0;
     }
 
     goto w;
@@ -231,9 +230,7 @@ w:
           return TOK_ERR;
         return TOK_STRING;
       }
-      buff[i] = c; /*
-       d->column++;
-       seek++;*/
+      buff[i] = c;
     }
   }
   if (expecting == TOK_STRING) {
@@ -301,7 +298,7 @@ w:
     c = '/';
   }
   switch (c) {
-    // clang-format off
+  // clang-format off
     /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
@@ -435,7 +432,7 @@ w:
         return TOK_IDENTIFIER;
       }
     }
-    // clang-format off
+  // clang-format off
     /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':
