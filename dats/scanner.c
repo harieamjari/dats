@@ -332,24 +332,31 @@ w:
         switch (buff[0]) {
         case 'a':
           tok_num = 27.50;
+          tok_note = 5;
           break;
         case 'b':
           tok_num = 30.86;
+          tok_note = 6;
           break;
         case 'c':
           tok_num = 16.35;
+          tok_note = 0;
           break;
         case 'd':
           tok_num = 18.35;
+          tok_note = 1;
           break;
         case 'e':
           tok_num = 20.50;
+          tok_note = 2;
           break;
         case 'f':
           tok_num = 21.82;
+          tok_note = 3;
           break;
         case 'g':
           tok_num = 24.49;
+          tok_note = 4;
           break;
         default:
           local_errors++;
@@ -366,9 +373,11 @@ w:
           switch (buff[1]) {
           case '#':
             tok_num *= pow(2.0, 1.0 / 12.0);
+            tok_semitone = 1;
             break;
           case 'b':
             tok_num /= pow(2.0, 1.0 / 12.0);
+            tok_semitone = -1;
             break;
           }
           char *end;
@@ -421,6 +430,8 @@ w:
         return TOK_MASTER;
       else if (!strcmp("synth", buff))
         return TOK_SYNTH;
+      else if (!strcmp("filter", buff))
+        return TOK_FILTER;
       else if (!strcmp("read", buff))
         return TOK_READ;
       else if (!strcmp("write", buff))

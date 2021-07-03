@@ -51,11 +51,12 @@ Tutorial is found at doc directory.
 
 - libsynth - Provides synthesizers.
 
-- libfilter - Provides filters for manipulating raw PCM s16le data.
-
-- libwav - Provides functions for writing wav files.
+- libfilter - Provides wrappers for filters or filters for manipulating raw PCM
+  s16le data.
 
 - dats - Source code of dats.
+
+- sndfilter - Provides filters for manipulating raw PCM s16le data.
 
 - memory-leak-detector - Memory leak detector
 

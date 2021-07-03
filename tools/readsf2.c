@@ -1,3 +1,30 @@
+/* readsf2 - reads sf2 file metadata
+ *
+ * MIT License
+ *
+ * Copyright (c) 2021 Al-buharie Amjari
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons
+ * to whom the Software is furnished to do so, subject to the
+ * following conditions:
+ *
+ * The above copyright notice and this permission notice shall
+ * be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * BUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include <assert.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -31,23 +58,27 @@ struct __attribute__((packed)) sfPresetBag {
   uint16_t mod;
 };
 
-
-typedef struct range_t range_t;
-struct __attribute__((packed)) range_t
-{ 
- uint8_t byLo; 
- uint8_t byHi; 
+typedef struct sfInstBag sfInstBag;
+struct __attribute__((packed)) sfInstBag { 
+  uint16_t gen;
+  uint16_t mod;
 };
 
-typedef union amt_t amt_t;
-union __attribute__((packed)) amt_t {
+typedef struct range_t range_t;
+struct __attribute__((packed)) range_t {
+  uint8_t byLo;
+  uint8_t byHi;
+};
+
+typedef union gamt_t gamt_t;
+union __attribute__((packed)) gamt_t {
   range_t ranges;
   int16_t samt;
   uint16_t wamt;
 };
 
 typedef struct sfGenList sfGenList;
-struct sfGenList {
+struct __attribute__((packed)) sfGenList {
   uint16_t gen_oper;
   uint16_t gen_amt;
 };
@@ -68,6 +99,12 @@ struct __attribute__((packed)) sfModList {
   int16_t mod_amt;
   uint16_t dummy2;
   uint16_t dummy3;
+};
+
+typedef struct sfInstList sfInstList;
+struct __attribute__((packed)) sfInstList {
+  char name[20];
+  uint16_t bag;
 };
 
 int main(int argc, char *argv[]) {
@@ -283,10 +320,52 @@ int main(int argc, char *argv[]) {
       printf("    Modulator lists:\n");
       for (uint32_t i = 0; i < uSize / 10; i++) {
         printf("     %-3d                   %-3d  %-3d  %-3d  %-3d  %-3d\n", i,
-              mod_list[i].dummy1, mod_list[i].mod_dest, mod_list[i].mod_amt,
-      mod_list[i].dummy2, mod_list[i].dummy3);
+               mod_list[i].dummy1, mod_list[i].mod_dest, mod_list[i].mod_amt,
+               mod_list[i].dummy2, mod_list[i].dummy3);
       }
       free(mod_list);
+    } else if (!strncmp(uTag, "pgen", 4)) {
+      printf("  pgen size                      %d\n", uSize);
+      sfGenList *gen_list = malloc(sizeof(sfGenList) * (uSize / 4));
+      assert(gen_list != NULL);
+      if (fread(gen_list, sizeof(sfGenList), uSize / 4, fp) != uSize / 4) {
+        free(gen_list);
+        CORRUPTED;
+      }
+      printf("    Generator lists:\n");
+      for (uint32_t i = 0; i < uSize / 4; i++) {
+        printf("     %-3d                   %-3d  %-3d\n", i,
+               gen_list[i].gen_oper, gen_list[i].gen_amt);
+      }
+      free(gen_list);
+    } else if (!strncmp(uTag, "inst", 4)) {
+      printf("  inst size                      %d\n", uSize);
+      sfInstList *inst_list = malloc(sizeof(sfInstList) * (uSize / 22));
+      assert(inst_list != NULL);
+      if (fread(inst_list, sizeof(sfInstList), uSize / 22, fp) != uSize / 22) {
+        free(inst_list);
+        CORRUPTED;
+      }
+      printf("    Instrument lists:\n");
+      for (uint32_t i = 0; i < uSize / 22; i++) {
+        printf("     %-3d %-19s   %-3d\n", i,
+               inst_list[i].name, inst_list[i].bag);
+      }
+      free(inst_list);
+    } else if (!strncmp(uTag, "ibag", 4)) {
+      printf("  ibag size                      %d\n", uSize);
+      sfInstBag *inst_bags = malloc(sizeof(sfInstBag) * (uSize / 4));
+      assert(inst_bags != NULL);
+      if (fread(inst_bags, sizeof(sfInstBag), uSize / 4, fp) != uSize / 4) {
+        free(inst_bags);
+        CORRUPTED;
+      }
+      printf("    Instrument bags:\n");
+      for (uint32_t i = 0; i < uSize / 4; i++) {
+        printf("     %-3d                   %-3d  %-3d\n", i,
+               inst_bags[i].gen, inst_bags[i].mod);
+      }
+      free(inst_bags);
     } else
       break;
   }

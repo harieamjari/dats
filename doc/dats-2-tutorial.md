@@ -93,7 +93,7 @@ In this document, a filter takes a pcm16, (optionally, with arguments), and retu
 
 # Language and notation
 ## staff
-
+A staff is declared and defined, with the keyword, `staff`.
 Inside a staff, there exist environment variables that can be tweaked by assignment. These are:
 
 - bpm (default: 120.0) This sets the bpm of the next following note
@@ -135,13 +135,12 @@ You may also add dotted note to a floating point, like `4.0.`, and perform addit
 but other arithmetic operator such, `- / *`, is illegal.
 
 #### note
-In addition to being able to represent note as letter and an integer, like `d4`
-you may represent note as numeric; floating point (440.0) or just integer (440),
-but this is discouraged from using as this hinders readablity and unexpected behaviour
-may arise from using too large numeric that exceed the range of `double`. Furthermore,
-allocating a size of `0` is undefined behavior. Composers are advice to exercise caution.
-
-No any arithmetic operation must be performed.
+A note is represented with a key and an octave:
+```
+  c4 // [abcdefg](b|#)?[0-9]
+```
+Unlike the parameter length, arithmetic operation is illegal
+to perform on a note.
 
 - To raise the note a semitone, append `#` to the first letter of the note, and to lower
 the note a semitone, append `b` to the first letter of the note.
@@ -158,6 +157,22 @@ the note a semitone, append `b` to the first letter of the note.
  `c4. e4. g4.`)
 
 ## pcm16
+A pcm16 type is an array of raw samples. They are always mono in dats 2.0.0.
+
+To get a pcm16 type, dats provide two functions you can get from one; 
+they are, `synth.synth_name()` and `mix()`.
+
+The mix function, takes two argument of type `pcm16`, mixes them and returns
+a pcm16:
+```
+pcm16 foo = mix((synth.filter_name(...)), (synth.filter_name(...)));
+```
+Notice that an extra parenthesis is needed. Without it, Dats would interpret it
+as appending pcm16:
+```
+pcm16 foo = mix(synth.synth_name(...), synth.synth_name(...));
+```
+In this case, `mix` took only one argument instead of the needed, two.
 
 
 

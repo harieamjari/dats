@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2 -Wall -Wextra
+CFLAGS = -O2 -Wall -Wextra -march=native
 
 OBJ  = mem.o
 OBJ += snd.o
@@ -10,6 +10,7 @@ OBJ += reverb.o
 
 libsndfilter.a : $(OBJ)
 	ar rcs $@ $^
+	chmod +x $@
 
 $(OBJ) : %.o : %.c
 

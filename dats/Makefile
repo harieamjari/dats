@@ -13,7 +13,7 @@ endif
 
 dats : $(OBJ)
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $^  \
-	 -L../libdsynth -ldsynth -lm -o $@
+	 -L../libdsynth -ldsynth -L../libdfilter -ldfilter  -lm -o $@
 
 $(OBJ) :%.o:%.c $(wildcard *.h)
 	gcc -c -I.. -I../include $(CFLAGS) $(DEBUG_FLAGS) $< -o $@

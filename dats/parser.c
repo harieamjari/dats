@@ -33,6 +33,7 @@
 #include "wav.h"
 
 #include "libdsynth/allsynth.h"
+#include "libdfilter/allfilter.h"
 
 extern void print_all_nr_t(nr_t *nr);
 
@@ -44,18 +45,17 @@ static dats_t *d;
 /* Returns 0 if success. Non-zero if failed. */
 static int parse_notes_rests() {
   if (tok == TOK_N) {
+  add_lengthn:
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_FLOAT) {
+      EXPECTING(TOK_FLOAT, d);
+      return 1;
+    }
     nr_t *cnr = malloc(sizeof(nr_t));
     assert(cnr != NULL);
     cnr->type = SYM_NOTE;
     cnr->length = 0;
     cnr->next = NULL;
-  add_lengthn:
-    tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT) {
-      free(cnr);
-      EXPECTING(TOK_FLOAT, d);
-      return 1;
-    }
 
     cnr->length += (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
     uint32_t dotted_len =
@@ -83,7 +83,7 @@ static int parse_notes_rests() {
     note_t *f = n;
     assert(n != NULL);
 
-    if (tok != TOK_NOTE && tok != TOK_FLOAT) {
+    if (tok != TOK_NOTE) {
       free(cnr);
       free(n);
       UNEXPECTED(tok, d);
@@ -93,6 +93,10 @@ static int parse_notes_rests() {
   addn: /* add dyad */
     f->frequency = tok_num * pow(2.0, (double)tok_octave) *
                    pow(1.059463094, (double)tok_semitone);
+    f->nkey.key = tok_note;
+    f->nkey.octave = tok_octave;
+    f->nkey.semitone = tok_semitone;
+
     f->attack = tok_attack;
     f->decay = tok_decay;
     f->sustain = tok_sustain;
@@ -104,7 +108,7 @@ static int parse_notes_rests() {
       f->duration /= 2;
       tok = read_next_tok_cur_dats_t(d);
     }
-    if (tok == TOK_NOTE || tok == TOK_FLOAT) {
+    if (tok == TOK_NOTE) {
       f->next = malloc(sizeof(note_t));
       assert(f != NULL);
       f = f->next;
@@ -251,7 +255,11 @@ static int parse_notes_rests() {
       EXPECTING(TOK_FLOAT, d);
       return 1;
     }
-    tok_octave = (int)tok_num;
+    tok_octave = tok_num;
+    if (tok_octave>3 || tok_octave<-3){
+      C_ERROR(d, "Illegal range, (-3 to 3)");
+      return 1;
+    }
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
@@ -266,7 +274,11 @@ static int parse_notes_rests() {
       EXPECTING(TOK_FLOAT, d);
       return 1;
     }
-    tok_semitone = (int)tok_num;
+    tok_semitone = tok_num;
+    if (tok_semitone>1 || tok_semitone<-1){
+      C_ERROR(d, "Illegal range, (-1 to 1)");
+      return 1;
+    }
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
@@ -362,6 +374,7 @@ append:
   tok = read_next_tok_cur_dats_t(d);
   switch (tok) {
   case TOK_SYNTH:
+    {
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_DOT) {
       UNEXPECTED(tok, d);
@@ -472,7 +485,7 @@ append:
               tok_identifier = NULL;
               tok = read_next_tok_cur_dats_t(d);
               if (tok != TOK_DQUOTE) {
-                C_ERROR(d, "Identifier must end with a double quote\n");
+                C_ERROR(d, "Strings must end with a double quote\n");
                 return NULL;
               }
               tok = read_next_tok_cur_dats_t(d);
@@ -492,6 +505,156 @@ append:
       tok = read_next_tok_cur_dats_t(d);
     }
     pcm16_t *p = synth(staff);
+    assert(p != NULL);
+    pcm16->value.pcm16.total_numsamples += p->numsamples;
+    p->next = NULL;
+    if (pcm16->value.pcm16.pcm != NULL)
+      for (pcm16_t *pcma = pcm16->value.pcm16.pcm; 1; pcma = pcma->next) {
+        if (pcma->next == NULL) {
+          pcma->next = p;
+          break;
+        }
+      }
+    else
+      pcm16->value.pcm16.pcm = p;
+
+    if (tok == TOK_COMMA)
+      goto append;
+   }
+    break;
+  case TOK_FILTER:
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_DOT) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_IDENTIFIER) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+
+    const DFFilter *driver = get_dfilter_by_name(tok_identifier);
+    if (driver == NULL) {
+      C_ERROR(d, "No filter %s\n", tok_identifier);
+      return NULL;
+    }
+    printf("Filter %s found\n", tok_identifier);
+    fflush(stderr);
+    fflush(stdout);
+    free(tok_identifier);
+    tok_identifier = NULL;
+
+    pcm16_t *(*const filter)(const pcm16_t *const pcm16) = driver->filter;
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_LPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_LPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+
+    symrec_t *ppcm16 = parse_pcm16(NULL);
+
+    if (ppcm16 == NULL) {
+      return NULL;
+    }
+
+    if (tok != TOK_RPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_RPAREN) {
+      UNEXPECTED(tok, d);
+      return NULL;
+    }
+
+    if (ppcm16->type != TOK_PCM16) {
+      C_ERROR(d, "Filters takes pcm16 not %s\n", token_t_to_str(ppcm16->type));
+      return NULL;
+    }
+
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok == TOK_LBRACKET) {
+      do {
+        tok = read_next_tok_cur_dats_t(d);
+        if (tok != TOK_IDENTIFIER) {
+          C_ERROR(d, "Expecting options\n");
+          return NULL;
+        }
+        for (int i = 0; driver->options[i].option_name != NULL; i++) {
+          if (!strcmp(driver->options[i].option_name, tok_identifier)) {
+            free(tok_identifier);
+            tok_identifier = NULL;
+            tok = read_next_tok_cur_dats_t(d);
+            if (tok != TOK_EQUAL) {
+              EXPECTING(TOK_EQUAL, d);
+              return NULL;
+            }
+            switch (driver->options[i].type) {
+            case DFOPTION_FLOAT:
+              tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_FLOAT) {
+                EXPECTING(TOK_FLOAT, d);
+                return NULL;
+              }
+              driver->options[i].value.floatv = tok_num;
+              printf("Driver num %f\n", driver->options[i].value.floatv);
+              tok = read_next_tok_cur_dats_t(d);
+              break;
+            case DFOPTION_INT:
+              tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_FLOAT) {
+                EXPECTING(TOK_FLOAT, d);
+                return NULL;
+              }
+              driver->options[i].value.intv = (int)tok_num;
+              printf("Driver num %d\n", driver->options[i].value.intv);
+              tok = read_next_tok_cur_dats_t(d);
+              break;
+            case DFOPTION_STRING:
+              tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_DQUOTE) {
+                C_ERROR(
+                    d, "`write`, expects an identifier between double quote\n");
+                return NULL;
+              }
+              expecting = TOK_STRING;
+              tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_STRING) {
+                UNEXPECTED(tok, d);
+                return NULL;
+              }
+              expecting = TOK_NULL;
+              driver->options[i].value.strv = tok_identifier;
+              printf("Driver num %s\n", driver->options[i].value.strv);
+              tok_identifier = NULL;
+              tok = read_next_tok_cur_dats_t(d);
+              if (tok != TOK_DQUOTE) {
+                C_ERROR(d, "String must end with a double quote\n");
+                return NULL;
+              }
+              tok = read_next_tok_cur_dats_t(d);
+              break;
+            }
+            break;
+          } else if (driver->options[i + 1].option_name == NULL) {
+            C_ERROR(d, "no such option, '%s'", tok_identifier);
+            return NULL;
+          }
+        }
+      } while (tok == TOK_COMMA);
+      if (tok != TOK_RBRACKET) {
+        EXPECTING(TOK_RBRACKET, d);
+        return NULL;
+      }
+      tok = read_next_tok_cur_dats_t(d);
+    }
+    pcm16_t *p = filter(ppcm16->value.pcm16.pcm);
     assert(p != NULL);
     pcm16->value.pcm16.total_numsamples += p->numsamples;
     p->next = NULL;

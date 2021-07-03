@@ -38,6 +38,7 @@ EXTERN float tok_attack;
 EXTERN float tok_decay;
 EXTERN float tok_sustain;
 EXTERN float tok_release;
+EXTERN int tok_note;
 EXTERN int tok_volume;
 EXTERN int tok_octave;
 EXTERN int tok_semitone;
