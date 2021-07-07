@@ -23,4 +23,6 @@ void *sf2_destroy_sf2(SF2 *sf2) {
   free(sf2->igen);
 
   free(sf2->shdr);
+
+  free(sf2);
 }

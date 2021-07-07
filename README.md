@@ -41,17 +41,15 @@ Tutorial is found at doc directory.
 
 ### TODO
 
-- libsynth - Provides synthesizers.
+- libdsynth - Provides synthesizers.
 
-- libfilter - Provides filters for manipulating raw PCM s16le data.
-
-- Branching and conditional statements.
+- libdfilter - Provides filters for manipulating raw PCM s16le data.
 
 ### DIR
 
-- libsynth - Provides synthesizers.
+- libdsynth - Provides synthesizers.
 
-- libfilter - Provides wrappers for filters or filters for manipulating raw PCM
+- libdfilter - Provides wrappers for filters or filters for manipulating raw PCM
   s16le data.
 
 - dats - Source code of dats.
@@ -60,7 +58,7 @@ Tutorial is found at doc directory.
 
 - memory-leak-detector - Memory leak detector
 
-- test - Contain dats file for testing dats interpreter
+- test - Contain example dats file for testing the Dats interpreter
 
 - doc - Documentation for dats
 
