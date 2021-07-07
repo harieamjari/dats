@@ -40,8 +40,7 @@ static pcm16_t *synth(const symrec_t *restrict staff) {
           wavetable[i] = rand();
         int16_t prev = 0;
         uint32_t cur = 0;
-        for (uint32_t i = 0; i < nn->duration;
-             i++) {
+        for (uint32_t i = 0; i < nn->duration; i++) {
           wavetable[cur] = ((wavetable[cur] / 2) + (prev / 2));
           pcm[total + i] +=
               (int16_t)

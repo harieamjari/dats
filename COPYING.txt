@@ -1,6 +1,7 @@
-Dats is license under LGPLv2.1 but there are other software that are
-distributed under different license like the sndfilter. Such software,
-when distributed along with Dats, (1) should retain their same license or
-(2) sublicense with a compatible one if permissable. This does not impose
-a requirement or a restriction on the distribution of Dats nor its 3rd
-party software, but a recommendation to the distributors.
+Dats is license under the LGPLv2.1 but there are other software included
+that are distributed under different license like the sndfilter. Such
+software, when distributed along with Dats, (1) should retain their same
+license or (2) sublicense with a compatible one if permissable. This does
+not impose additional requirements or restrictions on the distribution
+of Dats nor its included 3rd party software, but a recommendation to
+the distributors.

@@ -5,6 +5,7 @@ extern DSSynth ss_kpa;
 extern DSSynth ss_sin;
 extern DSSynth ss_square;
 extern DSSynth ss_synth;
+extern DSSynth ss_sf2;
 
 #include "list_synths.c"
 

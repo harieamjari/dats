@@ -1,5 +1,5 @@
-#ifndef SYNTHS_H
-#define SYNTHS_H
+#ifndef SYNTH_H
+#define SYNTH_H
 #include "env.h"
 #include <stdint.h>
 

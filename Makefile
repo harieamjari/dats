@@ -12,7 +12,7 @@ test : dats
 clean : 
 	cd memory-leak-detector && make clean
 	cd sndfilter && make clean
-	cd libdfilter && make
+	cd libdfilter && make clean
 	cd libdsynth && make clean
 	cd dats && make clean
 	cd tools && make clean

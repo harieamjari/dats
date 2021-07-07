@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O3 -march=native
+CFLAGS = -Wall -Wextra -O3 -march=native -c
 
 ENABLE_DEBUG = no
 
@@ -14,10 +14,10 @@ F_FILTER += f_reverb.c
 OBJ := $(patsubst %.c, %.o, $(F_FILTER) allfilter.c)
 
 libdfilter.so : $(OBJ)
-	$(CC) -shared $(CFLAGS) $(MEM_LEAK) $^ -lm -L../sndfilter -lsndfilter -o $@
+	$(CC) -shared $(MEM_LEAK) $^ -lm -L../sndfilter -lsndfilter -o $@
 
 $(OBJ): %.o: %.c
-	$(CC) -I.. -I../include -c -fPIC $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+	$(CC) -I.. -I../include -fPIC $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
 
 .PHONY: indent
 clean: libdfilter.so $(OBJ)
