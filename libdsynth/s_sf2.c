@@ -28,28 +28,36 @@ static void free_string_options(void) {
 }
 
 static pcm16_t *synth(const symrec_t *staff) {
+  char *sf2_name;
   if (options[0].value.strv == NULL) {
     fprintf(stderr, "[s_sf2] no sf2 file loaded.");
 #ifdef _WIN32
     putchar('\n');
     return NULL;
 #endif
-
-    char *default_sf2 =
+    sf2_name =
 #ifdef __TERMUX__
         __TERMUX_PREFIX__
 #else
         "/usr"
 #endif
         "/share/soundfonts/default.sf2";
-    printf(" loading %s\n", default_sf2);
-    FILE *fp = fopen(default_sf2, "rb");
-    if (fp == NULL) {
-      fprintf(stderr, "[s_sf2] ");
-      perror(default_sf2);
-      return NULL;
-    }
+    printf(" loading %s\n", sf2_name);
 
+  } else
+    sf2_name = options[0].value.strv;
+
+  FILE *fp = fopen(sf2_name, "rb");
+  if (fp == NULL) {
+    fprintf(stderr, "[s_sf2] ");
+    perror(sf2_name);
+    return NULL;
+  }
+
+  SF2 *sf2_ctx = sf2_read_sf2(fp);
+  if (sf2_ctx == NULL) {
+    fprintf(stderr, "[s_sf2] ");
+    sf2_perror(sf2_name);
     return NULL;
   }
   int16_t *pcm = calloc(sizeof(int16_t), (size_t)staff->value.staff.numsamples);

@@ -1,5 +1,5 @@
-#ifndef SYNTH_H
-#define SYNTH_H
+#ifndef DSYNTH_H
+#define DSYNTH_H
 #include "env.h"
 #include <stdint.h>
 
@@ -38,4 +38,4 @@ struct DSSynth {
   pcm16_t *(*const synth)(const symrec_t *const staff);
 };
 
-#endif /* SYNTHS_H */
+#endif /* DSYNTH_H */

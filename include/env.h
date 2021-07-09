@@ -76,7 +76,8 @@ struct note_t {
   uint32_t duration; // for staccato and staccatissimo
 
   /* alternative for frequency */
-  nkey_t nkey;
+  nkey_t nnkey; //note number key
+  char   mnkey; //midi note number
 
   float frequency;
   float velocity;

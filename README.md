@@ -24,6 +24,9 @@ master {
 ```
 Execute dats file as `dats file.dats`
 
+Note: This software is unstable, and more changes will have come; PRs are incredibly helpful.
+Make sure you `clang-format -i *.[ch]` your source before doing so
+
 # Building
 
 Building Dats requires no dependencies and should compile on Windows and \*nix operating

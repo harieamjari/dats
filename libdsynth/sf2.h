@@ -1,7 +1,7 @@
 #ifndef SF2_H
 #define SF2_H
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 typedef struct phdr_t phdr_t;
 struct __attribute__((packed)) phdr_t {
@@ -16,7 +16,7 @@ struct __attribute__((packed)) phdr_t {
 
 typedef struct pbag_t pbag_t;
 struct __attribute__((packed)) pbag_t {
-  uint16_t gen_index; 
+  uint16_t gen_index;
   uint16_t mod_index;
 };
 
@@ -71,9 +71,9 @@ struct __attribute__((packed)) shdr_t {
   uint32_t end_loop;
   uint32_t sample_rate;
   int8_t pitch_correction; /* in cents */
-  int8_t unused; /* padding */
-  uint16_t sample_link; 
-  uint16_t sample_type; 
+  int8_t unused;           /* padding */
+  uint16_t sample_link;
+  uint16_t sample_type;
 };
 
 typedef struct SF2 SF2;
@@ -93,7 +93,6 @@ struct SF2 {
   uint16_t nb_pgen;
   pgen_t *pgen;
 
-
   uint16_t nb_inst;
   inst_t *inst;
 
@@ -110,7 +109,10 @@ struct SF2 {
   shdr_t *shdr;
 };
 
-extern SF2 *sf2_read_sf2(char *name);
+extern int sf2_errno;
+extern const char *const sf2_errlist[];
+extern SF2 *sf2_read_sf2(FILE *fp);
+extern void sf2_perror(char *str);
 extern void sf2_destroy_sf2(SF2 *sf2);
 
 #endif /* SF2_H */

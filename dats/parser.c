@@ -93,9 +93,9 @@ static int parse_notes_rests() {
   addn: /* add dyad */
     f->frequency = tok_num * pow(2.0, (double)tok_octave) *
                    pow(1.059463094, (double)tok_semitone);
-    f->nkey.key = tok_note;
-    f->nkey.octave = tok_octave;
-    f->nkey.semitone = tok_semitone;
+    f->nnkey.key = tok_note;
+    f->nnkey.octave = tok_octave;
+    f->nnkey.semitone = tok_semitone;
 
     f->attack = tok_attack;
     f->decay = tok_decay;

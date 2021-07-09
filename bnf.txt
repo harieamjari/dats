@@ -3,7 +3,19 @@
 BNF for Dats v2
 
 
-<staff> := | "staff" <identifier> "{" <nr>";" "}" | <staff> <staff> ;
-<staff_name> := [A-Za-z0-9_]+;
-<nrb> := "n" <value> <key> | "r" <value> | "bpm" <value> ;
+<S> := <staff> <S> | <master> <S> | ;
 
+<staff> := "staff" <identifier> "{" <nr> "}" <staff> | ;
+<master := "master" <identifier> "{" <stmts> "}" <master> | ;
+<stmt> := <assignment> ";" <stmt> | <IO> ";" <stmt> | ;
+<assignment> := "pcm16" <identifier> "=" <pcm16> ;
+<pcm16> :=
+    "synth" "." <synth_name> "(" <identifier> ")" ( "[" <options> "]" )? ("," <pcm16>)?
+  | "filter" "." <filter_name> "(" <identifier> ")" ( "[" <options> "]" )? ("," <pcm16>)?
+  | "mix" "(" "(" <pcm16> ")" "," "(" <pcm16> ")" ")" ("," <pcm16>)?
+  | ;
+<identifier> := [^0-9]+[A-Za-z0-9_]+ ;
+
+<nr> := "n" <length> "," <key> ";" <nr> | "r" <length> ";" <nr> | ;
+<length> := [0-9]+(\.+)?;
+<key> := [a-g](#|b)?[0-9] <key> | ;

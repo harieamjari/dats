@@ -1,4 +1,3 @@
-#
 #include "sndfilter/biquad.h"
 #include "sndfilter/compressor.h"
 #include "sndfilter/reverb.h"

@@ -58,11 +58,14 @@ int process_args(const int argc, char *const *argv) {
           puts("Dats interpreter Draft-2.0.0");
           printf("%s [dats file]\noptions:\n\n", argv[0]);
           printf("--list-synths                        prints all available synths\n"
-                 "--list-filters (draft)               prints all available filters\n");
+                 "--list-filters                       prints all available filters\n");
           /* clang-format on */
           return 0;
         } else if (!strcmp(&argv[i][2], "list-synths")) {
           print_synths();
+          return 0;
+        } else if (!strcmp(&argv[i][2], "list-filters")){
+          print_filters();
           return 0;
         }
       }

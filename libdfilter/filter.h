@@ -38,4 +38,4 @@ struct DFFilter {
   pcm16_t *(*const filter)(const pcm16_t *const pcm16);
 };
 
-#endif /* SYNTHS_H */
+#endif /* DFILTER_H */

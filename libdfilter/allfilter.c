@@ -17,7 +17,6 @@ const DFFilter *get_dfilter_by_name(const char *name) {
   return NULL;
 }
 
-/*
 void print_filters() {
   for (int i = 0; filter_list[i] != NULL; i++) {
     printf("%s\n  description: %s\n  options:\n", filter_list[i]->name,
@@ -28,8 +27,4 @@ void print_filters() {
     }
     putchar('\n');
   }
-}*/
-/*
-void print_all_filters(void){
 }
-}*/
