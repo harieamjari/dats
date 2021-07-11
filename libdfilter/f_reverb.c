@@ -5,6 +5,7 @@
 
 #include <math.h>
 #include <stdint.h>
+#include <string.h>
 #include <stdlib.h>
 
 #ifdef DATS_DETECT_MEM_LEAK

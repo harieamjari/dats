@@ -93,9 +93,7 @@ static int parse_notes_rests() {
   addn: /* add dyad */
     f->frequency = tok_num * pow(2.0, (double)tok_octave) *
                    pow(1.059463094, (double)tok_semitone);
-    f->nnkey.key = tok_note;
-    f->nnkey.octave = tok_octave;
-    f->nnkey.semitone = tok_semitone;
+    f->mnkey = tok_note + tok_semitone + tok_octave*0x0c;
 
     f->attack = tok_attack;
     f->decay = tok_decay;
@@ -275,10 +273,10 @@ static int parse_notes_rests() {
       return 1;
     }
     tok_semitone = tok_num;
-    if (tok_semitone>1 || tok_semitone<-1){
-      C_ERROR(d, "Illegal range, (-1 to 1)");
-      return 1;
-    }
+//    if (tok_semitone>1 || tok_semitone<-1){
+//      C_ERROR(d, "Illegal range, (-1 to 1)");
+//      return 1;
+//    }
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 

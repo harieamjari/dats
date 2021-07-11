@@ -24,8 +24,9 @@ master {
 ```
 Execute dats file as `dats file.dats`
 
-Note: This software is unstable, and more changes will have come; PRs are incredibly helpful.
-Make sure you `clang-format -i *.[ch]` your source before doing so
+Note: This software is unstable, and more changes will have to come. 
+
+PRs are warmly welcomed. Make sure you `clang-format -i *.[ch]` your source before doing so.
 
 # Building
 

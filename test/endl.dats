@@ -1,8 +1,9 @@
 /* Endless love by Neal K */
 
 staff m1 {
-  bpm = 95.501;
+  bpm = 95;
   octave = 1; // raise the note one octave
+  semitone = 1;
   n 4., e4;
   n 8, c5;
   n 4., a4;
@@ -54,8 +55,9 @@ staff m1 {
 }
 
 staff m2 {
-  bpm = 95.501;
+  bpm = 95;
   octave = 1;
+  semitone = 1;
   n 8, a3;
   n 8, e4;
   n 4, c5;
@@ -119,6 +121,7 @@ staff m2 {
 staff m3 {
   bpm = 95;
   octave = 1;
+  semitone = 1;
 
   n 2, c5;
   n 2, a4;

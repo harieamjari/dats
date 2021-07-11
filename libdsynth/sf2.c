@@ -39,7 +39,7 @@
 
 int sf2_errno = 0;
 const char *const sf2_errlist[] = {"no error",
-                                   "unrecognized file format or corrupted",
+                                   "unrecognized file format, and maybe corrupted",
                                    "structurally unsound", "no memory"};
 
 SF2 *sf2_read_sf2(FILE *fp) {
@@ -184,7 +184,6 @@ SF2 *sf2_read_sf2(FILE *fp) {
       phdr_t *presets = malloc(sizeof(phdr_t) * (usize / 38));
       assert(presets != NULL);
       if (fread(presets, sizeof(phdr_t), usize / 38, fp) != usize / 38) {
-        free(presets);
         CORRUPTED(1);
       }
 
@@ -207,7 +206,6 @@ SF2 *sf2_read_sf2(FILE *fp) {
       pbag_t *preset_bags = malloc(sizeof(pbag_t) * (usize / 4));
       assert(preset_bags != NULL);
       if (fread(preset_bags, sizeof(pbag_t), usize / 4, fp) != usize / 4) {
-        free(preset_bags);
         CORRUPTED(1);
       }
       sf2->pbag = preset_bags;
@@ -224,7 +222,6 @@ SF2 *sf2_read_sf2(FILE *fp) {
       pmod_t *mod_list = malloc(sizeof(pmod_t) * (usize / 10));
       assert(mod_list != NULL);
       if (fread(mod_list, sizeof(pmod_t), usize / 10, fp) != usize / 10) {
-        free(mod_list);
         CORRUPTED(1);
       }
       sf2->pmod = mod_list;
@@ -243,7 +240,6 @@ SF2 *sf2_read_sf2(FILE *fp) {
       pgen_t *gen_list = malloc(sizeof(pgen_t) * (usize / 4));
       assert(gen_list != NULL);
       if (fread(gen_list, sizeof(pgen_t), usize / 4, fp) != usize / 4) {
-        free(gen_list);
         CORRUPTED(1);
       }
       sf2->pgen = gen_list;
@@ -261,7 +257,6 @@ SF2 *sf2_read_sf2(FILE *fp) {
       inst_t *inst_list = malloc(sizeof(inst_t) * (usize / 22));
       assert(inst_list != NULL);
       if (fread(inst_list, sizeof(inst_t), usize / 22, fp) != usize / 22) {
-        free(inst_list);
         CORRUPTED(1);
       }
       sf2->inst = inst_list;
@@ -276,7 +271,6 @@ SF2 *sf2_read_sf2(FILE *fp) {
       ibag_t *inst_bags = malloc(sizeof(ibag_t) * (usize / 4));
       assert(inst_bags != NULL);
       if (fread(inst_bags, sizeof(ibag_t), usize / 4, fp) != usize / 4) {
-        free(inst_bags);
         CORRUPTED(1);
       }
       sf2->ibag = inst_bags;
@@ -293,7 +287,6 @@ SF2 *sf2_read_sf2(FILE *fp) {
       imod_t *mod_list = malloc(sizeof(imod_t) * (usize / 10));
       assert(mod_list != NULL);
       if (fread(mod_list, sizeof(imod_t), usize / 10, fp) != usize / 10) {
-        free(mod_list);
         CORRUPTED(1);
       }
       sf2->imod = mod_list;
@@ -312,7 +305,6 @@ SF2 *sf2_read_sf2(FILE *fp) {
       igen_t *gen_list = malloc(sizeof(igen_t) * (usize / 4));
       assert(gen_list != NULL);
       if (fread(gen_list, sizeof(igen_t), usize / 4, fp) != usize / 4) {
-        free(gen_list);
         CORRUPTED(1);
       }
       sf2->igen = gen_list;
@@ -330,7 +322,6 @@ SF2 *sf2_read_sf2(FILE *fp) {
       shdr_t *shdr_list = malloc(sizeof(shdr_t) * (usize / 46));
       assert(shdr_list != NULL);
       if (fread(shdr_list, sizeof(shdr_t), usize / 46, fp) != usize / 46) {
-        free(shdr_list);
         CORRUPTED(1);
       }
       sf2->shdr = shdr_list;
@@ -341,7 +332,7 @@ SF2 *sf2_read_sf2(FILE *fp) {
       //        shdr_list[i].name);
       //      }
     } else
-      break;
+      CORRUPTED(1);
   }
   return sf2;
 }

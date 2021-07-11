@@ -332,31 +332,31 @@ w:
         switch (buff[0]) {
         case 'a':
           tok_num = 27.50;
-          tok_note = 5;
+          tok_note = 9 + 0x0c;
           break;
         case 'b':
           tok_num = 30.86;
-          tok_note = 6;
+          tok_note = 11 + 0x0c;
           break;
         case 'c':
           tok_num = 16.35;
-          tok_note = 0;
+          tok_note = 0 + 0x0c;
           break;
         case 'd':
           tok_num = 18.35;
-          tok_note = 1;
+          tok_note = 2 + 0x0c;
           break;
         case 'e':
           tok_num = 20.50;
-          tok_note = 2;
+          tok_note = 4 + 0x0c;
           break;
         case 'f':
           tok_num = 21.82;
-          tok_note = 3;
+          tok_note = 5 + 0x0c;
           break;
         case 'g':
           tok_num = 24.49;
-          tok_note = 4;
+          tok_note = 7 + 0x0c;
           break;
         default:
           local_errors++;
@@ -373,21 +373,23 @@ w:
           switch (buff[1]) {
           case '#':
             tok_num *= pow(2.0, 1.0 / 12.0);
-            tok_semitone = 1;
+            tok_note++;
             break;
           case 'b':
             tok_num /= pow(2.0, 1.0 / 12.0);
-            tok_semitone = -1;
+            tok_note--;
             break;
           }
           char *end;
           tok_num *= pow(2.0, strtof(buff + 2, &end));
+          tok_note *= strtof(buff + 2, &end);
           if (*end)
             ERROR("Warning: non numeric character/s %s\n", end);
           return TOK_NOTE;
         } else if (isdigit(buff[1]) && !buff[2]) {
           char *end;
           tok_num *= pow(2.0, strtof(buff + 1, &end));
+          tok_note *= strtof(buff + 1, &end);
           if (*end)
             ERROR("Warning: non numeric character/s %s\n", end);
           return TOK_NOTE;

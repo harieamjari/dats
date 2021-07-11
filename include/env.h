@@ -64,19 +64,11 @@ enum token_t {
 typedef enum music_symbol music_symbol;
 enum music_symbol { SYM_REST, SYM_NOTE };
 
-typedef struct nkey_t nkey_t;
-struct nkey_t {
-  uint8_t key:3; /* C=0 D=1 E=2 F=3 G=4 A=5 B=6 */
-  int8_t octave:3;
-  int8_t semitone:2;
-};
-
 typedef struct note_t note_t;
 struct note_t {
   uint32_t duration; // for staccato and staccatissimo
 
   /* alternative for frequency */
-  nkey_t nnkey; //note number key
   char   mnkey; //midi note number
 
   float frequency;
