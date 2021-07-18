@@ -15,9 +15,14 @@ BNF for Dats v2
   | "mix" "(" "(" <pcm16> ")" "," "(" <pcm16> ")" ")" ("," <pcm16>)?
   | <identifier> ("," <pcm16>)?
   | ;
+<IO> := "write" "(" <string> "," <pcm16> ")" ;
+<string> := "\"" (.+) "\"" ;
 <identifier> := [^0-9]+[A-Za-z0-9_]+ ;
 
-<nr> := "n" <length> "," <key> ";" <nr> | "r" <length> ";" <nr> | ;
-<length> := [0-9]+(\.+)? ("+" <length>)? ;
-<key> := [a-g](#|b)?[0-9] (<articulation>)? <key> | ;
+<nr> := "n" <length> "," <note> ";" <nr> | "r" <length> ";" <nr> | ;
+<length> := (<integer> | <float>) (\.+)? ("+" <length>)? ;
+<integer> := [0-9]+ ;
+<float> := [0-9]+\.[0-9]+ ;
+
+<note> := [a-g](#|b)?[0-9] (<articulation>)? <note> | ;
 <articulation> := "." 

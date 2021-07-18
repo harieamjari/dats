@@ -10,7 +10,7 @@ enum token_t {
 
   /* Data types */
   TOK_STAFF,
-  //TOK_TRACK,
+  // TOK_TRACK,
   TOK_SYNTH,
   TOK_FILTER,
   TOK_MASTER,
@@ -69,7 +69,7 @@ struct note_t {
   uint32_t duration; // for staccato and staccatissimo
 
   /* alternative for frequency */
-  char   mnkey; //midi note number
+  char mnkey; // midi note number
 
   float frequency;
   float velocity;

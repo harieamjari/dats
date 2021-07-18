@@ -54,39 +54,54 @@ static pcm16_t *synth(const symrec_t *staff) {
     return NULL;
   }
 
-  SF2 *sf2_ctx = sf2_read_sf2(fp);
+  const SF2 * const sf2_ctx = sf2_read_sf2(fp);
   if (sf2_ctx == NULL) {
     fprintf(stderr, "[s_sf2] ");
     sf2_perror(sf2_name);
     return NULL;
   }
-  int16_t *pcm = calloc(sizeof(int16_t), (size_t)staff->value.staff.numsamples);
+  int16_t *pcm =
+      calloc(sizeof(int16_t), (size_t)((float)sf2_ctx->shdr[0].end * 44100.0 /
+                                       (float)sf2_ctx->shdr[0].sample_rate));
   pcm16_t *pcm_ctx = malloc(sizeof(pcm16_t));
   if (pcm_ctx == NULL || pcm == NULL)
     return NULL;
 
   uint32_t total = 0;
-  for (nr_t *n = staff->value.staff.nr; n != NULL; n = n->next) {
-    if (n->type == SYM_NOTE) {
-      for (note_t *nn = n->note; nn != NULL; nn = nn->next) {
-        for (uint32_t i = 0; i < nn->duration; i++) {
-          pcm[total + i] +=
-              ((double)nn->volume *
-               sin(2.0 * M_PI *
-                   (nn->frequency + sin(2.0 * M_PI * options[0].value.floatv *
-                                        (double)i / 44100.0) *
-                                        options[1].value.floatv) *
-                   (double)i / 44100.0));
-        }
-      }
-    }
-    total += n->length;
-    if ((total % 44100) < 1000) {
-      printf("\r[s_sf2] %d/%d", total, staff->value.staff.numsamples);
-      fflush(stdout);
-    }
-  }
-  putchar('\n');
+
+  printf("name: %s rate: %d start: %d end: %d\n", sf2_ctx->shdr[0].name,
+         sf2_ctx->shdr[0].sample_rate, sf2_ctx->shdr[0].start,
+         sf2_ctx->shdr[0].end);
+  total = (uint32_t)((float)sf2_ctx->shdr[0].end * 44100.0 /
+                     (float)sf2_ctx->shdr[0].sample_rate);
+ /* for (uint32_t i = sf2_ctx->shdr[0].start; i < (sf2_ctx->shdr[0].end); i++) {
+    pcm[(uint32_t)((float)(i - sf2_ctx->shdr[0].start) * 44100.0 /
+                   sf2_ctx->shdr[0].sample_rate)] = sf2_ctx->smpl[i];
+  }*/
+
+  (sf2_generate_pcm(NULL, 10, "8+$", sf2_ctx)?sf2_perror("183"):0);
+  //  for (nr_t *n = staff->value.staff.nr; n != NULL; n = n->next) {
+  //    if (n->type == SYM_NOTE) {
+  //      for (note_t *nn = n->note; nn != NULL; nn = nn->next) {
+  //        for (uint32_t i = 0; i < nn->duration; i++) {
+  //          pcm[total + i] +=
+  //              ((double)nn->volume *
+  //               sin(2.0 * M_PI *
+  //                   (nn->frequency + sin(2.0 * M_PI * options[0].value.floatv
+  //                   *
+  //                                        (double)i / 44100.0) *
+  //                                        options[1].value.floatv) *
+  //                   (double)i / 44100.0));
+  //        }
+  //      }
+  //    }
+  //    total += n->length;
+  //    if ((total % 44100) < 1000) {
+  //      printf("\r[s_sf2] %d/%d", total, staff->value.staff.numsamples);
+  //      fflush(stdout);
+  //    }
+  //  }
+  //  putchar('\n');
   for (DSOption *ctx = options; ctx->option_name != NULL; ctx++) {
     printf("[s_sf2] %s ", ctx->option_name);
     switch (ctx->type) {
@@ -102,10 +117,11 @@ static pcm16_t *synth(const symrec_t *staff) {
     }
     putchar('\n');
   }
-  pcm_ctx->numsamples = staff->value.staff.numsamples;
+  pcm_ctx->numsamples = total; // staff->value.staff.numsamples;
   pcm_ctx->pcm = pcm;
   pcm_ctx->next = NULL;
   free_string_options();
+  sf2_destroy_sf2(sf2_ctx);
   return pcm_ctx;
 }
 

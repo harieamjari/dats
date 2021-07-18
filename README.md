@@ -60,8 +60,6 @@ Tutorial is found at doc directory.
 
 - sndfilter - Provides filters for manipulating raw PCM s16le data.
 
-- memory-leak-detector - Memory leak detector
-
 - test - Contain example dats file for testing the Dats interpreter
 
 - doc - Documentation for dats

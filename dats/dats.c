@@ -31,12 +31,6 @@
 #include "libdsynth/allsynth.h"
 #include "scanner.h"
 
-#ifdef DATS_DETECT_MEM_LEAK
-#define DEFINE_MEM_LEAK_DETECTOR_VARIABLES
-#include "memory-leak-detector/leak_detector.h"
-#endif
-//#include "libwav/wav.h"
-
 /* Parses dats_t */
 extern int parse_cur_dats_t(dats_t *const t);
 
@@ -100,9 +94,6 @@ int process_args(const int argc, char *const *argv) {
 }
 
 int main(int argc, char **argv) {
-#ifdef DATS_DETECT_MEM_LEAK
-  atexit(report_mem_leak);
-#endif
   int ret;
   ret = process_args(argc, argv);
   if (ret)

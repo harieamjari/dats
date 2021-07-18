@@ -1,22 +1,18 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O3 -march=native
+CFLAGS = -Wall -Wextra -O2 -march=native -I.. -I../include
 OBJ := dats.o parser.o scanner.o wav.o
-#all : dats
 
 ENABLE_DEBUG = no
 
 ifeq ($(ENABLE_DEBUG), yes)
-	DEBUG_FLAGS = -ggdb3 -fsanitize=address -fsanitize=undefined
-	OBJ += ../memory-leak-detector/leak_detector.o
-        CFLAGS += -DDATS_DETECT_MEM_LEAK
+	CFLAGS += -ggdb3 -fsanitize=address -fsanitize=undefined
 endif
 
 dats : $(OBJ)
-	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $^  \
-	 -L../libdsynth -ldsynth -L../libdfilter -ldfilter  -lm -o $@
+	$(CC) $^ -L../libdsynth -ldsynth -L../libdfilter \
+	-ldfilter -lm -o $@
 
 $(OBJ) :%.o:%.c $(wildcard *.h)
-	gcc -c -I.. -I../include $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
 
 .PHONY : clean test indent
 clean: 
@@ -33,5 +29,5 @@ uninstall: dats
 	rm $(PREFIX)/bin/$^
 
 indent :
-	indent *.[ch] -nut || clang-format *.[ch]
+	clang-format -i *.[ch]
 

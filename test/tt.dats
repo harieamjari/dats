@@ -3,5 +3,5 @@ staff foo {
 }
 
 master {
-  pcm16 bar = synth.sf2(foo);
+  write("t.wav", synth.sf2(foo));
 }

@@ -38,9 +38,14 @@
   }
 
 int sf2_errno = 0;
-const char *const sf2_errlist[] = {"no error",
-                                   "unrecognized file format, and maybe corrupted",
-                                   "structurally unsound", "no memory"};
+const char *const sf2_errlist[] = {
+    "no error",
+    "unrecognized file format, or maybe corrupted",
+    "structurally unsound",
+    "no memory",
+    "unsupported version",
+    "no such preset",
+};
 
 SF2 *sf2_read_sf2(FILE *fp) {
   rewind(fp);
@@ -84,6 +89,8 @@ SF2 *sf2_read_sf2(FILE *fp) {
         CORRUPTED(1);
 
       printf("  Version:                       %hi.%-10hi\n", wMajor, wMinor);
+      if (wMajor != 2 || wMinor != 1)
+        CORRUPTED(4);
     } else if (!strncmp(utag, "isng", 4)) {
       if (usize > 256)
         CORRUPTED(1);
@@ -116,7 +123,7 @@ SF2 *sf2_read_sf2(FILE *fp) {
       char TOOLName[257] = {0};
       if (fread(TOOLName, 1, usize, fp) != usize)
         CORRUPTED(1);
-      printf("  Tool created:                  %s\n", TOOLName);
+      printf("  Tool created with:             %s\n", TOOLName);
 
     } else
       break;
@@ -178,7 +185,7 @@ SF2 *sf2_read_sf2(FILE *fp) {
     if (fread(&usize, sizeof(uint32_t), 1, fp) != 1)
       CORRUPTED(1);
     if (!STR4CMP(utag, "phdr")) {
-      // printf("  phdr size                      %d\n", usize);
+      printf("  phdr size                      %d\n", usize);
       if (usize % 38)
         CORRUPTED(2);
       phdr_t *presets = malloc(sizeof(phdr_t) * (usize / 38));
@@ -199,7 +206,6 @@ SF2 *sf2_read_sf2(FILE *fp) {
       //      }
 
     } else if (!STR4CMP(utag, "pbag")) {
-
       printf("  pbag size                      %d\n", usize);
       if (usize % 4)
         CORRUPTED(2);
@@ -209,7 +215,7 @@ SF2 *sf2_read_sf2(FILE *fp) {
         CORRUPTED(1);
       }
       sf2->pbag = preset_bags;
-      sf2->nb_phdr = usize / 4;
+      sf2->nb_pbag = usize / 4;
       //      printf("    Preset bags:\n");
       //      for (uint32_t i = 0; i < usize / 4; i++) {
       //        printf("     %-3d                   %-3d  %-3d\n", i,
@@ -225,7 +231,7 @@ SF2 *sf2_read_sf2(FILE *fp) {
         CORRUPTED(1);
       }
       sf2->pmod = mod_list;
-      sf2->nb_pgen = usize / 10;
+      sf2->nb_pmod = usize / 10;
       //      printf("    PModulator lists:\n");
       //      for (uint32_t i = 0; i < usize / 10; i++) {
       //        printf("     %-3d                   %-3d  %-3d  %-3d  %-3d
@@ -326,7 +332,7 @@ SF2 *sf2_read_sf2(FILE *fp) {
       }
       sf2->shdr = shdr_list;
       sf2->nb_shdr = usize / 46;
-      //      printf("    Sanple header lists:\n");
+      //      printf("    Sample header lists:\n");
       //      for (uint32_t i = 0; i < usize / 46; i++) {
       //        printf("     %-3d                   %-3s\n", i,
       //        shdr_list[i].name);
@@ -337,11 +343,26 @@ SF2 *sf2_read_sf2(FILE *fp) {
   return sf2;
 }
 
-void sf2_perror(char *str) {
+/* returns 0 if success. nonzero represents failure */
+int sf2_generate_pcm(const int16_t *dest, const uint32_t duration,
+                     const char *const preset_name, const SF2 *const sf2) {
+  uint32_t phdr_index = 0;
+  for (; phdr_index < sf2->nb_phdr; phdr_index++){
+    if (!strcmp(sf2->phdr[phdr_index].name, preset_name))
+      break;
+  }
+  if (!strcmp(sf2->phdr[phdr_index-1].name, "EOP"))
+    return (sf2_errno = 5);
+
+  printf("[sf2] preset name %s\n", sf2->phdr[phdr_index].name);
+  return 1;
+}
+
+void sf2_perror(const char *const str) {
   fprintf(stderr, "%s: %s\n", str, sf2_errlist[sf2_errno]);
 }
 
-void sf2_destroy_sf2(SF2 *sf2) {
+void sf2_destroy_sf2(const SF2 * const sf2) {
   if (sf2 == NULL)
     return;
   free(sf2->smpl);

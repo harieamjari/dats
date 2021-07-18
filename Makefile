@@ -1,6 +1,5 @@
 .PHONY : dats test clean install uninstall
 dats :
-	cd memory-leak-detector && make
 	cd sndfilter && make
 	cd libdfilter && make
 	cd libdsynth && make
@@ -10,7 +9,6 @@ test : dats
 	cd dats && make test
 
 clean : 
-	cd memory-leak-detector && make clean
 	cd sndfilter && make clean
 	cd libdfilter && make clean
 	cd libdsynth && make clean

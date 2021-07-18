@@ -25,10 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef DATS_DETECT_MEM_LEAK
-#include "memory-leak-detector/leak_detector.h"
-#endif
-
 #include "scanner.h"
 #include "wav.h"
 
