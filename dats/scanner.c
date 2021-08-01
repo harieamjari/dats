@@ -378,14 +378,14 @@ w:
           }
           char *end;
           tok_num *= pow(2.0, strtof(buff + 2, &end));
-          tok_note *= strtof(buff + 2, &end);
+          tok_note = tok_note + 0x0c * strtof(buff + 2, &end);
           if (*end)
             ERROR("Warning: non numeric character/s %s\n", end);
           return TOK_NOTE;
         } else if (isdigit(buff[1]) && !buff[2]) {
           char *end;
           tok_num *= pow(2.0, strtof(buff + 1, &end));
-          tok_note *= strtof(buff + 1, &end);
+          tok_note = tok_note + 0x0c * strtof(buff + 1, &end);
           if (*end)
             ERROR("Warning: non numeric character/s %s\n", end);
           return TOK_NOTE;

@@ -9,7 +9,7 @@ OBJ += compressor.o
 OBJ += reverb.o
 
 libsndfilter.a : $(OBJ)
-	ar rcs $@ $^
+	$(AR) rcs $@ $^
 	chmod +x $@
 
 $(OBJ) : %.o : %.c

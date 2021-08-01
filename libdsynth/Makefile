@@ -18,7 +18,7 @@ S_SYNTHS += s_sf2.c
 OBJ := $(patsubst %.c, %.o, $(S_SYNTHS) $(MISC))
 
 libdsynth.so : $(OBJ)
-	$(CC) -shared $^ -lm -o $@
+	$(CC) -shared $^ -lm -lfluidsynth -o $@
 
 $(OBJ): %.o: %.c $(wildcard *.h)
 
@@ -32,4 +32,4 @@ install: libdsynth.so
 uninstall: libdsynth.so
 	rm $(PREFIX)/lib/$^
 indent:
-	indent *.[ch]
+	clang-format -i *.[ch]

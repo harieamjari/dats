@@ -41,17 +41,18 @@ static dats_t *d;
 /* Returns 0 if success. Non-zero if failed. */
 static int parse_notes_rests() {
   if (tok == TOK_N) {
-  add_lengthn:
-    tok = read_next_tok_cur_dats_t(d);
-    if (tok != TOK_FLOAT) {
-      EXPECTING(TOK_FLOAT, d);
-      return 1;
-    }
     nr_t *cnr = malloc(sizeof(nr_t));
     assert(cnr != NULL);
     cnr->type = SYM_NOTE;
     cnr->length = 0;
     cnr->next = NULL;
+  add_lengthn:
+    tok = read_next_tok_cur_dats_t(d);
+    if (tok != TOK_FLOAT) {
+      EXPECTING(TOK_FLOAT, d);
+      free(cnr);
+      return 1;
+    }
 
     cnr->length += (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
     uint32_t dotted_len =
@@ -131,6 +132,7 @@ static int parse_notes_rests() {
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_FLOAT) {
       UNEXPECTED(tok, d);
+      free(cnr);
       return 1;
     }
     cnr->length += (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
@@ -464,7 +466,7 @@ append:
               tok = read_next_tok_cur_dats_t(d);
               if (tok != TOK_DQUOTE) {
                 C_ERROR(
-                    d, "`write`, expects an identifier between double quote\n");
+                    d, "Option expects a string");
                 return NULL;
               }
               expecting = TOK_STRING;
@@ -479,7 +481,7 @@ append:
               tok_identifier = NULL;
               tok = read_next_tok_cur_dats_t(d);
               if (tok != TOK_DQUOTE) {
-                C_ERROR(d, "Strings must end with a double quote\n");
+                C_ERROR(d, "Strings must end with a double quote");
                 return NULL;
               }
               tok = read_next_tok_cur_dats_t(d);

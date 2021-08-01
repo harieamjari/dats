@@ -114,7 +114,8 @@ extern int sf2_errno;
 extern const char *const sf2_errlist[];
 extern SF2 *sf2_read_sf2(FILE *fp);
 extern void sf2_perror(const char *const str);
-extern void sf2_destroy_sf2(const SF2 * const sf2);
-extern int sf2_generate_pcm();
+extern void sf2_destroy_sf2(SF2 *sf2);
+int sf2_generate_pcm(const int16_t *dest, const uint32_t duration,
+                     const char *const preset_name, const SF2 *const sf2);
 
 #endif /* SF2_H */

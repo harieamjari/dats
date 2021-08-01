@@ -258,6 +258,60 @@ int main(int argc, char *argv[]) {
         CORRUPTED(1);
       printf("  IROM:                          %s\n", ROMName);
 
+    } else if (!strncmp(utag, "iver", 4)) {
+      if (usize > 256)
+        CORRUPTED(1);
+
+      char IVERName[257] = {0};
+      if (fread(IVERName, 1, usize, fp) != usize)
+        CORRUPTED(1);
+      printf("  IVER:                          %s\n", IVERName);
+
+    } else if (!strncmp(utag, "ICRD", 4)) {
+      if (usize > 256)
+        CORRUPTED(1);
+
+      char ICRDName[257] = {0};
+      if (fread(ICRDName, 1, usize, fp) != usize)
+        CORRUPTED(1);
+      printf("  ICRD:                          %s\n", ICRDName);
+
+    } else if (!strncmp(utag, "IENG", 4)) {
+      if (usize > 256)
+        CORRUPTED(1);
+
+      char IENGName[257] = {0};
+      if (fread(IENGName, 1, usize, fp) != usize)
+        CORRUPTED(1);
+      printf("  IENG:                          %s\n", IENGName);
+
+    } else if (!strncmp(utag, "IPRD", 4)) {
+      if (usize > 256)
+        CORRUPTED(1);
+
+      char IPRDName[257] = {0};
+      if (fread(IPRDName, 1, usize, fp) != usize)
+        CORRUPTED(1);
+      printf("  IPRD:                          %s\n", IPRDName);
+
+    } else if (!strncmp(utag, "ICOP", 4)) {
+      if (usize > 256)
+        CORRUPTED(1);
+
+      char ICOPName[257] = {0};
+      if (fread(ICOPName, 1, usize, fp) != usize)
+        CORRUPTED(1);
+      printf("  ICOP:                          %s\n", ICOPName);
+
+    } else if (!strncmp(utag, "ICMT", 4)) {
+      if (usize > 256)
+        CORRUPTED(1);
+
+      char ICMTName[65538] = {0};
+      if (fread(ICMTName, 1, usize, fp) != usize)
+        CORRUPTED(1);
+      printf("  ICMT:                          %s\n", ICMTName);
+
     } else if (!strncmp(utag, "ISFT", 4)) {
       if (usize > 256)
         CORRUPTED(1);

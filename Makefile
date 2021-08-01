@@ -1,26 +1,26 @@
 .PHONY : dats test clean install uninstall
 dats :
-	cd sndfilter && make
-	cd libdfilter && make
-	cd libdsynth && make
-	cd dats && make
+	cd sndfilter && $(MAKE)
+	cd libdfilter && $(MAKE)
+	cd libdsynth && $(MAKE)
+	cd dats && $(MAKE)
 
 test : dats
-	cd dats && make test
+	cd dats && $(MAKE) test
 
 clean : 
-	cd sndfilter && make clean
-	cd libdfilter && make clean
-	cd libdsynth && make clean
-	cd dats && make clean
-	cd tools && make clean
+	cd sndfilter && $(MAKE) clean
+	cd libdfilter && $(MAKE) clean
+	cd libdsynth && $(MAKE) clean
+	cd dats && $(MAKE) clean
+	cd tools && $(MAKE) clean
 
 install :
-	cd dats && make install
-	cd libdfilter && make install
-	cd libdsynth && make install
+	cd dats && $(MAKE) install
+	cd libdfilter && $(MAKE) install
+	cd libdsynth && $(MAKE) install
 
 uninstall :
-	cd dats && make uninstall
-	cd libdsynth && make uninstall
-	cd libdfilter && make uninstall
+	cd dats && $(MAKE) uninstall
+	cd libdsynth && $(MAKE) uninstall
+	cd libdfilter && $(MAKE) uninstall

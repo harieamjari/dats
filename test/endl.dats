@@ -2,7 +2,7 @@
 
 staff m1 {
   bpm = 95;
-  octave = 1; // raise the note one octave
+  // octave = 1; // raise the note one octave
   semitone = 1;
   n 4., e4;
   n 8, c5;
@@ -150,8 +150,8 @@ staff m3 {
 
 }
 master {
-  pcm16 tr1 = synth.sin(m1);
-  pcm16 tr2 = synth.square(m2);
+  pcm16 tr1 = synth.sf2(m1)[preset=10];
+  pcm16 tr2 = synth.sf2(m2)[preset=9];
   pcm16 tr3 = synth.sin(m3);
   write("t.wav", mix((tr1), (mix((tr2),(tr3)))));
 }

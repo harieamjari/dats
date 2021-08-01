@@ -347,11 +347,11 @@ SF2 *sf2_read_sf2(FILE *fp) {
 int sf2_generate_pcm(const int16_t *dest, const uint32_t duration,
                      const char *const preset_name, const SF2 *const sf2) {
   uint32_t phdr_index = 0;
-  for (; phdr_index < sf2->nb_phdr; phdr_index++){
+  for (; phdr_index < sf2->nb_phdr; phdr_index++) {
     if (!strcmp(sf2->phdr[phdr_index].name, preset_name))
       break;
   }
-  if (!strcmp(sf2->phdr[phdr_index-1].name, "EOP"))
+  if (!strcmp(sf2->phdr[phdr_index - 1].name, "EOP"))
     return (sf2_errno = 5);
 
   printf("[sf2] preset name %s\n", sf2->phdr[phdr_index].name);
@@ -362,7 +362,7 @@ void sf2_perror(const char *const str) {
   fprintf(stderr, "%s: %s\n", str, sf2_errlist[sf2_errno]);
 }
 
-void sf2_destroy_sf2(const SF2 * const sf2) {
+void sf2_destroy_sf2(SF2 *sf2) {
   if (sf2 == NULL)
     return;
   free(sf2->smpl);

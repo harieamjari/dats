@@ -30,7 +30,7 @@ PRs are warmly welcomed. Make sure you `clang-format -i *.[ch]` your source befo
 
 # Building
 
-Building Dats requires no dependencies and should compile on Windows and \*nix operating
+Building Dats requires fluidsynth, and with it, should compile on Windows and \*nix operating
 systems, provided that the compiler provides GNU extensions.
 
 ## \*nix
