@@ -304,7 +304,7 @@ int main(int argc, char *argv[]) {
       printf("  ICOP:                          %s\n", ICOPName);
 
     } else if (!strncmp(utag, "ICMT", 4)) {
-      if (usize > 256)
+      if (usize > 65537)
         CORRUPTED(1);
 
       char ICMTName[65538] = {0};

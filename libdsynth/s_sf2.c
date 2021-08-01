@@ -99,8 +99,8 @@ static pcm16_t *synth(const symrec_t *staff) {
     return NULL;
   }
   fluid_synth_set_gain(synth, 5.0);
-    int sfont_id, bank_num, preset_num;
-    fluid_synth_get_program(synth, 0, &sfont_id, &bank_num, &preset_num);
+  int sfont_id, bank_num, preset_num;
+  fluid_synth_get_program(synth, 0, &sfont_id, &bank_num, &preset_num);
   fluid_synth_program_select(synth, 0, sfont_id, 0, 9);
 
   int16_t *pcm =
