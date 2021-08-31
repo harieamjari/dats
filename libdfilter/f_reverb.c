@@ -77,9 +77,9 @@ static pcm16_t *filter(const pcm16_t *pcm16) {
     int pos = pcm16->numsamples;
     sf_sample_st empty[48000];
     memset(empty, 0, sizeof(sf_sample_st) * 48000);
-    while (44100.0 > 0) {
-      if (44100.0 <= 48000) {
-        sf_reverb_process(&rv, 44100.0, empty, &output_snd->samples[pos]);
+    while (tailsmp > 0) {
+      if (tailsmp <= 48000) {
+        sf_reverb_process(&rv, tailsmp, empty, &output_snd->samples[pos]);
         break;
       } else {
         sf_reverb_process(&rv, 48000, empty, &output_snd->samples[pos]);

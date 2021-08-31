@@ -96,6 +96,15 @@ struct pcm16_t {
   pcm16_t *next;
 };
 
+/* master AST */
+typedef struct master_t master_t;
+struct master_t {
+  /* left value type */
+  token_t type;
+
+  char name[100];
+};
+
 typedef struct symrec_t symrec_t;
 struct symrec_t {
   token_t type;

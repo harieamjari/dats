@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O3 -fPIC -march=native -I.. -I../include
+CFLAGS = -Wall -Wextra -O3 -fPIC  -I.. -I../include
 
 ENABLE_DEBUG = no
 
@@ -26,4 +26,4 @@ install: libdfilter.so
 uninstall: libdfilter.so
 	rm $(PREFIX)/lib/$^
 indent:
-	indent *.[ch]
+	clang-format -i *.[ch]

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O3 -march=native -fPIC -I.. -I../include
+CFLAGS = -Wall -Wextra -O3  -fPIC -I.. -I../include
 
 ENABLE_DEBUG = no
 

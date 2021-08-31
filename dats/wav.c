@@ -1,4 +1,3 @@
-
 #include "wav.h"
 #include <assert.h>
 #include <stdint.h>

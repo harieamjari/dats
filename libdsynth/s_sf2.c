@@ -34,7 +34,7 @@ static void free_string_options(void) {
 static pcm16_t *synth(const symrec_t *staff) {
   char *sf2_name;
   if (options[0].value.strv == NULL) {
-    fprintf(stderr, "[s_sf2] no sf2 file loaded.");
+    fprintf(stderr, "[s_sf2] no sf2 file entered.");
 #ifdef _WIN32
     putchar('\n');
     return NULL;
@@ -46,15 +46,11 @@ static pcm16_t *synth(const symrec_t *staff) {
         "/usr"
 #endif
         "/share/soundfonts/default.sf2";
-    printf(" loading %s\n", sf2_name);
+    printf(" using %s", sf2_name);
+    fflush(stdout);
 
   } else
     sf2_name = options[0].value.strv;
-
-  if (options[1].value.strv == NULL) {
-    fprintf(stderr, "[s_sf2] no preset name entered \n");
-    return NULL;
-  }
 
   fluid_settings_t *settings;
   fluid_synth_t *synth = NULL;
@@ -182,7 +178,7 @@ static pcm16_t *synth(const symrec_t *staff) {
     }
     putchar('\n');
   }
-  pcm_ctx->numsamples = total; // staff->value.staff.numsamples;
+  pcm_ctx->numsamples = total;
   pcm_ctx->pcm = pcm;
   pcm_ctx->next = NULL;
   free_string_options();

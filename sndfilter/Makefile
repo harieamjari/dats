@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2 -Wall -Wextra -fPIC -march=native
+CFLAGS = -O2 -Wall -Wextra -fPIC 
 
 OBJ  = mem.o
 OBJ += snd.o

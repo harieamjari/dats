@@ -1,6 +1,6 @@
 *This BNF may be outdated*
 
-BNF for Dats v2
+EBNF for Dats v2
 
 
 <S> := <staff> <S> | <master> <S> | ;

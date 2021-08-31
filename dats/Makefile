@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O2 -march=native -I.. -I../include
+CFLAGS = -Wall -Wextra -O2  -I.. -I../include
 OBJ := dats.o parser.o scanner.o wav.o
 
 ENABLE_DEBUG = no
