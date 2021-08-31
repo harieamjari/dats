@@ -35,17 +35,13 @@ static pcm16_t *synth(const symrec_t *staff) {
   char *sf2_name;
   if (options[0].value.strv == NULL) {
     fprintf(stderr, "[s_sf2] no sf2 file entered.");
-#ifdef _WIN32
-    putchar('\n');
-    return NULL;
-#endif
     sf2_name =
 #ifdef __TERMUX__
-        __TERMUX_PREFIX__
-#else
-        "/usr"
+        __TERMUX_PREFIX__ "/share"
+#elif defined(__unix__)
+        "/usr/share"
 #endif
-        "/share/soundfonts/default.sf2";
+        "/soundfonts/default.sf2";
     printf(" using %s", sf2_name);
     fflush(stdout);
 
