@@ -28,8 +28,8 @@
 #include "scanner.h"
 #include "wav.h"
 
-#include "libdsynth/allsynth.h"
 #include "libdfilter/allfilter.h"
+#include "libdsynth/allsynth.h"
 
 extern void print_all_nr_t(nr_t *nr);
 
@@ -90,7 +90,7 @@ static int parse_notes_rests() {
   addn: /* add dyad */
     f->frequency = tok_num * pow(2.0, (double)tok_octave) *
                    pow(1.059463094, (double)tok_semitone);
-    f->mnkey = tok_note + tok_semitone + tok_octave*0x0c;
+    f->mnkey = tok_note + tok_semitone + tok_octave * 0x0c;
 
     f->attack = tok_attack;
     f->decay = tok_decay;
@@ -252,7 +252,7 @@ static int parse_notes_rests() {
       return 1;
     }
     tok_octave = tok_num;
-    if (tok_octave>3 || tok_octave<-3){
+    if (tok_octave > 3 || tok_octave < -3) {
       C_ERROR(d, "Illegal range, (-3 to 3)");
       return 1;
     }
@@ -271,10 +271,10 @@ static int parse_notes_rests() {
       return 1;
     }
     tok_semitone = tok_num;
-//    if (tok_semitone>1 || tok_semitone<-1){
-//      C_ERROR(d, "Illegal range, (-1 to 1)");
-//      return 1;
-//    }
+    //    if (tok_semitone>1 || tok_semitone<-1){
+    //      C_ERROR(d, "Illegal range, (-1 to 1)");
+    //      return 1;
+    //    }
     rule_match = 1;
     tok = read_next_tok_cur_dats_t(d);
 
@@ -369,8 +369,7 @@ static symrec_t *parse_pcm16(char *id) {
 append:
   tok = read_next_tok_cur_dats_t(d);
   switch (tok) {
-  case TOK_SYNTH:
-    {
+  case TOK_SYNTH: {
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_DOT) {
       UNEXPECTED(tok, d);
@@ -465,8 +464,7 @@ append:
             case DSOPTION_STRING:
               tok = read_next_tok_cur_dats_t(d);
               if (tok != TOK_DQUOTE) {
-                C_ERROR(
-                    d, "Option expects a string");
+                C_ERROR(d, "Option expects a string");
                 return NULL;
               }
               expecting = TOK_STRING;
@@ -516,8 +514,7 @@ append:
 
     if (tok == TOK_COMMA)
       goto append;
-   }
-    break;
+  } break;
   case TOK_FILTER:
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_DOT) {

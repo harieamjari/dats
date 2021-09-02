@@ -75,7 +75,7 @@ static pcm16_t *filter(const pcm16_t *pcm16) {
   int tailsmp = 44100;
   if (tailsmp > 0) {
     int pos = pcm16->numsamples;
-    sf_sample_st empty[48000];
+    sf_sample_st *empty = malloc(sizeof(sf_sample_st)*48000);
     memset(empty, 0, sizeof(sf_sample_st) * 48000);
     while (tailsmp > 0) {
       if (tailsmp <= 48000) {
@@ -87,6 +87,7 @@ static pcm16_t *filter(const pcm16_t *pcm16) {
         pos += 48000;
       }
     }
+    free(empty);
   }
 
   putchar('\n');

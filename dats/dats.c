@@ -25,7 +25,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <sys/stat.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #include "libdfilter/allfilter.h"
 #include "libdsynth/allsynth.h"
@@ -58,7 +60,7 @@ int process_args(const int argc, char *const *argv) {
         } else if (!strcmp(&argv[i][2], "list-synths")) {
           print_synths();
           return 0;
-        } else if (!strcmp(&argv[i][2], "list-filters")){
+        } else if (!strcmp(&argv[i][2], "list-filters")) {
           print_filters();
           return 0;
         }
@@ -94,6 +96,16 @@ int process_args(const int argc, char *const *argv) {
 }
 
 int main(int argc, char **argv) {
+#ifdef _WIN32
+  {
+    HINSTANCE dll_module;
+    if ((dll_module = LoadLibrary("exchndl.dll")) != NULL) {
+      void (*exchndl_init)(void) = GetProcAddress(dll_module, "ExcHndlInit");
+      exchndl_init();
+    }
+  }
+#endif
+
   int ret;
   ret = process_args(argc, argv);
   if (ret)
