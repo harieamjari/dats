@@ -15,7 +15,7 @@
 static DSOption options[] = {
    {DSOPTION_STRING, "sf2", "sf2 file", {.strv = NULL}},
    {DSOPTION_INT, "preset", "preset num (default: 0)", {.intv = 0}},
-   {DSOPTION_INT, "bank", "preset num (default: 0)", {.intv = 0}},
+   {DSOPTION_INT, "bank", "bank num (default: 0)", {.intv = 0}},
    {.option_name = NULL}
 };
 /* clang-format on */
@@ -93,7 +93,8 @@ static pcm16_t *synth(const symrec_t *staff) {
   fluid_synth_set_gain(synth, 5.0);
   int sfont_id, bank_num, preset_num;
   fluid_synth_get_program(synth, 0, &sfont_id, &bank_num, &preset_num);
-  fluid_synth_program_select(synth, 0, sfont_id, 0, 9);
+  fluid_synth_program_select(synth, 0, sfont_id, options[2].value.intv,
+    options[1].value.intv);
 
   int16_t *pcm =
       calloc(sizeof(int16_t), (size_t)(staff->value.staff.numsamples));

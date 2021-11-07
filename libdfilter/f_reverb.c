@@ -41,6 +41,7 @@ static pcm16_t *filter(const pcm16_t *pcm16) {
   // read the data and convert to stereo floating point
   int16_t L, R;
   sf_snd snd = sf_snd_new(pcm16->numsamples, 44100, false);
+  #pragma omp parallel for
   for (uint32_t i = 0; i < pcm16->numsamples; i++) {
     // read the sample
     L = pcm16->pcm[i];
@@ -108,6 +109,7 @@ static pcm16_t *filter(const pcm16_t *pcm16) {
   }
   pcm_ctx->numsamples = output_snd->size;
   pcm_ctx->pcm = malloc(sizeof(int16_t) * output_snd->size);
+  #pragma omp parallel for
   for (int i = 0; i < output_snd->size; i++) {
     float R = output_snd->samples[i].R;
     if (R < 0)

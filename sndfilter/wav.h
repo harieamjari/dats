@@ -12,6 +12,6 @@
 #include "snd.h"
 
 sf_snd sf_wavload(const char *file);
-bool   sf_wavsave(sf_snd snd, const char *file);
+bool sf_wavsave(sf_snd snd, const char *file);
 
 #endif // SNDFILTER_WAV__H

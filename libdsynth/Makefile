@@ -1,10 +1,16 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -O3  -fPIC -I.. -I../include
 
-ENABLE_DEBUG = no
+include ../config.txt
 
 ifeq ($(ENABLE_DEBUG), yes)
-        CFLAGS += -ggdb3 -fsanitize=address -fsanitize=undefined
+	CFLAGS += -ggdb3
+	LDFLAGS += -fsanitize=address
+endif
+
+ifeq ($(ENABLE_OPENMP), yes)
+	CFLAGS += -fopenmp
+	LDFLAGS += -fopenmp
 endif
 
 MISC = sf2.c allsynth.c
@@ -18,7 +24,7 @@ S_SYNTHS += s_sf2.c
 OBJ := $(patsubst %.c, %.o, $(S_SYNTHS) $(MISC))
 
 libdsynth.so : $(OBJ)
-	$(CC) -shared $^ -lm -lfluidsynth -o $@
+	$(CC) -shared $^ -lm -lfluidsynth -o $@ $(LDFLAGS)
 
 $(OBJ): %.o: %.c $(wildcard *.h)
 

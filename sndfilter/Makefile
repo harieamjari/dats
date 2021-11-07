@@ -1,5 +1,18 @@
 CC = gcc
-CFLAGS = -O2 -Wall -Wextra -fPIC 
+CFLAGS = -O2 -ggdb3 -Wall -Wextra -fPIC 
+
+include ../config.txt
+
+ifeq ($(ENABLE_DEBUG), yes)
+	CFLAGS += -ggdb3
+	LDFLAGS += -fsanitize=address
+endif
+
+ifeq ($(ENABLE_OPENMP), yes)
+	CFLAGS += -fopenmp
+	LDFLAGS += -fopenmp
+endif
+
 
 OBJ  = mem.o
 OBJ += snd.o

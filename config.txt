@@ -1,0 +1,6 @@
+# libdsynth
+
+# libdfilter
+
+ENABLE_DEBUG = no
+ENABLE_OPENMP = no

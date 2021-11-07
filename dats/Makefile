@@ -1,16 +1,22 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -O2  -I.. -I../include
 OBJ := dats.o parser.o scanner.o wav.o
-
-ENABLE_DEBUG = no
+LDFLAGS = -L../libdsynth -ldsynth -L../libdfilter \
+	-ldfilter -lm 
+include ../config.txt
 
 ifeq ($(ENABLE_DEBUG), yes)
-	CFLAGS += -ggdb3 -fsanitize=address -fsanitize=undefined
+	CFLAGS += -ggdb3
+	LDFLAGS += -fsanitize=address
+endif
+
+ifeq ($(ENABLE_OPENMP), yes)
+	CFLAGS += -fopenmp
+	LDFLAGS += -fopenmp
 endif
 
 dats : $(OBJ)
-	$(CC) $^ -L../libdsynth -ldsynth -L../libdfilter \
-	-ldfilter -lm -o $@
+	$(CC) $^ -o $@ $(LDFLAGS)
 
 $(OBJ) :%.o:%.c $(wildcard *.h)
 

@@ -33,11 +33,9 @@ static pcm16_t *synth(const symrec_t *staff) {
       for (note_t *nn = n->note; nn != NULL; nn = nn->next) {
         int16_t wavetable[(int)(44100.0 / nn->frequency)];
         int rise = (int)(44100.0 * options[0].value.floatv / nn->frequency);
+        #pragma omp parallel for
         for (int i = 0; i < (int)(44100.0 / nn->frequency); i++) {
-          if (i < rise)
-            wavetable[i] = (int16_t)nn->volume;
-          else
-            wavetable[i] = 0;
+            wavetable[i] = (i < rise? (int16_t)nn->volume : 0);
         }
         uint32_t cur = 0;
         for (uint32_t i = 0; i < nn->duration; i++) {

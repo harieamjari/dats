@@ -767,6 +767,7 @@ append:
       return NULL;
     }
 
+    #pragma omp parallel for
     for (uint32_t i = 0; i < length; i++) {
       pcm[i] = (i < pcm16_mix1->value.pcm16.pcm->numsamples
                     ? pcm16_mix1->value.pcm16.pcm->pcm[i]
