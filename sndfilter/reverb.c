@@ -31,10 +31,18 @@ static bool isprime(int v) {
   if ((v % 2) == 0 || (v % 3) == 0)
     return false;
   int max = (int)sqrt((double)v);
+  int cancel = 0;
+  
+  #pragma omp parallel for
   for (int i = 5; i <= max; i += 6) {
-    if ((v % i) == 0 || (v % (i + 2)) == 0)
-      return false;
+    if ((v % i) == 0 || (v % (i + 2)) == 0){
+      cancel = 1;
+      #pragma omp cancel for
+      //return false;
+    }
   }
+  if (cancel) return false;
+  
   return true;
 }
 
@@ -306,6 +314,7 @@ static inline void oversample_stepup(sf_rv_oversample_st *oversample,
     return;
   }
   output[0] = biquad_step(&oversample->lpfU, input * oversample->factor);
+  #pragma omp parallel for
   for (int i = 1; i < oversample->factor; i++)
     output[i] = biquad_step(&oversample->lpfU, 0);
 }
@@ -316,6 +325,7 @@ static inline float oversample_stepdown(sf_rv_oversample_st *oversample,
   if (oversample->factor == 1)
     return input[0];
   float out = biquad_step(&oversample->lpfD, input[0]);
+  #pragma omp parallel for
   for (int i = 1; i < oversample->factor; i++)
     biquad_step(&oversample->lpfD, input[i]);
   return out;
@@ -359,6 +369,7 @@ static inline float noise_step(sf_rv_noise_st *noise) {
     noise->buf[0] = 0;
     while (len > 1) {
       float left = 0;
+      #pragma omp parallel for
       for (int i = tot - 1; i >= 0; i--) {
         float right = left;
         left = noise->buf[i * len];
@@ -763,6 +774,7 @@ void sf_advancereverb(sf_reverb_state_st *rv, int rate, int oversamplefactor,
                                  162, 140, 131, 111, 79};
   int totfactor = osrate / 34125;
   int msize = nextprime(10 * osrate / 34125);
+  #pragma omp parallel for
   for (int i = 0; i < 10; i++) {
     allpassm_make(&rv->diffL[i], nextprime(diffLc[i] * totfactor), msize,
                   -0.78f, 1);
@@ -772,6 +784,7 @@ void sf_advancereverb(sf_reverb_state_st *rv, int rate, int oversamplefactor,
 
   static const int crossLc[4] = {430, 341, 264, 174};
   static const int crossRc[4] = {447, 324, 247, 191};
+  #pragma omp parallel for
   for (int i = 0; i < 4; i++) {
     allpass_make(&rv->crossL[i], nextprime(crossLc[i] * totfactor), 0.78f, 1);
     allpass_make(&rv->crossR[i], nextprime(crossRc[i] * totfactor), 0.78f, 1);
@@ -864,6 +877,7 @@ void sf_reverb_process(sf_reverb_state_st *rv, int size, sf_sample_st *input,
   // oversample buffer
   float osL[SF_REVERB_OF], osR[SF_REVERB_OF];
 
+  #pragma omp parallel for
   for (int i = 0; i < size; i++) {
     // early reflection
     sf_sample_st er = earlyref_step(&rv->earlyref, input[i]);

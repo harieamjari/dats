@@ -1,12 +1,19 @@
-.PHONY : dats tools test clean install uninstall all
+.PHONY : dats libdfilter libdsynth sndfilter tools test\
+         clean install uninstall all
 
 all : dats tools
 
-dats :
-	cd sndfilter && $(MAKE)
-	cd libdfilter && $(MAKE)
-	cd libdsynth && $(MAKE)
+dats : libdfilter libdsynth
 	cd dats && $(MAKE)
+
+sndfilter :
+	cd sndfilter && $(MAKE)
+
+libdfilter : sndfilter
+	cd libdfilter && $(MAKE)
+
+libdsynth :
+	cd libdsynth && $(MAKE)
 
 tools :
 	cd tools && $(MAKE)
