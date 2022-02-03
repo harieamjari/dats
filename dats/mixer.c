@@ -1,6 +1,6 @@
 /*  Dats interpreter
  *
- * Copyright (c) 2021 Al-buharie Amjari
+ * Copyright (c) 2022 Al-buharie Amjari
  *
  * This file is part of Dats.
  *
@@ -18,3 +18,9 @@
  * License along with Dats; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
+#include <stdint.h>
+#include <stdlib.h>
+
+int16_t *dats_mix_int16(int16_t *pcm1, int16_t *pcm2) { return NULL; }
+float *dats_mix_float(float *pcm1, float *pcm2) { return NULL; }

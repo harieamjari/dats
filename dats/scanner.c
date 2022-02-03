@@ -63,6 +63,14 @@ void clean_all_dats_t(void) {
   dats_files = NULL;
 }
 
+void destroy_pcm16(pcm16_t *pcm16) {
+  pcm16_t *n;
+  for (pcm16_t *a = pcm16; a != NULL; a = n) {
+    n = a->next;
+    free(a);
+  }
+}
+
 void clean_all_symrec_t_all_dats_t() {
   for (dats_t *d = dats_files; d != NULL; d = d->next) {
     symrec_t *n;
@@ -128,23 +136,23 @@ symrec_t *getsym(const dats_t *const t, char const *const id) {
   return NULL;
 }
 
-symrec_t *symrec_tcpy(symrec_t *const s) {
-  symrec_t *copy = malloc(sizeof(symrec_t));
-  assert(copy != NULL);
-  switch (s->type) {
-  case TOK_STAFF:
-    copy->type = s->type;
-    copy->value.staff.identifier = s->value.staff.identifier;
-    copy->value.staff.numsamples = s->value.staff.numsamples;
-    copy->value.staff.nr = s->value.staff.nr;
-    copy->next = NULL;
-    break;
-  default:
-    free(copy);
-    copy = NULL;
-  }
-  return copy;
-}
+// symrec_t *symrec_tcpy(symrec_t *const s) {
+//  symrec_t *copy = malloc(sizeof(symrec_t));
+//  assert(copy != NULL);
+//  switch (s->type) {
+//  case TOK_STAFF:
+//    copy->type = s->type;
+//    copy->value.staff.identifier = s->value.staff.identifier;
+//    copy->value.staff.numsamples = s->value.staff.numsamples;
+//    copy->value.staff.nr = s->value.staff.nr;
+//    copy->next = NULL;
+//    break;
+//  default:
+//    free(copy);
+//    copy = NULL;
+//  }
+//  return copy;
+//}
 
 void print_debugging_info(const token_t tok, dats_t *d) {
   switch (tok) {
@@ -172,6 +180,37 @@ void print_debugging_info(const token_t tok, dats_t *d) {
   ERROR("%s", buff);
   ERROR("%*s\n", column_token_found + (length - (int)strlen(d->scan_line)),
         "^");
+}
+
+void print_scan_line(const dats_t *d, const size_t line, const size_t column) {
+  char buff[1000] = {0};
+  rewind(d->fp);
+  size_t num_line = 0;
+  int c = 0;
+  while (num_line != line - 1 || c != EOF) {
+    c = fgetc(d->fp);
+    if (c == (int)'\n')
+      num_line++;
+  }
+  if (c == EOF)
+    return;
+  char scan_line[502] = {0};
+  if (fgets(scan_line, 500, d->fp) != NULL)
+    fseek(d->fp, -(long)(strlen(scan_line)), SEEK_CUR);
+
+  if (scan_line[strlen(scan_line) - 1] != '\n') {
+    int ls = strlen(scan_line);
+    scan_line[ls] = '\n';
+    scan_line[ls + 1] = 0;
+  }
+  if (scan_line[strlen(scan_line) - 2] == '\r') {
+    int ls = strlen(scan_line);
+    memcpy(scan_line + (ls - 2), scan_line + (ls - 1), 2);
+  }
+
+  int length = sprintf(buff, "    %d | %s", line, scan_line);
+  ERROR("%s", buff);
+  ERROR("%*s\n", column + (length - (int)strlen(scan_line)), "^");
 }
 /*---------.
  | Scanner |
@@ -294,7 +333,7 @@ w:
     c = '/';
   }
   switch (c) {
-    // clang-format off
+  // clang-format off
     /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
@@ -441,7 +480,7 @@ w:
         return TOK_IDENTIFIER;
       }
     }
-    // clang-format off
+  // clang-format off
     /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':

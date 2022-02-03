@@ -1,3 +1,24 @@
+/* Dats interpreter
+ *
+ * Copyright (c) 2021-2022 Al-buharie Amjari
+ *
+ * This file is part of Dats.
+ *
+ * Dats is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * Dats is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with Dats; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 #ifndef ENV_H
 #define ENV_H
 #include <stdint.h>
@@ -89,26 +110,42 @@ struct nr_t {
   nr_t *next;
 };
 
+typedef enum pcm16_type_t pcm16_type_t;
+enum pcm16_type_t {ID, MIX, FILTER, SYNTH};
 typedef struct pcm16_t pcm16_t;
 struct pcm16_t {
+  pcm16_type_t type;
+  union {
+    struct {
+      char *id;
+    } ID;
+    struct {
+      uint32_t nb_pcm16;
+      pcm16_t *pcm16;
+    } MIX;
+    struct {
+      char *filter_name, *pcm16_name;
+    } FILTER;
+    struct {
+      char *synth_name, *staff_name;
+      uint32_t nb_options;
+      struct {
+        char *option_name;
+        union {
+          int intv; float floatv; char *strv;
+        };
+      }*options;
+    } SYNTH;
+  };
   int16_t *pcm;
   uint32_t numsamples;
   pcm16_t *next;
 };
 
-/* master AST */
-typedef struct master_t master_t;
-struct master_t {
-  /* left value type */
-  token_t type;
-
-  char name[100];
-};
-
 typedef struct symrec_t symrec_t;
 struct symrec_t {
   token_t type;
-  int line, column;
+  size_t line, column;
   union {
     struct {
       char *identifier;

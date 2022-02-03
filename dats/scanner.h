@@ -24,6 +24,7 @@ EXTERN symrec_t *getsym(const dats_t *const t, char const *const id);
 EXTERN token_t read_next_tok_cur_dats_t(dats_t *const t);
 EXTERN void print_all_symrec_t_cur_dats_t(const dats_t *const t);
 EXTERN void print_debugging_info(const token_t tok, dats_t *d);
+EXTERN void print_scan_line(const dats_t *d, const size_t, const size_t);
 
 EXTERN int line_token_found;
 EXTERN int column_token_found;

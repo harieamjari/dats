@@ -35,6 +35,7 @@
 
 /* Parses dats_t */
 extern int parse_cur_dats_t(dats_t *const t);
+extern int semantic_cur_dats_t(dats_t const *const);
 
 /* process_args returns the value 0 if sucesss and nonzero if
  * failed.
@@ -117,6 +118,8 @@ int main(int argc, char **argv) {
      * must be skipped
      */
     if (parse_cur_dats_t(p))
+      continue;
+    if (semantic_cur_dats_t(p))
       continue;
     print_all_symrec_t_cur_dats_t(p);
   }

@@ -1,6 +1,12 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -O2  -I.. -I../include
-OBJ := dats.o parser.o scanner.o wav.o
+
+OBJ = dats.o
+OBJ += parser.o 
+OBJ += scanner.o
+OBJ += wav.o
+OBJ += semantic.o
+
 LDFLAGS = -L../libdsynth -ldsynth -L../libdfilter \
 	-ldfilter -lm 
 include ../config.txt
