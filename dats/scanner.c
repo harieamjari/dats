@@ -1,6 +1,6 @@
 /*  Dats interpreter
  *
- * Copyright (c) 2021 Al-buharie Amjari
+ * Copyright (c) 2021-2022 Al-buharie Amjari
  *
  * This file is part of Dats.
  *
@@ -29,19 +29,6 @@
 #include "scanner.h"
 
 dats_t *dats_files = NULL;
-
-void print_all_nr_t(nr_t *nr) {
-  for (nr_t *p = nr; p != NULL; p = p->next) {
-    switch (p->type) {
-    case SYM_NOTE:
-      printf("NOTE length: %u frequency: %f\n", p->length, p->note->frequency);
-      break;
-    case SYM_REST:
-      printf("REST length: %u\n", p->length);
-      break;
-    }
-  }
-}
 
 void clean_all_dats_t(void) {
   dats_t *n = dats_files;
@@ -136,24 +123,6 @@ symrec_t *getsym(const dats_t *const t, char const *const id) {
   return NULL;
 }
 
-// symrec_t *symrec_tcpy(symrec_t *const s) {
-//  symrec_t *copy = malloc(sizeof(symrec_t));
-//  assert(copy != NULL);
-//  switch (s->type) {
-//  case TOK_STAFF:
-//    copy->type = s->type;
-//    copy->value.staff.identifier = s->value.staff.identifier;
-//    copy->value.staff.numsamples = s->value.staff.numsamples;
-//    copy->value.staff.nr = s->value.staff.nr;
-//    copy->next = NULL;
-//    break;
-//  default:
-//    free(copy);
-//    copy = NULL;
-//  }
-//  return copy;
-//}
-
 void print_debugging_info(const token_t tok, dats_t *d) {
   switch (tok) {
   case TOK_IDENTIFIER:
@@ -187,13 +156,13 @@ void print_scan_line(const dats_t *d, const size_t line, const size_t column) {
   rewind(d->fp);
   size_t num_line = 0;
   int c = 0;
-  while (num_line != line - 1 || c != EOF) {
+  while (num_line != line - 1) {
     c = fgetc(d->fp);
     if (c == (int)'\n')
       num_line++;
+    if (c == EOF)
+      return;
   }
-  if (c == EOF)
-    return;
   char scan_line[502] = {0};
   if (fgets(scan_line, 500, d->fp) != NULL)
     fseek(d->fp, -(long)(strlen(scan_line)), SEEK_CUR);
@@ -333,7 +302,7 @@ w:
     c = '/';
   }
   switch (c) {
-  // clang-format off
+    // clang-format off
     /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
@@ -480,7 +449,7 @@ w:
         return TOK_IDENTIFIER;
       }
     }
-  // clang-format off
+    // clang-format off
     /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':

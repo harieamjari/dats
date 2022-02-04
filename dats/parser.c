@@ -357,8 +357,7 @@ static symrec_t *parse_pcm16(char *id) {
   assert(pcm16 != NULL);
   pcm16->type = TOK_PCM16;
   pcm16->line = line_token_found;
-  pcm16->line = column_token_found;
-  pcm16->value.pcm16.pcm = NULL;
+  pcm16->column = column_token_found;
   pcm16->value.pcm16.total_numsamples = 0;
   pcm16->value.pcm16.identifier = id;
   pcm16->next = d->sym_table;
@@ -388,6 +387,9 @@ append:
       return NULL;
     }
     pcm16_tail->type = SYNTH;
+    pcm16_tail->pcm = NULL;
+    pcm16_tail->SYNTH.synth_line = line_token_found;
+    pcm16_tail->SYNTH.synth_column = column_token_found;
     pcm16_tail->SYNTH.synth_name = tok_identifier;
     pcm16_tail->SYNTH.staff_name = NULL;
     pcm16_tail->SYNTH.options = NULL;
@@ -413,7 +415,9 @@ append:
       UNEXPECTED(tok, d);
       return NULL;
     }
-    pcm16_head->SYNTH.staff_name = tok_identifier;
+    pcm16_tail->SYNTH.staff_line = line_token_found;
+    pcm16_tail->SYNTH.staff_column = column_token_found;
+    pcm16_tail->SYNTH.staff_name = tok_identifier;
     tok_identifier = NULL;
 
     //    symrec_t *staff = getsym(d, tok_identifier);
@@ -451,9 +455,9 @@ append:
             char *strv;
           };
         });
-        pcm16_head->SYNTH.options = NULL;
-        pcm16_head->SYNTH.options =
-            realloc(pcm16_head->SYNTH.options, option_size * nb_options);
+        pcm16_tail->SYNTH.options = NULL;
+        pcm16_tail->SYNTH.options =
+            realloc(pcm16_tail->SYNTH.options, option_size * nb_options);
         tok = read_next_tok_cur_dats_t(d);
         if (tok != TOK_EQUAL) {
           EXPECTING(TOK_EQUAL, d);
@@ -462,8 +466,8 @@ append:
         tok = read_next_tok_cur_dats_t(d);
         switch (tok) {
         case TOK_FLOAT:
-          pcm16_head->SYNTH.options[nb_options - 1].intv = (int)tok_num;
-          pcm16_head->SYNTH.options[nb_options - 1].floatv = tok_num;
+          pcm16_tail->SYNTH.options[nb_options - 1].intv = (int)tok_num;
+          pcm16_tail->SYNTH.options[nb_options - 1].floatv = tok_num;
           printf("Driver num %f\n", tok_num);
           tok = read_next_tok_cur_dats_t(d);
           break;
@@ -475,7 +479,7 @@ append:
           expecting = TOK_STRING;
           tok = read_next_tok_cur_dats_t(d);
           expecting = TOK_NULL;
-          pcm16_head->SYNTH.options[nb_options - 1].strv = tok_identifier;
+          pcm16_tail->SYNTH.options[nb_options - 1].strv = tok_identifier;
           printf("Driver num %s\n", tok_identifier);
           tok_identifier = NULL;
           tok = read_next_tok_cur_dats_t(d);
@@ -488,10 +492,12 @@ append:
         }
         nb_options++;
       } while (tok == TOK_COMMA);
+      pcm16_tail->SYNTH.nb_options = nb_options;
       if (tok != TOK_RBRACKET) {
         EXPECTING(TOK_RBRACKET, d);
         return NULL;
       }
+      tok = read_next_tok_cur_dats_t(d);
     }
     if (tok == TOK_COMMA) {
       pcm16_tail->next = malloc(sizeof(pcm16_t));
@@ -502,6 +508,9 @@ append:
   } break;
   case TOK_IDENTIFIER: {
     pcm16_tail->type = ID;
+    pcm16_tail->ID.line = line_token_found;
+    pcm16_tail->ID.column = column_token_found;
+    pcm16_tail->pcm = NULL;
     pcm16_tail->ID.id = tok_identifier;
     tok_identifier = NULL;
 
@@ -745,6 +754,7 @@ append:
     return NULL;
   }
   pcm16->value.pcm16.pcm = pcm16_head;
+  pcm16_tail->next = NULL;
   return pcm16;
 }
 

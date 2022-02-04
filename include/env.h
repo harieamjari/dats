@@ -118,17 +118,23 @@ struct pcm16_t {
   union {
     struct {
       char *id;
+      size_t line, column;
     } ID;
     struct {
       uint32_t nb_pcm16;
       pcm16_t *pcm16;
+      size_t line, column;
     } MIX;
     struct {
       char *filter_name, *pcm16_name;
+      size_t filter_line, filter_column;
+      size_t pcm16_line, pcm16_column;
     } FILTER;
     struct {
       char *synth_name, *staff_name;
-      uint32_t nb_options;
+      size_t staff_line, staff_column;
+      size_t synth_line, synth_column;
+      size_t nb_options;
       struct {
         char *option_name;
         union {

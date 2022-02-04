@@ -17,7 +17,6 @@ EXTERN void clean_all_symrec_t_cur_dats_t (const dats_t * const t);*/
 
 EXTERN void clean_all_symrec_t_all_dats_t(void);
 
-EXTERN symrec_t *symrec_tcpy(symrec_t *const s);
 EXTERN int count_dats_t(void);
 EXTERN const char *token_t_to_str(const token_t t);
 EXTERN symrec_t *getsym(const dats_t *const t, char const *const id);
@@ -31,6 +30,8 @@ EXTERN int column_token_found;
 
 EXTERN int local_errors;
 EXTERN int global_errors;
+EXTERN int local_warnings;
+EXTERN int global_warnings;
 
 EXTERN int seek;
 EXTERN float tok_num;
@@ -78,6 +79,16 @@ EXTERN dats_t *dats_files;
         "warning" COLOR_OFF ": %s",                                            \
         __FILE__, __LINE__, __func__, d->fname, line_token_found,              \
         column_token_found + 1, str)
+
+#define SEMANTIC(d, line, column, ...)                                         \
+  {                                                                            \
+    local_errors++;                                                            \
+    ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON             \
+          "error" COLOR_OFF ": ",                                              \
+          __FILE__, __LINE__, __func__, d->fname, line, column);               \
+    ERROR(__VA_ARGS__);                                                        \
+    print_scan_line(d, line, column);                                          \
+  }
 
 #define C_ERROR(d, ...)                                                        \
   {                                                                            \

@@ -12,7 +12,7 @@
  * Dats is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * Lesser General Public License for more details.v
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with Dats; if not, write to the Free Software
@@ -26,6 +26,8 @@
 #include "env.h"
 #include "scanner.h"
 
+#include "libdfilter/allfilter.h"
+#include "libdsynth/allsynth.h"
 int semantic_cur_dats_t(dats_t *d) {
   for (symrec_t *n = d->sym_table; n != NULL; n = n->next) {
     switch (n->type) {
@@ -34,25 +36,36 @@ int semantic_cur_dats_t(dats_t *d) {
       case ID: {
         symrec_t *pcm16 = getsym(d, n->value.pcm16.pcm->ID.id);
         if (pcm16 == NULL) {
-          REPORT("Undefined reference to %s\n", tok_identifier);
-          print_scan_line(d, pcm16->line, pcm16->column);
+          REPORT("Undefined reference to %s\n", n->value.pcm16.pcm->ID.id);
+          print_scan_line(d, n->value.pcm16.pcm->ID.line,
+                          n->value.pcm16.pcm->ID.column);
+          continue;
         }
         if (pcm16->type != TOK_PCM16) {
-          C_ERROR(d, "Incompatible %s to pcm16\n", token_t_to_str(pcm16->type));
+          SEMANTIC(d, n->line, n->column, "Incompatible %s to pcm16\n",
+                   token_t_to_str(pcm16->type));
+          REPORT("note: previously declared here::\n");
           print_scan_line(d, pcm16->line, pcm16->column);
         }
       } break;
-        //    const DSSynth *driver = get_dsynth_by_name(tok_identifier);
-        //    if (driver == NULL) {
-        //      C_ERROR(d, "No synth %s\n", tok_identifier);
-        //      return NULL;
-        //    }
+      case SYNTH: {
+        const DSSynth *driver =
+            get_dsynth_by_name(n->value.pcm16.pcm->SYNTH.synth_name);
+        if (driver == NULL) {
+          SEMANTIC(d, n->value.pcm16.pcm->SYNTH.synth_line,
+                   n->value.pcm16.pcm->SYNTH.synth_column,
+                   "No synth named, '%s'\n",
+                   n->value.pcm16.pcm->SYNTH.synth_name);
+          continue;
+        }
         //    printf("Synth %s found\n", tok_identifier);
         //    free(tok_identifier);
 
         //    pcm16_t *(*const synth)(const symrec_t *const staff) =
         //    driver->synth;
+      } break;
       }
+      break;
     }
   }
 
