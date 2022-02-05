@@ -50,10 +50,35 @@ void clean_all_dats_t(void) {
   dats_files = NULL;
 }
 
-void destroy_pcm16(pcm16_t *pcm16) {
+void destroy_pcm16_t(pcm16_t *pcm16) {
+  if (pcm16 == NULL)
+    return;
   pcm16_t *n;
   for (pcm16_t *a = pcm16; a != NULL; a = n) {
     n = a->next;
+    switch (a->type) {
+    case ID:
+      free(a->ID.id);
+      break;
+    case MIX:
+      for (uint32_t i = 0; i < a->MIX.nb_pcm16; i++)
+        destroy_pcm16_t(a->MIX.pcm16);
+      break;
+    case FILTER:
+      free(a->FILTER.filter_name);
+      free(a->FILTER.pcm16_name);
+      break;
+    case SYNTH:
+      free(a->SYNTH.synth_name);
+      free(a->SYNTH.staff_name);
+      for (size_t i = 0; i < a->SYNTH.nb_options; i++) {
+        free(a->SYNTH.options[i].option_name);
+        free(a->SYNTH.options[i].strv);
+      }
+      free(a->SYNTH.options);
+      break;
+    }
+    free(a->pcm);
     free(a);
   }
 }
@@ -80,16 +105,9 @@ void clean_all_symrec_t_all_dats_t() {
           free(nr);
         }
       } break;
-      case TOK_PCM16: {
-        pcm16_t *ptmp;
-        for (pcm16_t *pcm = p->value.pcm16.pcm; pcm != NULL; pcm = ptmp) {
-          ptmp = pcm->next;
-          free(pcm->pcm);
-        }
-        free(p->value.pcm16.pcm);
-        free(p->value.pcm16.identifier);
+      case TOK_PCM16:
+        destroy_pcm16_t(p->value.pcm16.pcm);
         break;
-      }
       default:
         ERROR("UNKNOWN TYPE %d\n", p->type);
       }

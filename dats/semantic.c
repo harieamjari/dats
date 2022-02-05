@@ -28,10 +28,14 @@
 
 #include "libdfilter/allfilter.h"
 #include "libdsynth/allsynth.h"
+
+void print_pcm16_t(pcm16_t *const pcm16);
+
 int semantic_cur_dats_t(dats_t *d) {
   for (symrec_t *n = d->sym_table; n != NULL; n = n->next) {
     switch (n->type) {
     case TOK_PCM16:
+      print_pcm16_t(n->value.pcm16.pcm);
       switch (n->value.pcm16.pcm->type) {
       case ID: {
         symrec_t *pcm16 = getsym(d, n->value.pcm16.pcm->ID.id);

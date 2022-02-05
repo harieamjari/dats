@@ -360,16 +360,17 @@ static symrec_t *parse_pcm16(char *id) {
   pcm16->column = column_token_found;
   pcm16->value.pcm16.total_numsamples = 0;
   pcm16->value.pcm16.identifier = id;
+  pcm16->value.pcm16.pcm = NULL;
   pcm16->next = d->sym_table;
   d->sym_table = pcm16;
 
   pcm16_t *pcm16_head = malloc(sizeof(pcm16_t));
   assert(pcm16_head != NULL);
   pcm16_head->next = NULL;
+  pcm16_head->pcm = NULL;
 
   pcm16_t *pcm16_tail = pcm16_head;
 
-  pcm16->value.pcm16.pcm = pcm16_head;
   tok_identifier = NULL;
 
 append:
@@ -379,11 +380,13 @@ append:
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_DOT) {
       UNEXPECTED(tok, d);
+      destroy_pcm16_t(pcm16_head);
       return NULL;
     }
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_IDENTIFIER) {
       UNEXPECTED(tok, d);
+      destroy_pcm16_t(pcm16_head);
       return NULL;
     }
     pcm16_tail->type = SYNTH;
@@ -393,6 +396,7 @@ append:
     pcm16_tail->SYNTH.synth_name = tok_identifier;
     pcm16_tail->SYNTH.staff_name = NULL;
     pcm16_tail->SYNTH.options = NULL;
+    pcm16_tail->SYNTH.nb_options = 0;
     tok_identifier = NULL;
 
     //    const DSSynth *driver = get_dsynth_by_name(tok_identifier);
@@ -407,12 +411,14 @@ append:
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_LPAREN) {
       UNEXPECTED(tok, d);
+      destroy_pcm16_t(pcm16_head);
       return NULL;
     }
 
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_IDENTIFIER) {
       UNEXPECTED(tok, d);
+      destroy_pcm16_t(pcm16_head);
       return NULL;
     }
     pcm16_tail->SYNTH.staff_line = line_token_found;
@@ -430,6 +436,7 @@ append:
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_RPAREN) {
       UNEXPECTED(tok, d);
+      destroy_pcm16_t(pcm16_head);
       return NULL;
     }
 
@@ -445,6 +452,7 @@ append:
         tok = read_next_tok_cur_dats_t(d);
         if (tok != TOK_IDENTIFIER) {
           C_ERROR(d, "Expecting options\n");
+          destroy_pcm16_t(pcm16_head);
           return NULL;
         }
         const size_t option_size = sizeof(struct {
@@ -455,12 +463,15 @@ append:
             char *strv;
           };
         });
-        pcm16_tail->SYNTH.options = NULL;
         pcm16_tail->SYNTH.options =
             realloc(pcm16_tail->SYNTH.options, option_size * nb_options);
+        assert(pcm16_tail->SYNTH.options != NULL);
+        pcm16_tail->SYNTH.options[nb_options - 1].option_name = tok_identifier;
+        tok_identifier = NULL;
         tok = read_next_tok_cur_dats_t(d);
         if (tok != TOK_EQUAL) {
           EXPECTING(TOK_EQUAL, d);
+          destroy_pcm16_t(pcm16_head);
           return NULL;
         }
         tok = read_next_tok_cur_dats_t(d);
@@ -468,12 +479,14 @@ append:
         case TOK_FLOAT:
           pcm16_tail->SYNTH.options[nb_options - 1].intv = (int)tok_num;
           pcm16_tail->SYNTH.options[nb_options - 1].floatv = tok_num;
+          pcm16_tail->SYNTH.options[nb_options - 1].strv = NULL;
           printf("Driver num %f\n", tok_num);
           tok = read_next_tok_cur_dats_t(d);
           break;
         default:
           if (tok != TOK_DQUOTE) {
             C_ERROR(d, "Option expects a string, '\"'");
+            destroy_pcm16_t(pcm16_head);
             return NULL;
           }
           expecting = TOK_STRING;
@@ -485,6 +498,7 @@ append:
           tok = read_next_tok_cur_dats_t(d);
           if (tok != TOK_DQUOTE) {
             C_ERROR(d, "Strings must end with a double quote");
+            destroy_pcm16_t(pcm16_head);
             return NULL;
           }
           tok = read_next_tok_cur_dats_t(d);
@@ -492,9 +506,10 @@ append:
         }
         nb_options++;
       } while (tok == TOK_COMMA);
-      pcm16_tail->SYNTH.nb_options = nb_options;
+      pcm16_tail->SYNTH.nb_options = nb_options - 1;
       if (tok != TOK_RBRACKET) {
         EXPECTING(TOK_RBRACKET, d);
+        destroy_pcm16_t(pcm16_head);
         return NULL;
       }
       tok = read_next_tok_cur_dats_t(d);

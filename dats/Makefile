@@ -6,6 +6,7 @@ OBJ += parser.o
 OBJ += scanner.o
 OBJ += wav.o
 OBJ += semantic.o
+OBJ += utils.o
 
 LDFLAGS = -L../libdsynth -ldsynth -L../libdfilter \
 	-ldfilter -lm 

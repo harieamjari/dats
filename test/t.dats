@@ -187,10 +187,11 @@ r 2;
 }
 	
 master {
-   pcm16 track1 = kdl;
-   pcm16 track2 = synth.kla(stam);
-
-
- 
+/* multi line **
+   ***
+   hh */
+  /* pcm16 tmp1 = synth.kpa(apple);*/
+   pcm16 track1 = synth.kpa(apple), track1;
+   write("t.wav", track1);
 }
 
