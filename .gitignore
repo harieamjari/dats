@@ -33,3 +33,5 @@ dats/*.wav
 # Indent backups
 *.c~
 *.h~
+
+version.h

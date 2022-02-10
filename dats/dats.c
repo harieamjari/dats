@@ -32,6 +32,7 @@
 #include "libdfilter/allfilter.h"
 #include "libdsynth/allsynth.h"
 #include "scanner.h"
+#include "version.h"
 
 /* Parses dats_t */
 extern int parse_cur_dats_t(dats_t *const t);
@@ -52,7 +53,17 @@ int process_args(const int argc, char *const *argv) {
       if (argv[i][1] == '-') {
         if (!strcmp(&argv[i][2], "help")) {
           /* clang-format off */
-          puts("Dats interpreter Draft-2.0.0");
+          printf("Dats interpreter Draft-2.0.0 ");
+          putchar('(');
+      {   int i = 0;
+          while (i!=____git_refs_heads_parser_0_1_0_len-1)
+          putchar(____git_refs_heads_parser_0_1_0[i++]);
+      }   putchar(':');
+      {   int i = 0;
+          while (i!=____git_HEAD_len-1)
+          putchar((____git_HEAD+5)[i++]);
+      }
+          puts(")");
           printf("%s [dats file]\noptions:\n\n", argv[0]);
           printf("--list-synths                        prints all available synths\n"
                  "--list-filters                       prints all available filters\n");

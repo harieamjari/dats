@@ -29,6 +29,12 @@ void print_pcm16_t(pcm16_t *const pcm16) {
         printf("option: %s\n", p->SYNTH.options[i].option_name);
         fflush(stdout);
       }
+    case FILTER:
+      print_pcm16_t(p->FILTER.pcm16_arg);
+      for (size_t i = 0; i < p->FILTER.nb_options; i++) {
+        printf("option: %s\n", p->FILTER.options[i].option_name);
+        fflush(stdout);
+      }
     }
   }
 }

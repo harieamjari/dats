@@ -122,13 +122,21 @@ struct pcm16_t {
     } ID;
     struct {
       uint32_t nb_pcm16;
-      pcm16_t *pcm16;
+      pcm16_t *pcm16; //an array
       size_t line, column;
     } MIX;
     struct {
-      char *filter_name, *pcm16_name;
+      char *filter_name;
+      pcm16_t *pcm16_arg; //a linked list
       size_t filter_line, filter_column;
       size_t pcm16_line, pcm16_column;
+      size_t nb_options;
+      struct {
+        char *option_name;
+        union {
+          int intv; float floatv; char *strv;
+        };
+      }*options;
     } FILTER;
     struct {
       char *synth_name, *staff_name;

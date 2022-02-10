@@ -22,14 +22,19 @@ ifeq ($(ENABLE_OPENMP), yes)
 	LDFLAGS += -fopenmp
 endif
 
-dats : $(OBJ)
+.PHONY : clean test indent
+
+dats :$(OBJ)
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-$(OBJ) :%.o:%.c $(wildcard *.h)
+version.h:
+	xxd -i ../.git/refs/heads/parser-0.1.0 > version.h
+	xxd -i ../.git/HEAD >> version.h
 
-.PHONY : clean test indent
+$(OBJ) :%.o:%.c $(wildcard *.h) version.h
+
 clean: 
-	rm dats $(OBJ)
+	rm dats $(OBJ) version.h
 
 test : dats
 	./dats ../test/t.dats

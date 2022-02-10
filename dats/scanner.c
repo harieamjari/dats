@@ -66,7 +66,7 @@ void destroy_pcm16_t(pcm16_t *pcm16) {
       break;
     case FILTER:
       free(a->FILTER.filter_name);
-      free(a->FILTER.pcm16_name);
+      destroy_pcm16_t(a->FILTER.pcm16_arg);
       break;
     case SYNTH:
       free(a->SYNTH.synth_name);
@@ -320,7 +320,7 @@ w:
     c = '/';
   }
   switch (c) {
-    // clang-format off
+  // clang-format off
     /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
@@ -467,7 +467,7 @@ w:
         return TOK_IDENTIFIER;
       }
     }
-    // clang-format off
+  // clang-format off
     /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':
