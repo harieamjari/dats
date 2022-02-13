@@ -112,6 +112,10 @@ int main(int argc, char **argv) {
   {
     HINSTANCE dll_module;
     if ((dll_module = LoadLibrary("exchndl.dll")) != NULL) {
+      /* This is a security hole as anyone can create dll and put
+       * whatever they want to ExcHndlInit. Verify that the dll is genuine
+       * and came from legitimate sites or github account ye user..
+       */
       void (*exchndl_init)(void) = GetProcAddress(dll_module, "ExcHndlInit");
       exchndl_init();
     }

@@ -110,8 +110,19 @@ struct nr_t {
   nr_t *next;
 };
 
+typedef struct synth_option_t synth_option_t;
+struct synth_option_t {
+  char *option_name;
+  int line, column;
+  union {
+    int intv;
+    float floatv;
+    char *strv;
+  };
+};
+
 typedef enum pcm16_type_t pcm16_type_t;
-enum pcm16_type_t {ID, MIX, FILTER, SYNTH};
+enum pcm16_type_t { ID, MIX, FILTER, SYNTH };
 typedef struct pcm16_t pcm16_t;
 struct pcm16_t {
   pcm16_type_t type;
@@ -122,33 +133,23 @@ struct pcm16_t {
     } ID;
     struct {
       uint32_t nb_pcm16;
-      pcm16_t *pcm16; //an array
+      pcm16_t *pcm16; // an array
       size_t line, column;
     } MIX;
     struct {
       char *filter_name;
-      pcm16_t *pcm16_arg; //a linked list
+      pcm16_t *pcm16_arg; // a linked list
       size_t filter_line, filter_column;
       size_t pcm16_line, pcm16_column;
       size_t nb_options;
-      struct {
-        char *option_name;
-        union {
-          int intv; float floatv; char *strv;
-        };
-      }*options;
+      synth_option_t *options;
     } FILTER;
     struct {
       char *synth_name, *staff_name;
       size_t staff_line, staff_column;
       size_t synth_line, synth_column;
       size_t nb_options;
-      struct {
-        char *option_name;
-        union {
-          int intv; float floatv; char *strv;
-        };
-      }*options;
+      synth_option_t *options;
     } SYNTH;
   };
   int16_t *pcm;

@@ -115,7 +115,6 @@ EXTERN dats_t *dats_files;
 
 #define REPORT(...)                                                            \
   {                                                                            \
-    local_errors++;                                                            \
     ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] ", __FILE__, __LINE__,        \
           __func__);                                                           \
     ERROR(__VA_ARGS__);                                                        \

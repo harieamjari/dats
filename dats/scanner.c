@@ -683,6 +683,8 @@ const char *token_t_to_str(const token_t t) {
     return "pcm16";
   case TOK_SYNTH:
     return "synth";
+  case TOK_FILTER:
+    return "filter";
   case TOK_WRITE:
     return "write";
   case TOK_READ:

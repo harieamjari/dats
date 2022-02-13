@@ -26,10 +26,6 @@
 #include <string.h>
 
 #include "scanner.h"
-#include "wav.h"
-
-#include "libdfilter/allfilter.h"
-#include "libdsynth/allsynth.h"
 
 extern void print_all_nr_t(nr_t *nr);
 
@@ -398,7 +394,7 @@ append:
 
     tok = read_next_tok_cur_dats_t(d);
     if (tok != TOK_IDENTIFIER) {
-      UNEXPECTED(tok, d);
+      EXPECTING(TOK_IDENTIFIER, d);
       destroy_pcm16_t(pcm16_head);
       return NULL;
     }
@@ -436,18 +432,14 @@ append:
           destroy_pcm16_t(pcm16_head);
           return NULL;
         }
-        const size_t option_size = sizeof(struct {
-          char *name;
-          union {
-            int intv;
-            float floatv;
-            char *strv;
-          };
-        });
+        const size_t option_size = sizeof(synth_option_t);
         pcm16_tail->SYNTH.options =
             realloc(pcm16_tail->SYNTH.options, option_size * nb_options);
         assert(pcm16_tail->SYNTH.options != NULL);
         pcm16_tail->SYNTH.options[nb_options - 1].option_name = tok_identifier;
+        pcm16_tail->SYNTH.options[nb_options - 1].line = (int)line_token_found;
+        pcm16_tail->SYNTH.options[nb_options - 1].column = (int)column_token_found;
+
         tok_identifier = NULL;
         tok = read_next_tok_cur_dats_t(d);
         if (tok != TOK_EQUAL) {
@@ -579,14 +571,7 @@ append:
           destroy_pcm16_t(pcm16_head);
           return NULL;
         }
-        const size_t option_size = sizeof(struct {
-          char *name;
-          union {
-            int intv;
-            float floatv;
-            char *strv;
-          };
-        });
+        const size_t option_size = sizeof(synth_option_t);
         pcm16_tail->FILTER.options =
             realloc(pcm16_tail->FILTER.options, option_size * nb_options);
         assert(pcm16_tail->FILTER.options != NULL);
@@ -686,6 +671,7 @@ static int parse_stmt() {
       UNEXPECTED(tok, d);
       return 1;
     }
+    size_t line = line_token_found, column = column_token_found;
     char *id = tok_identifier;
     symrec_t *pcm16 = NULL;
 
@@ -699,6 +685,8 @@ static int parse_stmt() {
       return 1;
     }
 
+    line_token_found = line;
+    column_token_found = column;
     pcm16 = parse_pcm16(id);
     if (pcm16 == NULL)
       return 1;
