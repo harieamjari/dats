@@ -8,37 +8,37 @@ The Hello World of dats:
     n 4, d4;
   }
 
-  master {
+  main {
     pcm16 bar = synth.psg(foo);
     write("t.wav", bar);
   }
 ```
 # The Basics
 
-Toward playing music, there must be series of notes written for the player to read.
-For dats, a note is declared with the keyword `n`. `n` must contain two arguments,
-a length and a pitch, each are separated by a comma:
+Toward playing music, there must be series of musical notes written for the player to read.
+For dats, a musical note is declared with the keyword `n`. `n` must contain two arguments,
+a length and a note, each are separated by a comma:
 
 ```
-  n <length>, <pitch>;
+  n <length>, <note>;
 ```
 
 And example of such declaration is:
 ```
   n 4, c4;
 ```
-This is a declaration of note of length 1/4, playing c4. The length
-is just the denominator of how much measure the note took.
+This is a declaration of musical note of length 1/4, playing c4. The length
+is just the denominator of how much measure the musical note took.
 
-Such notes, (and rests), are always declared inside a staff.
+Such musical notes, (and musical rests), are always declared inside a staff.
 
 ```
   staff foo {
     n 4, c4;
   }
 ```
-Now we have a staff, what else do we need? A `master`. A master is basically
-where the entry point of execution. (Multiple declaration of master is valid)
+Now we have a staff, what else do we need? A `main`. A main is basically
+where you do your operations on staffs and synthesize, producing sounds.
 
 First, we process the staff using a synthesizer. The output of this synthesizer
 is then stored into a variable, usually a type of `pcm16`:
@@ -48,7 +48,7 @@ is then stored into a variable, usually a type of `pcm16`:
     n 4, c4;
   }
 
-  master {
+  main {
     pcm16 bar = synth.kpa(foo);
     write("w.wav", bar);
   }
@@ -63,6 +63,9 @@ you were appending with:
   pcm16 tr2 = synth.kpa(/* some staff */);
   pcm16 tr3 = tr1, tr2, tr2;
 ```
+
+What this does is it appends the sound from tr1, tr2, and tr1 and stores it
+to tr3.
 
 # Synths
 
@@ -135,9 +138,13 @@ You may also add dotted note to a floating point, like `4.0.`, and perform addit
 but other arithmetic operator such, `- / *`, is illegal.
 
 #### note
-A note is represented with a key and an octave:
+A note is represented with a "note" and an octave:
 ```
   c4 // [abcdefg](b|#)?[0-9]
+  | \
+  |  \--->octave 4
+  v
+ note 'c'
 ```
 Unlike the parameter length, arithmetic operation is illegal
 to perform on a note.

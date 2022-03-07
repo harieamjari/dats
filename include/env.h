@@ -24,7 +24,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-typedef enum token_t token_t;
 enum token_t {
   TOK_IDENTIFIER,
   TOK_STRING,
@@ -34,7 +33,7 @@ enum token_t {
   // TOK_TRACK,
   TOK_SYNTH,
   TOK_FILTER,
-  TOK_MASTER,
+  TOK_MAIN,
   TOK_PCM16,
   TOK_FLOAT,
 
@@ -67,8 +66,9 @@ enum token_t {
   TOK_SEMICOLON,
   TOK_COMMA,
   TOK_DOT,
-  TOK_DQUOTE, //  double quote
-  TOK_SQUOTE, // single qoute
+  TOK_DQUOTE, /*  double quote */
+  TOK_SQUOTE, /* single qoute */
+  TOK_UNDERSCORE
 
   TOK_EQUAL,
   TOK_ADD,
@@ -81,9 +81,10 @@ enum token_t {
   TOK_ERR,
   TOK_NULL
 };
+typedef enum token_t token_t;
 
-typedef enum music_symbol music_symbol;
 enum music_symbol { SYM_REST, SYM_NOTE };
+typedef enum music_symbol music_symbol;
 
 typedef struct note_t note_t;
 struct note_t {
@@ -111,6 +112,7 @@ struct nr_t {
 };
 
 typedef struct synth_option_t synth_option_t;
+typedef struct synth_option_t filter_option_t;
 struct synth_option_t {
   char *option_name;
   int line, column;
@@ -121,8 +123,8 @@ struct synth_option_t {
   };
 };
 
-typedef enum pcm16_type_t pcm16_type_t;
 enum pcm16_type_t { ID, MIX, FILTER, SYNTH };
+typedef enum pcm16_type_t pcm16_type_t;
 typedef struct pcm16_t pcm16_t;
 struct pcm16_t {
   pcm16_type_t type;
@@ -149,7 +151,7 @@ struct pcm16_t {
       size_t staff_line, staff_column;
       size_t synth_line, synth_column;
       size_t nb_options;
-      synth_option_t *options;
+      filter_option_t *options;
     } SYNTH;
   };
   int16_t *pcm;

@@ -43,7 +43,7 @@ static int parse_notes_rests() {
     cnr->length = 0;
     cnr->next = NULL;
   add_lengthn:
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
       free(cnr);
@@ -54,7 +54,7 @@ static int parse_notes_rests() {
     uint32_t dotted_len =
         (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
   checkn:
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     switch (tok) {
     case TOK_DOT:
       dotted_len /= 2;
@@ -70,7 +70,7 @@ static int parse_notes_rests() {
       return 1;
     }
     staff->value.staff.numsamples += cnr->length;
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
 
     note_t *n = malloc(sizeof(note_t));
     note_t *f = n;
@@ -94,17 +94,30 @@ static int parse_notes_rests() {
     f->release = tok_release;
     f->volume = tok_volume;
     f->duration = cnr->length;
-    tok = read_next_tok_cur_dats_t(d);
-    if (tok == TOK_DOT) {
+    tok = read_next_tok(d);
+
+    switch (tok) {
+    case:
+    TOK_DOT : {
       f->duration /= 2;
-      tok = read_next_tok_cur_dats_t(d);
+      tok = read_next_tok(d);
+      break;
     }
-    if (tok == TOK_NOTE) {
+    case:
+    TOK_UNDERSCORE : {
+      f->duration /= 4;
+      tok = read_next_tok(d);
+      break;
+    }
+    case:
+    TOK_NOTE : {
       f->next = malloc(sizeof(note_t));
       assert(f != NULL);
       f = f->next;
       goto addn;
     }
+    }
+
     f->next = NULL;
     cnr->note = n;
 
@@ -125,7 +138,7 @@ static int parse_notes_rests() {
     cnr->length = 0;
     cnr->next = NULL;
   add_lengthr:
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_FLOAT) {
       UNEXPECTED(tok, d);
       free(cnr);
@@ -135,7 +148,7 @@ static int parse_notes_rests() {
     uint32_t dotted_len =
         (uint32_t)(60.0 * 44100.0 * 4.0 / (tok_bpm * tok_num));
   checkr:
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     switch (tok) {
     case TOK_DOT:
       dotted_len /= 2;
@@ -158,12 +171,12 @@ static int parse_notes_rests() {
       staff->value.staff.nr = cnr;
     rule_match = 1;
   } else if (tok == TOK_BPM) {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
       return 1;
     }
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
       return 1;
@@ -174,75 +187,75 @@ static int parse_notes_rests() {
     }
     tok_bpm = tok_num;
     rule_match = 1;
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
 
   } else if (tok == TOK_VOLUME) {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
       return 1;
     }
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
       return 1;
     }
     tok_volume = (int)tok_num;
     rule_match = 1;
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
 
   } else if (tok == TOK_ATTACK) {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
       return 1;
     }
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
       return 1;
     }
     tok_attack = tok_num;
     rule_match = 1;
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
 
   } else if (tok == TOK_DECAY) {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
       return 1;
     }
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
       return 1;
     }
     tok_decay = tok_num;
     rule_match = 1;
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
 
   } else if (tok == TOK_SUSTAIN) {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
       return 1;
     }
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
       return 1;
     }
     tok_sustain = tok_num;
     rule_match = 1;
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
 
   } else if (tok == TOK_OCTAVE) {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
       return 1;
     }
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
       return 1;
@@ -253,15 +266,15 @@ static int parse_notes_rests() {
       return 1;
     }
     rule_match = 1;
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
 
   } else if (tok == TOK_SEMITONE) {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
       return 1;
     }
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
       return 1;
@@ -272,22 +285,22 @@ static int parse_notes_rests() {
     //      return 1;
     //    }
     rule_match = 1;
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
 
   } else if (tok == TOK_RELEASE) {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_EQUAL) {
       UNEXPECTED(tok, d);
       return 1;
     }
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_FLOAT) {
       EXPECTING(TOK_FLOAT, d);
       return 1;
     }
     tok_release = tok_num;
     rule_match = 1;
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
 
   } else
     return 0;
@@ -296,7 +309,7 @@ static int parse_notes_rests() {
     UNEXPECTED(tok, d);
     return 1;
   }
-  tok = read_next_tok_cur_dats_t(d);
+  tok = read_next_tok(d);
   return 0;
 }
 
@@ -310,7 +323,7 @@ static int parse_staff() {
   tok_sustain = 1.0;
   tok_release = 300.0;
 
-  tok = read_next_tok_cur_dats_t(d);
+  tok = read_next_tok(d);
   if (tok != TOK_IDENTIFIER) {
     EXPECTING(TOK_IDENTIFIER, d);
     return 1;
@@ -328,13 +341,13 @@ static int parse_staff() {
   staff->next = d->sym_table;
   d->sym_table = staff;
 
-  tok = read_next_tok_cur_dats_t(d);
+  tok = read_next_tok(d);
   if (tok != TOK_LCURLY_BRACE) {
     UNEXPECTED(tok, d);
     return 1;
   }
 
-  tok = read_next_tok_cur_dats_t(d);
+  tok = read_next_tok(d);
   do {
     rule_match = 0;
     if (parse_notes_rests())
@@ -350,16 +363,16 @@ static int parse_staff() {
 
 static pcm16_t *parse_pcm16_tail(pcm16_t *pcm16_head, pcm16_t *pcm16_tail) {
 append:
-  tok = read_next_tok_cur_dats_t(d);
+  tok = read_next_tok(d);
   switch (tok) {
   case TOK_SYNTH: {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_DOT) {
       UNEXPECTED(tok, d);
       destroy_pcm16_t(pcm16_head);
       return NULL;
     }
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_IDENTIFIER) {
       UNEXPECTED(tok, d);
       destroy_pcm16_t(pcm16_head);
@@ -385,14 +398,14 @@ append:
 
     //    pcm16_t *(*const synth)(const symrec_t *const staff) =
     //    driver->synth;
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_LPAREN) {
       UNEXPECTED(tok, d);
       destroy_pcm16_t(pcm16_head);
       return NULL;
     }
 
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_IDENTIFIER) {
       EXPECTING(TOK_IDENTIFIER, d);
       destroy_pcm16_t(pcm16_head);
@@ -410,7 +423,7 @@ append:
     //    }
     //    free(tok_identifier);
 
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_RPAREN) {
       UNEXPECTED(tok, d);
       destroy_pcm16_t(pcm16_head);
@@ -422,11 +435,11 @@ append:
     //      token_t_to_str(staff->type)); return NULL;
     //    }
 
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok == TOK_LBRACKET) {
       size_t nb_options = 1;
       do {
-        tok = read_next_tok_cur_dats_t(d);
+        tok = read_next_tok(d);
         if (tok != TOK_IDENTIFIER) {
           C_ERROR(d, "Expecting options\n");
           destroy_pcm16_t(pcm16_head);
@@ -438,23 +451,24 @@ append:
         assert(pcm16_tail->SYNTH.options != NULL);
         pcm16_tail->SYNTH.options[nb_options - 1].option_name = tok_identifier;
         pcm16_tail->SYNTH.options[nb_options - 1].line = (int)line_token_found;
-        pcm16_tail->SYNTH.options[nb_options - 1].column = (int)column_token_found;
+        pcm16_tail->SYNTH.options[nb_options - 1].column =
+            (int)column_token_found;
 
         tok_identifier = NULL;
-        tok = read_next_tok_cur_dats_t(d);
+        tok = read_next_tok(d);
         if (tok != TOK_EQUAL) {
           EXPECTING(TOK_EQUAL, d);
           destroy_pcm16_t(pcm16_head);
           return NULL;
         }
-        tok = read_next_tok_cur_dats_t(d);
+        tok = read_next_tok(d);
         switch (tok) {
         case TOK_FLOAT:
           pcm16_tail->SYNTH.options[nb_options - 1].intv = (int)tok_num;
           pcm16_tail->SYNTH.options[nb_options - 1].floatv = tok_num;
           pcm16_tail->SYNTH.options[nb_options - 1].strv = NULL;
           printf("Driver num %f\n", tok_num);
-          tok = read_next_tok_cur_dats_t(d);
+          tok = read_next_tok(d);
           break;
         default:
           if (tok != TOK_DQUOTE) {
@@ -463,18 +477,18 @@ append:
             return NULL;
           }
           expecting = TOK_STRING;
-          tok = read_next_tok_cur_dats_t(d);
+          tok = read_next_tok(d);
           expecting = TOK_NULL;
           pcm16_tail->SYNTH.options[nb_options - 1].strv = tok_identifier;
           printf("Driver num %s\n", tok_identifier);
           tok_identifier = NULL;
-          tok = read_next_tok_cur_dats_t(d);
+          tok = read_next_tok(d);
           if (tok != TOK_DQUOTE) {
             C_ERROR(d, "Strings must end with a double quote");
             destroy_pcm16_t(pcm16_head);
             return NULL;
           }
-          tok = read_next_tok_cur_dats_t(d);
+          tok = read_next_tok(d);
           break;
         }
         nb_options++;
@@ -485,7 +499,7 @@ append:
         destroy_pcm16_t(pcm16_head);
         return NULL;
       }
-      tok = read_next_tok_cur_dats_t(d);
+      tok = read_next_tok(d);
     }
     if (tok == TOK_COMMA) {
       pcm16_tail->next = malloc(sizeof(pcm16_t));
@@ -503,7 +517,7 @@ append:
     pcm16_tail->ID.id = tok_identifier;
     tok_identifier = NULL;
 
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok == TOK_COMMA) {
       pcm16_tail->next = malloc(sizeof(pcm16_t));
       assert(pcm16_tail != NULL);
@@ -511,15 +525,35 @@ append:
       pcm16_tail->next = NULL;
       goto append;
     }
-  } break;
+  } break; /*
+   case TOK_MIX: {
+     tok = read_next_tok(d);
+     if (tok != TOK_LPAREN) {
+       UNEXPECTED(tok, d);
+       destroy_pcm16_t(pcm16_head);
+       return NULL;
+     }
+     pcm16_tail->type = MIX;
+     pcm16_tail->MIX.line = line_token_found;
+     pcm16_tail->MIX.column = column_token_found;
+     pcm16_tail->MIX.nb_pcm16 = 0;
+     pcm16_tail->MIX.pcm16 = NULL;
+
+     tok = read_next_tok(d);
+     switch (tok){
+
+
+     }
+     printf("read %s\n", token_t_to_str(tok));
+   } break;*/
   case TOK_FILTER: {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_DOT) {
       UNEXPECTED(tok, d);
       destroy_pcm16_t(pcm16_head);
       return NULL;
     }
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_IDENTIFIER) {
       UNEXPECTED(tok, d);
       destroy_pcm16_t(pcm16_head);
@@ -535,14 +569,14 @@ append:
     pcm16_tail->FILTER.nb_options = 0;
     tok_identifier = NULL;
 
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_LPAREN) {
       UNEXPECTED(tok, d);
       destroy_pcm16_t(pcm16_head);
       return NULL;
     }
 
-    //    tok = read_next_tok_cur_dats_t(d);
+    //    tok = read_next_tok(d);
     //    if (tok != TOK_IDENTIFIER) {
     //      UNEXPECTED(tok, d);
     //      destroy_pcm16_t(pcm16_head);
@@ -555,42 +589,47 @@ append:
     pcm16_tail->FILTER.pcm16_arg = parse_pcm16_tail(
         pcm16_tail->FILTER.pcm16_arg, pcm16_tail->FILTER.pcm16_arg);
 
+    if (pcm16_tail->FILTER.pcm16_arg == NULL) {
+      destroy_pcm16_t(pcm16_head);
+      return NULL;
+    }
+
     if (tok != TOK_RPAREN) {
       UNEXPECTED(tok, d);
       destroy_pcm16_t(pcm16_head);
       return NULL;
     }
 
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok == TOK_LBRACKET) {
       size_t nb_options = 1;
       do {
-        tok = read_next_tok_cur_dats_t(d);
+        tok = read_next_tok(d);
         if (tok != TOK_IDENTIFIER) {
           C_ERROR(d, "Expecting options\n");
           destroy_pcm16_t(pcm16_head);
           return NULL;
         }
-        const size_t option_size = sizeof(synth_option_t);
+        const size_t option_size = sizeof(filter_option_t);
         pcm16_tail->FILTER.options =
             realloc(pcm16_tail->FILTER.options, option_size * nb_options);
         assert(pcm16_tail->FILTER.options != NULL);
         pcm16_tail->FILTER.options[nb_options - 1].option_name = tok_identifier;
         tok_identifier = NULL;
-        tok = read_next_tok_cur_dats_t(d);
+        tok = read_next_tok(d);
         if (tok != TOK_EQUAL) {
           EXPECTING(TOK_EQUAL, d);
           destroy_pcm16_t(pcm16_head);
           return NULL;
         }
-        tok = read_next_tok_cur_dats_t(d);
+        tok = read_next_tok(d);
         switch (tok) {
         case TOK_FLOAT:
           pcm16_tail->FILTER.options[nb_options - 1].intv = (int)tok_num;
           pcm16_tail->FILTER.options[nb_options - 1].floatv = tok_num;
           pcm16_tail->FILTER.options[nb_options - 1].strv = NULL;
           printf("Driver num %f\n", tok_num);
-          tok = read_next_tok_cur_dats_t(d);
+          tok = read_next_tok(d);
           break;
         default:
           if (tok != TOK_DQUOTE) {
@@ -599,18 +638,18 @@ append:
             return NULL;
           }
           expecting = TOK_STRING;
-          tok = read_next_tok_cur_dats_t(d);
+          tok = read_next_tok(d);
           expecting = TOK_NULL;
           pcm16_tail->FILTER.options[nb_options - 1].strv = tok_identifier;
           printf("Driver num %s\n", tok_identifier);
           tok_identifier = NULL;
-          tok = read_next_tok_cur_dats_t(d);
+          tok = read_next_tok(d);
           if (tok != TOK_DQUOTE) {
             C_ERROR(d, "Strings must end with a double quote");
             destroy_pcm16_t(pcm16_head);
             return NULL;
           }
-          tok = read_next_tok_cur_dats_t(d);
+          tok = read_next_tok(d);
           break;
         }
         nb_options++;
@@ -621,7 +660,7 @@ append:
         destroy_pcm16_t(pcm16_head);
         return NULL;
       }
-      tok = read_next_tok_cur_dats_t(d);
+      tok = read_next_tok(d);
     }
     if (tok == TOK_COMMA) {
       pcm16_tail->next = malloc(sizeof(pcm16_t));
@@ -666,7 +705,7 @@ static symrec_t *parse_pcm16(char *id) {
 static int parse_stmt() {
   /* statements */
   if (tok == TOK_PCM16) {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_IDENTIFIER) {
       UNEXPECTED(tok, d);
       return 1;
@@ -675,7 +714,7 @@ static int parse_stmt() {
     char *id = tok_identifier;
     symrec_t *pcm16 = NULL;
 
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (tok != TOK_EQUAL) {
       free(id);
       if (tok == TOK_IDENTIFIER)
@@ -692,19 +731,19 @@ static int parse_stmt() {
       return 1;
     rule_match = 1;
   } /* else if (tok == TOK_WRITE) {
-     tok = read_next_tok_cur_dats_t(d);
+     tok = read_next_tok(d);
      if (tok != TOK_LPAREN) {
        EXPECTING(TOK_LPAREN, d);
        return 1;
      }
 
-     tok = read_next_tok_cur_dats_t(d);
+     tok = read_next_tok(d);
      if (tok != TOK_DQUOTE) {
        C_ERROR(d, "`write`, expects an identifier between double quote\n");
        return 1;
      }
      expecting = TOK_STRING;
-     tok = read_next_tok_cur_dats_t(d);
+     tok = read_next_tok(d);
      if (tok != TOK_STRING) {
        EXPECTING(TOK_STRING, d);
        return 1;
@@ -719,13 +758,13 @@ static int parse_stmt() {
      free(tok_identifier);
      tok_identifier = NULL;
 
-     tok = read_next_tok_cur_dats_t(d);
+     tok = read_next_tok(d);
      if (tok != TOK_DQUOTE) {
        C_ERROR(d, "Identifier must end with a double quote\n");
        return 1;
      }
 
-     tok = read_next_tok_cur_dats_t(d);
+     tok = read_next_tok(d);
      if (tok != TOK_COMMA) {
        EXPECTING(TOK_COMMA, d);
        return 1;
@@ -760,7 +799,7 @@ static int parse_stmt() {
        return 1;
      }
 
-     tok = read_next_tok_cur_dats_t(d);
+     tok = read_next_tok(d);
      rule_match = 1;
    } */
   else
@@ -771,20 +810,20 @@ static int parse_stmt() {
     return 1;
   }
 
-  tok = read_next_tok_cur_dats_t(d);
+  tok = read_next_tok(d);
 
   return 0;
 }
 
 static int parse_master() {
 
-  tok = read_next_tok_cur_dats_t(d);
+  tok = read_next_tok(d);
   if (tok != TOK_LCURLY_BRACE) {
     UNEXPECTED(tok, d);
     return 1;
   }
 
-  tok = read_next_tok_cur_dats_t(d);
+  tok = read_next_tok(d);
   do {
     rule_match = 0;
     if (parse_stmt())
@@ -808,11 +847,11 @@ static int start() {
         return 1;
     } while (tok == TOK_STAFF);
     return local_errors;
-  case TOK_MASTER:
+  case TOK_MAIN:
     do {
       if (parse_master())
         return 1;
-    } while (tok == TOK_MASTER);
+    } while (tok == TOK_MAIN);
     return local_errors;
   case TOK_EOF:
     return local_errors;
@@ -830,7 +869,7 @@ int parse_cur_dats_t(dats_t *const t) {
   d = t;
 
   while (1) {
-    tok = read_next_tok_cur_dats_t(d);
+    tok = read_next_tok(d);
     if (start()) {
       ERROR("%d local errors generated\n", local_errors);
       global_errors += local_errors;

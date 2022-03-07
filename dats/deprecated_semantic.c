@@ -8,7 +8,7 @@ int semantic_cur_dats_t(dats_t *const t) {
   /* master lookup */
   symrec_t *master = NULL;
   for (symrec_t *p = t->sym_table; p != NULL; p = p->next) {
-    if (master != NULL && p->type == TOK_MASTER) {
+    if (master != NULL && p->type == TOK_MAIN) {
       int length =
           snprintf(NULL, 0, "[%s:%d @ %p] %s:%d:%d: ", __FILE__, __LINE__,
                    semantic_cur_dats_t, t->fname, t->line, t->column);
@@ -20,7 +20,7 @@ int semantic_cur_dats_t(dats_t *const t) {
       global_errors++;
       tok_master++;
     }
-    if (p->type == TOK_MASTER && master == NULL) {
+    if (p->type == TOK_MAIN && master == NULL) {
       master = p;
       tok_master++;
     }

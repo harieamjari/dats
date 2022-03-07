@@ -125,9 +125,9 @@ int count_dats_t(void) {
 
 symrec_t *getsym(const dats_t *const t, char const *const id) {
   symrec_t *n;
-  if (!strcmp(id, "master"))
+  if (!strcmp(id, "main"))
     for (symrec_t *p = t->sym_table; p != NULL; p = p->next)
-      if (p->type == TOK_MASTER)
+      if (p->type == TOK_MAIN)
         return p;
   for (symrec_t *p = t->sym_table; p != NULL; p = n) {
     n = p->next;
@@ -169,21 +169,21 @@ void print_debugging_info(const token_t tok, dats_t *d) {
         "^");
 }
 
-void print_scan_line(const dats_t *d, const size_t line, const size_t column) {
+void print_scan_line(FILE *fp, const size_t line, const size_t column) {
   char buff[1000] = {0};
-  rewind(d->fp);
+  rewind(fp);
   size_t num_line = 0;
   int c = 0;
   while (num_line != line - 1) {
-    c = fgetc(d->fp);
+    c = fgetc(fp);
     if (c == (int)'\n')
       num_line++;
     if (c == EOF)
       return;
   }
   char scan_line[502] = {0};
-  if (fgets(scan_line, 500, d->fp) != NULL)
-    fseek(d->fp, -(long)(strlen(scan_line)), SEEK_CUR);
+  if (fgets(scan_line, 500, fp) != NULL)
+    fseek(fp, -(long)(strlen(scan_line)), SEEK_CUR);
 
   if (scan_line[strlen(scan_line) - 1] != '\n') {
     int ls = strlen(scan_line);
@@ -199,11 +199,450 @@ void print_scan_line(const dats_t *d, const size_t line, const size_t column) {
   ERROR("%s", buff);
   ERROR("%*s\n", column + (length - (int)strlen(scan_line)), "^");
 }
+
+int fpeekc(FILE *fp) {
+  int c = fgetc(fp);
+  ungetc(c, fp);
+  return c;
+}
+
+long int fpeeks(char *buff, long size, FILE *fp) {
+  size = fread(buff, 1, size, fp);
+  fseek(fp, -size, SEEK_SET);
+  return size;
+}
+
+/*---------.
+ | Scanner |
+ `--------*/
+/* Peek next token of current dats_t* */
+token_t peek_next_tok(dats_t *const d, int skip) {
+  long int cur = ftell(d->fp);
+  int c, i = 0;
+  size_t lline = d->line, ccolumn = d->column;
+  char buff[100] = {0};
+
+  /* eat whitespace */
+w:
+  while (1) {
+    c = fgetc(d->fp);
+    ccolumn++;
+    if (((c != (int)' ') && c != (int)0x09) && c != (int)'\r')
+      break;
+  }
+  if (c == (int)'\n') {
+    lline++;
+    seek++;
+    ccolumn = 0;
+    goto w;
+  }
+  line_token_found = lline;
+  column_token_found = ccolumn;
+
+  if (expecting == TOK_STRING) {
+    ungetc(c, d->fp);
+    ccolumn--;
+    seek--;
+    int i;
+    for (i = 0; i < 100; i++) {
+      c = fgetc(d->fp);
+      ccolumn++;
+      if (c == '\\')
+        continue;
+      else if (c == '"') {
+        ungetc(c, d->fp);
+        seek--;
+        ccolumn--;
+        if (tok_identifier == NULL)
+          return TOK_ERR;
+        return TOK_STRING;
+      }
+      buff[i] = c;
+    }
+  }
+  if (expecting == TOK_STRING) {
+    ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
+          "error" COLOR_OFF ": Too long string\n",
+          __FILE__, __LINE__, __func__, d->fname, line_token_found,
+          column_token_found);
+    return TOK_ERR;
+  }
+  if (c == (int)'/') {
+    char prev_line[1000];
+    strcpy(prev_line, d->scan_line);
+    ccolumn++;
+    c = fgetc(d->fp);
+    seek++;
+    if (c == (int)'/') {
+      while ((c = fgetc(d->fp)) != EOF)
+        if (c == '\n') {
+          lline++;
+          ccolumn = 0;
+          seek++;
+          goto w;
+        }
+    } else if (c == (int)'*') {
+      while ((c = fgetc(d->fp)) != EOF) {
+        ccolumn++;
+        switch (c) {
+        case '*':
+          ccolumn++;
+          if ((c = fgetc(d->fp)) == '/') {
+            seek++;
+            goto w;
+          } else if (c == '\n') {
+            lline++;
+            ccolumn = 0;
+            seek++;
+          }
+          break;
+        case '\n':
+          lline++;
+          ccolumn = 0;
+          seek++;
+          break;
+        }
+      }
+      // strcpy(d->scan_line, prev_line);
+      local_errors++;
+      ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
+            "error" COLOR_OFF ": ",
+            __FILE__, __LINE__, __func__, d->fname, line_token_found,
+            column_token_found);
+      ERROR("unterminated multi-line comment\n");
+      print_scan_line(d->fp, line_token_found, column_token_found);
+      return TOK_ERR;
+    }
+    ccolumn--;
+    ungetc(c, d->fp);
+    seek--;
+    c = '/';
+  }
+  switch (c) {
+    // clang-format off
+    /* *INDENT-OFF* */
+    case 'a': case 'b': case 'c': case 'd': case 'e':
+    case 'f': case 'g': case 'h': case 'i': case 'j':
+    case 'k': case 'l': case 'm': case 'n': case 'o':
+    case 'p': case 'q': case 'r': case 's': case 't':
+    case 'u': case 'v': case 'w': case 'x': case 'y':
+    case 'z':
+    case 'A': case 'B': case 'C': case 'D': case 'E':
+    case 'F': case 'G': case 'H': case 'I': case 'J':
+    case 'K': case 'L': case 'M': case 'N': case 'O':
+    case 'P': case 'Q': case 'R': case 'S': case 'T':
+    case 'U': case 'V': case 'W': case 'X': case 'Y':
+    case 'Z':
+    /* *INDENT-ON* */
+    // clang-format on
+    {
+      int nchar;
+      ungetc(c, d->fp);
+      seek--;
+      ccolumn--;
+      (void)fscanf(d->fp, "%99[a-zA-Z0-9_#]%n", buff, &nchar);
+      ccolumn += nchar;
+      // printf("nchar %d %s column %d <----\n",  nchar, buff,
+      // column_token_found);
+      seek += nchar;
+      if (skip != i++)
+        goto w;
+      fseek(d->fp, cur, SEEK_SET);
+
+      if (buff[0] == 'n' && !buff[1])
+        return TOK_N;
+      else if (buff[0] == 'r' && !buff[1])
+        return TOK_R;
+      else if (!strcmp("staff", buff))
+        return TOK_STAFF;
+      else if ((buff[0] >= 'a' && buff[0] <= 'g') &&
+               (((buff[1] == '#' || buff[1] == 'b') && isdigit(buff[2])) ||
+                (buff[1] >= '0' && buff[1] <= '9'))) {
+        switch (buff[0]) {
+        // tok_note is a midi note number, while tok_num is a frequency.
+        case 'a':
+          tok_num = 27.50;
+          tok_note = 9 + 0x0c;
+          break;
+        case 'b':
+          tok_num = 30.86;
+          tok_note = 11 + 0x0c;
+          break;
+        case 'c':
+          tok_num = 16.35;
+          tok_note = 0 + 0x0c;
+          break;
+        case 'd':
+          tok_num = 18.35;
+          tok_note = 2 + 0x0c;
+          break;
+        case 'e':
+          tok_num = 20.50;
+          tok_note = 4 + 0x0c;
+          break;
+        case 'f':
+          tok_num = 21.82;
+          tok_note = 5 + 0x0c;
+          break;
+        case 'g':
+          tok_num = 24.49;
+          tok_note = 7 + 0x0c;
+          break;
+        default:
+          local_errors++;
+          ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
+                "error" COLOR_OFF ": ",
+                __FILE__, __LINE__, __func__, d->fname, line_token_found,
+                column_token_found);
+          ERROR("illegal key\n");
+          print_scan_line(d->fp, line_token_found, column_token_found);
+          return TOK_ERR;
+        }
+        if ((buff[1] == '#' || buff[1] == 'b') && isdigit(buff[2]) &&
+            !buff[3]) {
+          switch (buff[1]) {
+          case '#':
+            tok_num *= pow(2.0, 1.0 / 12.0);
+            tok_note++;
+            break;
+          case 'b':
+            tok_num /= pow(2.0, 1.0 / 12.0);
+            tok_note--;
+            break;
+          }
+          char *end;
+          tok_num *= pow(2.0, strtof(buff + 2, &end));
+          tok_note = tok_note + 0x0c * strtof(buff + 2, &end);
+          if (*end)
+            ERROR("Warning: non numeric character/s %s\n", end);
+          return TOK_NOTE;
+        } else if (isdigit(buff[1]) && !buff[2]) {
+          char *end;
+          tok_num *= pow(2.0, strtof(buff + 1, &end));
+          tok_note = tok_note + 0x0c * strtof(buff + 1, &end);
+          if (*end)
+            ERROR("Warning: non numeric character/s %s\n", end);
+          return TOK_NOTE;
+        } else
+          local_errors++;
+        ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
+              "error" COLOR_OFF ": ",
+              __FILE__, __LINE__, __func__, d->fname, line_token_found,
+              column_token_found);
+        ERROR("illegal key\n");
+        print_scan_line(d->fp, line_token_found, column_token_found);
+        return TOK_ERR;
+
+      } /*
+     else if (!strcmp ("repeat", buff))
+       return TOK_REPEAT;*/
+      else if (!strcmp("pcm16", buff))
+        return TOK_PCM16;
+      else if (!strcmp("bpm", buff))
+        return TOK_BPM;
+      else if (!strcmp("octave", buff))
+        return TOK_OCTAVE;
+      else if (!strcmp("semitone", buff))
+        return TOK_SEMITONE;
+      else if (!strcmp("attack", buff))
+        return TOK_ATTACK;
+      else if (!strcmp("decay", buff))
+        return TOK_DECAY;
+      else if (!strcmp("sustain", buff))
+        return TOK_SUSTAIN;
+      else if (!strcmp("release", buff))
+        return TOK_RELEASE;
+      else if (!strcmp("volume", buff))
+        return TOK_VOLUME;
+      else if (!strcmp("main", buff))
+        return TOK_MAIN;
+      else if (!strcmp("synth", buff))
+        return TOK_SYNTH;
+      else if (!strcmp("filter", buff))
+        return TOK_FILTER;
+      else if (!strcmp("read", buff))
+        return TOK_READ;
+      else if (!strcmp("write", buff))
+        return TOK_WRITE;
+      else if (!strcmp("mix", buff))
+        return TOK_MIX;
+      else {
+        return TOK_IDENTIFIER;
+      }
+    }
+    // clang-format off
+    /* *INDENT-OFF* */
+    case '0': case '1': case '2': case '3':
+    case '4': case '5': case '6': case '7':
+    case '8': case '9':
+    // clang-format on
+    /* *INDENT-ON* */
+    {
+      int nchar;
+      ungetc(c, d->fp);
+      ccolumn--;
+      seek--;
+      (void)fscanf(d->fp, "%99[0-9.]%n", buff, &nchar);
+      ccolumn += nchar;
+      // printf("nchar %d %s column %d <----\n",  nchar, buff,
+      {
+        int i = 0;
+        // This checks if a string has multiple periods.
+        // In an example `3.9..`, `3.9` is to be interpreted
+        // as a float, while the `..` is to be unget to be read
+        // as TOK_DOT TOK_DOT in the next function call by the parser.
+
+        while (isdigit(buff[i])) // count length of digits
+          i++;
+        if (buff[i] == (char)'.') { // if theres a period, count it.
+          i++;
+          if (isdigit(buff[i])) {
+            while (isdigit(buff[++i]))
+              ;
+            if (i != nchar)
+              for (int a = nchar - 1; a != i - 1; a--) {
+                buff[a] = 0;
+                seek--;
+                /* printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
+                        buff[a], buff[a]);*/
+                ccolumn--;
+              }
+          } else {
+            seek--;
+            ccolumn--;
+          }
+        }
+      }
+
+      char *end;
+      tok_num = strtof(buff, &end);
+      seek += nchar;
+      if (skip != i++)
+        goto w;
+      fseek(d->fp, cur, SEEK_SET);
+      return TOK_FLOAT;
+    }
+  case '-':
+    c = fgetc(d->fp);
+    ccolumn++;
+    seek++;
+    switch (c) {
+      // clang-format off
+      /* *INDENT-OFF* */
+    case '0': case '1': case '2': case '3':
+    case '4': case '5': case '6': case '7':
+    case '8': case '9':
+      // clang-format on
+      /* *INDENT-ON* */
+      {
+        int nchar;
+        ungetc(c, d->fp);
+        ccolumn--;
+        seek--;
+        buff[0] = '-';
+        (void)fscanf(d->fp, "%98[0-9.]%n", buff + 1, &nchar);
+        ccolumn += nchar;
+        {
+          int i = 0;
+          while (isdigit(buff[i]))
+            i++;
+          if (buff[i] == (char)'.') {
+            i++;
+            if (isdigit(buff[i])) {
+              while (isdigit(buff[++i]))
+                ;
+              if (i != nchar)
+                for (int a = nchar - 1; a != i - 1; a--) {
+                  buff[a] = 0;
+                  seek--;
+                  /*printf("i %d a %d nchar %d unget '%c' %x\n", i, a, nchar,
+                          buff[a], buff[a]);*/
+                  ccolumn--;
+                }
+            } else {
+              seek--;
+              ccolumn--;
+            }
+          }
+        }
+        char *end;
+        tok_num = strtof(buff, &end);
+        seek += nchar;
+        if (skip != i++)
+          goto w;
+        fseek(d->fp, cur, SEEK_SET);
+        return TOK_FLOAT;
+      }
+    default:
+      break;
+    }
+    ungetc(c, d->fp);
+    seek--;
+    ccolumn--;
+    if (skip != i++)
+      goto w;
+    fseek(d->fp, cur, SEEK_SET);
+    return TOK_SUB;
+  }
+  if (skip != i++)
+    goto w;
+  fseek(d->fp, cur, SEEK_SET);
+  switch (c) {
+  case '{':
+    return TOK_LCURLY_BRACE;
+  case '}':
+    return TOK_RCURLY_BRACE;
+  case '(':
+    return TOK_LPAREN;
+  case ')':
+    return TOK_RPAREN;
+  case '[':
+    return TOK_LBRACKET;
+  case ']':
+    return TOK_RBRACKET;
+  case ';':
+    return TOK_SEMICOLON;
+  case '"':
+    return TOK_DQUOTE;
+  case '\'':
+    return TOK_SQUOTE;
+  case '.':
+    return TOK_DOT;
+  case '=':
+    return TOK_EQUAL;
+  case ',':
+    return TOK_COMMA;
+  case '+':
+    return TOK_ADD;
+  case '/':
+    return TOK_DIV;
+  case '*':
+    return TOK_MUL;
+  case EOF:
+    return TOK_EOF;
+  default:
+    local_errors++;
+    ERROR("[" GREEN_ON "%s:%d @ %s" COLOR_OFF "] %s:%d:%d " RED_ON
+          "error" COLOR_OFF ": ",
+          __FILE__, __LINE__, __func__, d->fname, line_token_found,
+          column_token_found);
+    ERROR("illegal symbol");
+    print_scan_line(d->fp, line_token_found, column_token_found);
+    fseek(d->fp, cur, SEEK_SET);
+    return TOK_ERR;
+  }
+
+  fclose(d->fp);
+  ERROR("It seems that a crash has occured... please notify the maintainer with"
+        "this crash on https://github.com/harieamjari/dats\n");
+  exit(1);
+}
+
 /*---------.
  | Scanner |
  `--------*/
 /* Read next token of current dats_t* */
-token_t read_next_tok_cur_dats_t(dats_t *const d) {
+token_t read_next_tok(dats_t *const d) {
   int c;
   char buff[100] = {0};
 
@@ -274,8 +713,9 @@ w:
           d->line++;
           d->column = 0;
           seek++;
-          if (fgets(d->scan_line, 500, d->fp) != NULL)
-            fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
+          fpeeks(d->scan_line, 500, d->fp);
+          //          if (fgets(d->scan_line, 500, d->fp) != NULL)
+          //            fseek(d->fp, -(long)(strlen(d->scan_line)), SEEK_CUR);
           goto w;
         }
     } else if (c == (int)'*') {
@@ -320,7 +760,7 @@ w:
     c = '/';
   }
   switch (c) {
-  // clang-format off
+    // clang-format off
     /* *INDENT-OFF* */
     case 'a': case 'b': case 'c': case 'd': case 'e':
     case 'f': case 'g': case 'h': case 'i': case 'j':
@@ -352,6 +792,7 @@ w:
                (((buff[1] == '#' || buff[1] == 'b') && isdigit(buff[2])) ||
                 (buff[1] >= '0' && buff[1] <= '9'))) {
         switch (buff[0]) {
+        // tok_note is a midi note number, while tok_num is a frequency.
         case 'a':
           tok_num = 27.50;
           tok_note = 9 + 0x0c;
@@ -450,8 +891,8 @@ w:
         return TOK_RELEASE;
       else if (!strcmp("volume", buff))
         return TOK_VOLUME;
-      else if (!strcmp("master", buff))
-        return TOK_MASTER;
+      else if (!strcmp("main", buff))
+        return TOK_MAIN;
       else if (!strcmp("synth", buff))
         return TOK_SYNTH;
       else if (!strcmp("filter", buff))
@@ -467,7 +908,7 @@ w:
         return TOK_IDENTIFIER;
       }
     }
-  // clang-format off
+    // clang-format off
     /* *INDENT-OFF* */
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':
@@ -482,12 +923,16 @@ w:
       (void)fscanf(d->fp, "%99[0-9.]%n", buff, &nchar);
       d->column += nchar;
       // printf("nchar %d %s column %d <----\n",  nchar, buff,
-      // column_token_found);
       {
         int i = 0;
-        while (isdigit(buff[i]))
+        // This checks if a string has multiple periods.
+        // In an example `3.9..`, `3.9` is to be interpreted
+        // as a float, while the `..` is to be unget to be read
+        // as TOK_DOT TOK_DOT in the next function call by the parser.
+
+        while (isdigit(buff[i])) // count length of digits
           i++;
-        if (buff[i] == (char)'.') {
+        if (buff[i] == (char)'.') { // if theres a period, count it.
           i++;
           if (isdigit(buff[i])) {
             while (isdigit(buff[++i]))
@@ -667,6 +1112,8 @@ const char *token_t_to_str(const token_t t) {
     return "\"";
   case TOK_SQUOTE:
     return "'";
+  case TOK_EQUAL:
+    return "'='";
   case TOK_COMMA:
     return "','";
   case TOK_FLOAT:
@@ -677,8 +1124,8 @@ const char *token_t_to_str(const token_t t) {
     return "'r'";
   case TOK_NOTE:
     return "note";
-  case TOK_MASTER:
-    return "master";
+  case TOK_MAIN:
+    return "main";
   case TOK_PCM16:
     return "pcm16";
   case TOK_SYNTH:

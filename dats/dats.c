@@ -58,6 +58,9 @@ int process_args(const int argc, char *const *argv) {
       {   int i = 0;
           while (i!=____git_refs_heads_parser_0_1_0_len-1)
           putchar(____git_refs_heads_parser_0_1_0[i++]);
+#ifdef PREVIOUS_COMMIT
+          printf("-prev");
+#endif
       }   putchar(':');
       {   int i = 0;
           while (i!=____git_HEAD_len-1)

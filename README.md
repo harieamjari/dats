@@ -15,7 +15,7 @@ staff pol {
   n 4, c5;
 }
 
-master {
+main {
   // This uses the synthesizer named "kpa"
   // An implementation of Karplus-Strong Algorithm
   pcm16 kol = synth.kpa(pol);
@@ -36,7 +36,7 @@ systems, provided that the compiler provides GNU extensions.
 ## \*nix
 
 ```
-make && make install && make test
+make -j4 && make install && make test
 ```
 
 # Documentation

@@ -3,8 +3,8 @@
 #include "env.h"
 #include <stdint.h>
 
-typedef enum DSOptionType DSOptionType;
 enum DSOptionType { DSOPTION_FLOAT, DSOPTION_STRING, DSOPTION_INT };
+typedef enum DSOptionType DSOptionType;
 
 typedef struct DSOption DSOption;
 struct DSOption {

@@ -1,272 +1,472 @@
 
-\documentclass{article}
-\usepackage[top=0.4in]{geometry}
+\documentclass[11pt]{article}
+\usepackage[top=1in, left=1.5in, right=1.5in]{geometry}
+\usepackage[parfill]{parskip}
 \usepackage{fancyvrb}
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{hyperref}
+\usepackage{multicol}
+\usepackage{xcolor}
+\usepackage{fancyvrb}
 
 \title{\textbf{The Dats\thanks{\url{github.com/harieamjari/dats/}} language v2.0.0}}
-\author{Al-buharie Amjari}
+\newcounter{numpar}
+\newcommand{\np}[1][]{%
+  \par
+  \refstepcounter{numpar}%
+  \noindent
+  \makebox[0pt][r]{%
+    \makebox[0pt][l]{{\footnotesize\thenumpar}}%
+    \qquad
+  }%
+  #1%
+  \ignorespaces
+}
+\newcommand\textgray[1]{\fcolorbox{gray!80}{gray!10}{\texttt{#1}}}
+
+\let\stdsection\section
+\renewcommand\section{\clearpage\setcounter{numpar}{0}\stdsection}
+\let\stdsubsection\subsection
+\renewcommand\subsection{\setcounter{numpar}{0}\stdsubsection}
+\let\stdsubsubsection\subsubsection
+\renewcommand\subsubsection{\setcounter{numpar}{0}\stdsubsubsection}
+\hypersetup{pdftitle={The Dats Language},
+            pdfcreator={Al-buharie Amjari},
+            bookmarks=true,
+            bookmarksnumbered=true,
+            pdfpagelabels=true,
+            pdfpagemode=UseOutlines,
+            pdfstartview=FitH,
+            linktocpage=true,
+            colorlinks=true,
+            linkcolor=blue,
+            plainpages=false}
 
 \begin{document}
+\setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
 \maketitle
 
-\abstract
-This is part of the Dats v2.0.0 documentation\footnote{\url{github.com/harieamjari/dats/blob/master/doc/dats-2.tex}} and is a draft. This document may be outdated in the future so readers are adviced instead to follow 1, although this draft should be able to provide the syntax and able the user to extrapolate from these to
+\begin{Verbatim}[frame=single, label=The "Hello World" of Dats]
+      staff foo {
+        n 4, c4;
+        n 4, d4;
+        n 4, e4;
+      }
+
+      main {
+        pcm16 bar = synth.psg(foo);
+        write("t.wav", bar);
+      }
+\end{Verbatim}
+\vspace{1in}
+
+\begin{abstract}
+This is part of the Dats v2.0.0 documentation\footnote{\url{github.com/harieamjari/dats/blob/main/doc/dats-2.tex}} and is a draft. This document may be outdated in the future so readers are adviced instead to follow 1, although this draft should be able to provide the syntax and able the user to extrapolate from these to
 start writing a music composition in Dats language.
 
 Further revision of this draft may be publish by the author from time to time.
+\end{abstract}
 
+\tableofcontents
 
 \section{Introduction}
-
-\indent The Dats language is a text-based programming language use for music composition.  
+\np The Dats language is a text-based programming language use for music composition.  
 It intents to promote the readability of ASCII music sheets and the compilation of these into
  a soundfile.
-This language is fairly new and still in expiremental so other features such trills, tie,
-repeat, glissando, are not implemented but are considered to be.
+This language is fairly new and still in experimental so other features such trills, tie,
+repeat, glissando, are not implemented but are considered to be in the future. It preserves the
+concepts used in engraving music sheets via a syntatically similar one. This is
+recognized by the use of similar terminologies like:
+
+\begin{multicols}{2}
+\begin{itemize}
+\renewcommand{\labelitemi}{--}
+\item staff
+\item repeat
+\item note
+\item rest
+\item octave
+\item bpm (beats per minute)
+\item semitone
+\end{itemize}
+\end{multicols}
+
+\np Polyphony in
+
+\section{Terms, definitions and symbols}
+
+\begin{enumerate}
+\item Musical note
+
+Literal "Musical note" which plays a note for some duration.
+
+\item Musical rest
+
+Literal "Musical rest" which plays silence for some duration.
+
+\item Note
+
+A literal express by the RegEx: \verb+[a-g](#|b)?[0-9]+, and is used
+in the parameter of a musical note as \textgray{<note>}.
+
+\end{enumerate}
+
+\section{The basics}
+
+\np Toward playing music, there must be series of musical notes written for the player to read.
+For dats, a musical note is declared with the keyword \verb+n+. \verb+n+ must contain two arguments,
+a length and a note, each are separated by a comma:
 
 
+\begin{Verbatim}[frame=single]
+       n <length>, <note>;
+\end{Verbatim}
+
+
+\np And example of such declaration is:
+\begin{Verbatim}[frame=single]
+       n 4, c4;
+\end{Verbatim}
+
+This is a declaration of musical note of length 1/4, playing the note c4. The length
+is just the denominator of how much measure the musical note took.
+
+\np Such musical notes, (and musical rests), are always declared inside a \textit{staff block}:
+
+\begin{Verbatim}[frame=single]
+      staff foo {
+        n 4, c4;
+      }
+\end{Verbatim}
+
+\np Now we have a staff, what else do we need? A `main`. A main is basically
+where you do your operations on staffs and synthesize, producing sounds.
+
+\np First, we process the staff using a synthesizer. The output of this synthesizer
+is then stored into a variable, usually a type of `pcm16`:
+
+\begin{Verbatim}[frame=single]
+      staff foo {
+        n 4, c4;
+      }
+    
+      main {
+        pcm16 bar = synth.kpa(foo);
+        write("w.wav", bar);
+      }
+\end{Verbatim}
+
+\np This is then written into a file named, "w.wav". (Currently, Dats only supports writing wav files.)
+
+\np To append one or more pcm16 to another pcm16, you may simply just add a comma, followed by the pcm16
+you were appending with:
+
+\begin{Verbatim}[frame=single]
+      pcm16 tr1 = synth.kpa(/* some staff */);
+      pcm16 tr2 = synth.kpa(/* some staff */);
+      pcm16 tr3 = tr1, tr2, tr2;
+\end{Verbatim}
+
+\setcounter{numpar}{0}
 \section{Environment}
- \paragraph{} A Dats interpreter executes each statements from a Dats file sequentially. These
+\np A Dats interpreter executes each statements from a Dats file sequentially. These
 statements are always terminated by a semicolon.
 
-\paragraph{} The start of a Dats file is called, \verb+master+. 
-\section{Language}
-\subsection{Types}
-\subsubsection{staff}
-\paragraph{} The \verb+staff+ keyword signifies the beginning of a staff. It is then followed by an identifier and \verb+{+. A staff consist of
-notes, which is declared by using \verb+n+, and or rest, which is declared by using \verb+r+, inside the \textit{staff block}. The staff, is terminated by \verb+}+. The, \verb+n+, or, \verb+r+, which is declared inside the \textit{staff block} both takes an argument.
+\np The start of a Dats file is called, \verb+main+.
+\section{Language and notation}
+\subsection{Lexical elements}
+\subsubsection{Character sets}
 
-\paragraph{} \verb+n+, takes two arguments; the length and the frequency the note will be playing:
+The Dats v2.0.0 language supports the 26 \textit{uppercase letters} and 26
+\textit{lower case letter} of the \textit{Latin alphabet}:
+
+\begin{verbatim}
+       A B C D E F G H I J K L M
+       N O P Q R S T U V W X Y Z
+       a b c d e f g h i j k l m
+       n o p q r s t u v w x y z
+\end{verbatim}
+
+the 10 {decimal digits}:
+\begin{verbatim}
+       0 1 2 3 4 5 6 7 8 9
+\end{verbatim}
+
+and the miscs symbols:
+\begin{verbatim}
+       - + * / ( ) { } [ ] / " ; = .
+\end{verbatim}
+
+\subsubsection{Keywords}
+
+\np Keywords: one of
+
+\begin{verbatim}
+       attack        bpm          pcm16
+       decay         filter
+       main          mix
+       octave        read
+       release       semitone
+       sustain       synth
+       volume        write
+\end{verbatim}
+
+\subsubsection{Identifier}
+
+
+\subsubsection{Note}
+
+\np \textbf{Syntax}
+
+\begin{verbatim}
+<note> : [a-g](#|b)?[0-9] <symbols>
+       | <note> "," <note>
+<symbols> : <staccatto>
+          | <staccatissmo>
+          |
+          ;
+<staccatto> : "."
+            ;
+<staccatissimo> : "_"
+                ;
+\end{verbatim}
+
+\subsubsection{Length}
+
+\subsection{\texttt{staff}}
+\np The \textgray{staff} keyword signifies the beginning of a staff. It is then followed by an identifier and \verb+{+. A staff consist of
+notes and rests which is declared by using \verb+n+, or \verb+r+, inside the \textit{staff block}.
+The staff, is terminated by \verb+}+. The, \verb+n+, or, \verb+r+, which is declared inside the \textit{staff block} both takes an argument.
+
+\subsubsection{\texttt{n}}
+
+\np The \verb+n+ keyword signifies the beginning of a musical note. It must be declared
+inside the staff block.
+It takes 2 parameters; the \textgray{<length>} and the \textgray{<note>} of the
+musical note, each separated by a comma. It must end with a semicolon: 
+
 \begin{Verbatim}[frame=single]
-      n <length>, <frequency>;
+      n <length>, <note>;
 \end{Verbatim}
 
-\paragraph{} For argument, length, it may be in the form of integer or floating point number:
-\begin{Verbatim}[frame=single]
-      n 4.0, <frequency>;
-      n 4, <frequency>;
-\end{Verbatim}
-\paragraph{} For argument, \verb+frequency+, it may be in the form of \verb+[a-g](#|b)?[0-9]+, a floating
-point number, or an integer:
+\paragraph{\texttt{<note>}} The parameter \textgray{<note>} consist of a \verb+key+ and an \verb+octave+. It shall be in the form of \verb+[a-g](#|b)?[0-9]+:
 
 \begin{Verbatim}[frame=single]
-      n 4, 440;
-      n 4, 440.0;
-      n 4, a4;
+  c4 // [abcdefg](b|#)?[0-9]
+  ||
+  |`--->octave 4
+  v
+ key 'c'
+\end{Verbatim}
+The above has a key 'c' at octave 4.
+
+\np To play a whole note ringing at c4:
+\begin{Verbatim}[frame=single]
+      staff {
+        n 1, c4;
+      }
 \end{Verbatim}
 
-\paragraph{} Add operation may be performed in argument, length, to simulate a tie:
+a half of a note ringing at d4:
+
+\begin{Verbatim}[frame=single]
+      staff {
+        n 2, d4;
+      }
+\end{Verbatim}
+
+and a quarter of a note ringing at e4:
+\begin{Verbatim}[frame=single]
+      staff {
+        n 4, e4;
+      }
+\end{Verbatim}
+
+\np One can derive the length of the note from the denominator of these notes:
+\verb+1/1 1/2 1/4+
+
+\subparagraph{dyad}
+The parameter \textgray{<note>} may be entered for a number of times:
+
+\begin{Verbatim}[frame=single]
+      staff {
+        n 1, c4 e4 g4;
+      }
+\end{Verbatim}
+
+\np The example above plays the C major chord at root position as whole note. (Integer overflow is not
+protected; you might hear undesirable sounds.)
+
+\paragraph{\texttt{<length>}} For argument, \textgray{<length>}, it may be in the form of integer or floating point number:
+\label{nlength}
+
+\begin{Verbatim}[frame=single]
+      n 4.0, <note>;
+      n 4, <note>;
+\end{Verbatim}
+
+\np To simulate a tie, use \verb-+-
 
 \begin{Verbatim}[frame=single]
       n 4+4, 440; /* is equivalent to: */
       n 2, 440; 
 \end{Verbatim}
+
+\np How the former is equivalent to \textgray{n 2, 440;} might
+not make sense as, $4+4$ is mathematically equal to 8. Instead
+of treating this as an addition operation which sums up two
+operands (which is confusing), consider to pronouce it as
+\textit{four-tie-four} instead of \textit{four-plus-four}.
+ 
 \textbf{NOTE} Other arithmetic operations are prohibited.
 
-\subsubsection{pcm16}
-\paragraph{} This is is a signed 16-bit PCM. A declaration of variable of type,
+\np The paramater, \textgray{<length>}, will take any real positive integer (as long as it's in the range of int),
+so a length of \verb+3+ will work (equivalent to 1/3 of a note), \verb+5+ will work (equivalent to 1/5
+of a note) and others.
+
+\np To play a 1/8 note triplet, one may need to do some math:
+
+\begin{align}
+	\shortintertext{Multiply 1/8 with 2:}
+	\frac{1}{8}2 = \frac{2}{8} \Rightarrow \frac{1}{4} \\
+	\shortintertext{divide the answer with 3 (3 for triplet):}
+	\frac{1}{4(3)} = \frac{1}{12}
+\end{align}
+
+and use the denominator, \verb+12+, as the value of the length:
+\begin{Verbatim}[frame=single]
+      staff {
+        n 12, c4;
+        n 12, d4;
+        n 12, e4;
+      }
+\end{Verbatim}
+
+This process can be repeates for 1/8 note quadruplet, but instead of dividing
+with 3 in step (2), it's divided with 4 (4 for quadruplet) and so on.
+
+\np Single and double dotted notes are implemented but three dots were not. To use dots, you may need to use a period. An example below is a 1/4 dotted note:
+\begin{Verbatim}[frame=single]
+      staff {
+        n 4., c4;
+        n 4..,d4;
+      }
+\end{Verbatim}
+
+\np The key from A-G is supported, and the octave it takes may be any positive integer, but
+it should not exceed the range of \verb+int+.
+
+\np To use accidentals, use \verb+#+ to raise the note a semitone and use \verb+b+ to lower the
+note a semitone:
+\begin{Verbatim}[frame=single]
+      staff {
+        n 1, c#4;
+        n 2, db4;
+      }
+\end{Verbatim}
+
+\np Unlike the parameter \textgray{length>}, arithmetic operation is illegal
+to perform on a \textgray{<note>}. so \textgray{<note>+<note>} is prohibited.
+
+- To raise the note a semitone, append \verb+#+ to the first letter of the note, and to lower
+the note a semitone, append \verb+b+ to the first letter of the note.
+
+- To perform a staccato, append a \verb+.+ to every ending of a note.
+
+\begin{Verbatim}[frame=single]
+  n 4, c4.;
+\end{Verbatim}
+
+- To play a chord or a dyad, like `c4 e4 g4`, one just needs to write as it is:
+
+\begin{Verbatim}[frame=single]
+  n 4, c4 e4 g4;
+\end{Verbatim}
+
+\textbf{NOTE} If all these notes is played as staccato, append,
+\textgray{.}, to them, so, it becomes, \textgray{c4. e4. g4.}
+
+\subsubsection{\texttt{r}}
+
+\np The \verb+r+ keyword signifies the beginning of a musical rest. It must be
+declared inside the \textit{staff block}. It takes one parameter; the
+length of the rest:
+
+\begin{Verbatim}[frame=single]
+      r <length>;
+\end{Verbatim}
+
+\np The syntax of \textgray{<length>} is similar to the definition in 
+\autoref{nlength}.
+
+\subsubsection{Extensions}
+
+\subsection{\texttt{pcm16}}
+\np This is is a signed 16-bit PCM. A declaration of variable of type,
 \verb+pcm16+, must be immdediately followed by its identifier, followed by
 an assignment to one of synthesizers taking a variable of type, \verb+staff+. 
 \begin{Verbatim}[frame=single]
       pcm16 foo = synth.psg(pol);
 \end{Verbatim}
 
-\paragraph{} Or other variable of type ,\verb+pcm16+.
+or other variable of type ,\verb+pcm16+.
 \begin{Verbatim}[frame=single]
      pcm16 foo = synth.psg(pol);
      pcm16 bar = foo;
 \end{Verbatim}
 
-\paragraph{} To append these supported types, a comma must be declared, followed by a rvalue:
+\np To append these supported types, a comma must be added, followed by an rvalue:
 \begin{Verbatim}[frame=single]
       pcm16 foo = synth.psg(bar), synth.psg(bar);
 \end{Verbatim}
-\subsection{NOTE}
 
-The \verb+NOTE+ keyword signifies the beginning of a note. It must be declared
-inside the main block.
-It takes 2 parameters; the length and the key of the note. It must end with
-a semicolon: 
-\begin{Verbatim}[frame=single]
-      NOTE <length> <key>;
-\end{Verbatim}
-
-To play a whole note ringing at C4:
-\begin{Verbatim}[frame=single]
-      BEGIN
-      NOTE 1 C4;
-      END
-\end{Verbatim}
-\newpage
-A half of a note ringing at D4:
-\begin{Verbatim}[frame=single]
-      BEGIN
-      NOTE 2 D4;
-      END
-\end{Verbatim}
-
-And a quarter of a note ringing at E4:
-\begin{Verbatim}[frame=single]
-      BEGIN
-      NOTE 4 E4;
-      END
-\end{Verbatim}
-
-One can derive the length of the note from the denominator of these notes:
-\verb+1/1 1/2 1/4+
-
-\subsubsection{Extensions: dyad}
-The parameter \verb+<key>+ may be entered for a number of times:
-\begin{Verbatim}[frame=single]
-      BEGIN
-      NOTE 1 C4 E4 G4;
-      END
-\end{Verbatim}
-
-The example above plays the C major chord at root position as whole note. (Integer overflow is not
-protected; you might hear undesirable sounds.)
-
-\subsubsection{Extensions: others}
-The paramater, \verb+length+, will take any real positive integer (as long as it's in the range of int),
-so a length of \verb+3+ will work (equivalent to 1/3 of a note), \verb+5+ will work (equivalent to 1/5
-of a note) and others. \newline
-
-To play a 1/8 note triplet, one may need to do some math:
-
-\begin{align}
-	\shortintertext{Multiply 1/8 with 2:}
-	\frac{1}{8}2 = \frac{2}{8} \Rightarrow \frac{1}{4} \\
-	\shortintertext{divide the answer with 3:}
-	\frac{1}{4(3)} = \frac{1}{12}
-\end{align}
-
-And use the denominator, \verb+12+, as the value of the length:
-\begin{Verbatim}[frame=single]
-      BEGIN
-      NOTE 12 C4;
-      NOTE 12 D4;
-      NOTE 12 E4;
-      END
-\end{Verbatim}
-
-Single and double dotted notes are implemented but three dots were not. To use dots, you may need to use a period. An example below is a 1/4 dotted note:
-\begin{Verbatim}[frame=single]
-      BEGIN
-      NOTE 4.  C4;
-      NOTE 4.. D4;
-      ENDD
-\end{Verbatim}
-
-The key from A-G is supported, and the octave it takes may be any positive integer, but
-it should not exceed the range of \verb+int+. \newline
-
-To use accidentals, use \verb+#+ to raise the note a semitone and use \verb+b+ to lower the
-note a semitone:
-\begin{Verbatim}[frame=single]
-      BEGIN
-      NOTE 1 C#4;
-      NOTE 2 Db4;
-      END
-\end{Verbatim}
-
-\subsection{REST}
-The \verb+REST+ keyword signifies the beginning of a rest. It must be declared inside
-the main block.
-The keyword takes 1 parameter; the length of the rest. It must end with a semicolon:
-\begin{Verbatim}[frame=single]
-      REST <length>;
-\end{Verbatim}
 
 \subsubsection{Extensions}
 
-The length of the rest is semantically similar to one of that length
-of the note. Refer to the \verb+NOTE+ keyword.
+\np The length of the rest is semantically similar to one of that length
+of the note. Refer to the \verb+n+ keyword.
 
-\subsection{BPM}
-
-The \verb+BPM+ keyword sets the BPM of the music. It must be declared inside the main block.
-It takes 1 parameter; the BPM of the music in integer or decimal form. It must end
-with a semicolon:
-\begin{Verbatim}[frame=single]
-      BPM <BPM>;
-\end{Verbatim}
-
-\subsubsection{Extensions}
-
-The \verb+BPM+ keyword may be use to change the BPM of the music midway:
-\begin{Verbatim}[frame=single]
-      BEGIN
-      BPM 80;
-      NOTE 8 C4;
-      NOTE 8 D4;
-
-      BPM 130;
-      NOTE 8 E4;
-      NOTE 8 F4;
-      END
-\end{Verbatim}
-
-If \verb+BPM+ is not set, the default is set to be 120.
-
-Regex: \verb@[0-9]+(\.[0-9]+)?@
-\subsection{use}
-
-The \verb+use+ keyword sets the soundfont of the music. It must be declared before the main block begins.
-We may need to call this block the "prerequisite".
-It takes two parameter; the location of the library and the name of the soundfont
-or more technically, the name of the function:
-\begin{Verbatim}[frame=single]
-      use <library> <soundfont>
-\end{Verbatim}
-
-This opens the shared library with \verb+dlopen(3)+\footnote{\url{https://www.man7.org/linux/man-pages/man3/dlopen.3.html}}.
-
-If this is not set, it uses the default library, \verb+libpsg.so+ and uses the function \verb+guitar+\footnote{It employs \href{wikipedia.org/wiki/Karplus\%E2\%80\%93Strong_string_synthesis}{karplus-strong algorithm} to synthesize the guitar-like sound.}
-
-\subsubsection{Extensions}
-For creating your own soundfont, please refer to the file, "Plugin.md" (Which is unfinished yet).
-
-\section{Comments}
-Just like in the C programming language, you can use a double slash (solidus if you like), \verb+//+.
+\subsection{Comments}
+\np Just like in the C programming language, you can use a double slash (solidus if you like), \verb+//+.
 It eats the letters/words in its front until it reaches a newline.
 \begin{Verbatim}[frame=single]
-      BEGIN
-      NOTE 1 C4; //EAT MEEE!!!
-      END
+      staff {
+        n 1, c4; //EAT MEEE!!!
+      }
 \end{Verbatim}
 
-\section{Formatting}
-To preserve the readability of the text, it is a recommended practice to add a comment for every
+\subsection{Formatting}
+\np To preserve the readability of the text, it is a recommended practice to add a comment for every
 beginning measure, regardless of the time signature. Below is a 4/4 time signature:
 \begin{Verbatim}[frame=single]
-      BEGIN
-
-      // Measure 1
-      NOTE 1 C4;
-
-      // Measure 2
-      NOTE 4 D4;
-      NOTE 4 E4;
-      NOTE 4 F4;
-      NOTE 4 G4;
-
-      // Measure 3
-      NOTE 2 A4;
-      NOTE 2 B4;
-
-      END
+      staff {
+        // Measure 1
+        n 1, c4;
+  
+        // Measure 2
+        n 4, d4;
+        n 4, e4;
+        n 4, f4;
+        n 4, g4;
+  
+        // Measure 3
+        n 2, a4;
+        n 2, b4;
+      }
 \end{Verbatim}
 
+\section{Synths}
+
+\section{Filters}
+
+\section{EBNF}
 \section*{Afterword}
 
-Currently, even myself is having hard time transcribing music into Dats. It can be time consuming to debug the music sheet whenever a note was place 
+Currently, even myself is having hard time transcribing music into Dats. It can be time consuming to debug the ASCII music sheet whenever a note was place 
 incorrectly and a pain in the butt.
 
-\textbf{Composition created with Dats:}
 
-1. \url{facebook.com/groups/427631411331889/permalink/837013050393721}
 
 \end{document}

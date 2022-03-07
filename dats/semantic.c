@@ -20,6 +20,7 @@
  */
 
 #include <assert.h>
+#include <string.h>
 
 #include "env.h"
 #include "scanner.h"
@@ -53,7 +54,7 @@ static int duplicates_symrec_t(dats_t *d, symrec_t *sym) {
       if (!strcmp(id1, id2)) {
         SEMANTIC(d, sym1->line, sym1->column, "Redefinition of '%s'\n", id1);
         REPORT("note: previously declared here:\n");
-        print_scan_line(d, sym2->line, sym2->column);
+        print_scan_line(d->fp, sym2->line, sym2->column);
       }
     }
   }
@@ -70,21 +71,21 @@ int semantic_pcm16_t(dats_t *d, symrec_t *sym, pcm16_t *pcm16_cur) {
       symrec_t *pcm16 = getsym(d, pcm16_cur->ID.id);
       if (pcm16 == NULL) {
         REPORT("Undefined reference to '%s'\n", pcm16_cur->ID.id);
-        print_scan_line(d, pcm16_cur->ID.line, pcm16_cur->ID.column);
+        print_scan_line(d->fp, pcm16_cur->ID.line, pcm16_cur->ID.column);
         goto exit;
       }
       if (pcm16->type != TOK_PCM16) {
         SEMANTIC(d, pcm16_cur->ID.line, pcm16_cur->ID.column,
                  "Incompatible %s to pcm16\n", token_t_to_str(pcm16->type));
         REPORT("note: previously declared here:\n");
-        print_scan_line(d, pcm16->line, pcm16->column);
+        print_scan_line(d->fp, pcm16->line, pcm16->column);
         goto exit;
       }
       if (pcm16 == sym) {
         SEMANTIC(d, pcm16_cur->ID.line, pcm16_cur->ID.column,
                  "Infringing definition to itself\n");
         REPORT("with:\n");
-        print_scan_line(d, pcm16->line, pcm16->column);
+        print_scan_line(d->fp, pcm16->line, pcm16->column);
       }
     }
       goto exit;
@@ -94,15 +95,19 @@ int semantic_pcm16_t(dats_t *d, symrec_t *sym, pcm16_t *pcm16_cur) {
         SEMANTIC(d, pcm16_cur->SYNTH.synth_line, pcm16_cur->SYNTH.synth_column,
                  "No synth named, '%s'\n", pcm16_cur->SYNTH.synth_name);
       }
-      for (size_t i = 0; i < pcm16_cur->SYNTH.nb_options; i++){
-        for (DSOption *options = driver->options; options->option_name != NULL; options++){
-            if (!strcmp(options->option_name, pcm16_cur->SYNTH.options[i].option_name)){ 
-              goto found;
-            }
+      for (size_t i = 0; i < pcm16_cur->SYNTH.nb_options; i++) {
+        for (DSOption *options = driver->options; options->option_name != NULL;
+             options++) {
+          if (!strcmp(options->option_name,
+                      pcm16_cur->SYNTH.options[i].option_name)) {
+            goto found;
+          }
         }
-        SEMANTIC(d, pcm16_cur->SYNTH.options[i].line, pcm16_cur->SYNTH.options[i].column,
-                 "No synth options named, '%s'\n", pcm16_cur->SYNTH.options[i].option_name);
-found:{}
+        SEMANTIC(d, pcm16_cur->SYNTH.options[i].line,
+                 pcm16_cur->SYNTH.options[i].column,
+                 "No synth options named, '%s'\n",
+                 pcm16_cur->SYNTH.options[i].option_name);
+      found : {}
       }
       symrec_t *pcm16 = getsym(d, pcm16_cur->SYNTH.staff_name);
       if (pcm16 == NULL) {
@@ -114,7 +119,7 @@ found:{}
         SEMANTIC(d, pcm16_cur->SYNTH.staff_line, pcm16_cur->SYNTH.staff_column,
                  "Incompatible %s to staff\n", token_t_to_str(pcm16->type));
         REPORT("note: previously declared here:\n");
-        print_scan_line(d, pcm16->line, pcm16->column);
+        print_scan_line(d->fp, pcm16->line, pcm16->column);
       }
       //    printf("Synth %s found\n", tok_identifier);
       //    free(tok_identifier);
