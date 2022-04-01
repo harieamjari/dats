@@ -1,4 +1,6 @@
 # Dats
+NOTE NOTE NOTE!! This repo has been moved to
+https://github.com/dats-lang/dats-src
 
 A digital audio text station.
 
